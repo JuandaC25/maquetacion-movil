@@ -5,7 +5,7 @@ import { authService } from '../services/Api';
 import { LoginStyles } from '../styles/LoginStyles';
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -14,7 +14,7 @@ export default function LoginScreen({ navigation }: any) {
     setError('');
     setLoading(true);
     try {
-      const response = await authService.login(email, password);
+      const response = await authService.login(username, password);
       const token = response.token;
       await AsyncStorage.setItem('token', token);
       
@@ -51,8 +51,8 @@ export default function LoginScreen({ navigation }: any) {
           <TextInput
             style={LoginStyles.input}
             placeholder="Correo electrónico"
-            value={email}
-            onChangeText={setEmail}
+            value={username}
+            onChangeText={setUsername}
             keyboardType="email-address"
             autoCapitalize="none"
           />
