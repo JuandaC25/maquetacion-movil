@@ -8,7 +8,7 @@ export const LoginStyles = StyleSheet.create({
     padding: 20,
   },
   formBox: {
-    backgroundColor: '#ffffffff',
+    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
     shadowColor: '#000',

@@ -1,8 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-const API_URL = 'http://192.168.0.7:8080';
+// ⚠️ CAMBIAR ESTA IP SEGÚN TU PC:
+// 1. Abre PowerShell y ejecuta: ipconfig
+// 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
+// 3. Reemplaza la IP aquí abajo
+const LOCAL_IP = '172.16.111.139';  // 👈 Cambia esto en cada PC
+const API_URL = `http://${LOCAL_IP}:8081`;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -29,6 +33,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log('❌ Error en la petición:', error.response?.data);
+    console.log('❌ Status:', error.response?.status);
+    console.log('❌ URL:', error.config?.url);
+    
     if (error.response?.status === 401) {
       // Token expirado o inválido
       await AsyncStorage.removeItem('token');

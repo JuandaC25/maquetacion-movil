@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/Api';
 import { LoginStyles } from '../styles/LoginStyles';
@@ -14,28 +14,27 @@ export default function LoginScreen({ navigation }: any) {
     setError('');
     setLoading(true);
     try {
+      console.log('🔐 Iniciando login...');
       const response = await authService.login(username, password);
-      const token = response.token;
-      await AsyncStorage.setItem('token', token);
+      console.log('✅ Login exitoso, token recibido');
       
-      await AsyncStorage.multiRemove(['force_admin', 'force_tecnico']);
-      
-      // Obtener información del usuario
+      console.log('📡 Obteniendo datos del usuario...');
       const userData = await authService.getMe();
+      console.log('✅ Datos del usuario:', userData);
       const userRoles = userData?.roles || [];
+      console.log('👤 Roles:', userRoles);
       
-      if (userRoles.includes('ADMINISTRADOR')) {
-        await AsyncStorage.setItem('force_admin', '1');
-        navigation.replace('Admin');
-      } else if (userRoles.includes('TECNICO')) {
-        await AsyncStorage.setItem('force_tecnico', '1');
-        navigation.replace('PrestamosTecnico');
-      } else if (userRoles.includes('INSTRUCTOR')) {
+      if (userRoles.includes('INSTRUCTOR')) {
+        console.log('🎯 Navegando a Solicitudes...');
         navigation.replace('Solicitudes');
       } else {
-        navigation.replace('Inicio');
+        Alert.alert(
+          'Login exitoso',
+          `Bienvenido ${userData.nombre || username}\nRoles: ${userRoles.join(', ')}`
+        );
       }
     } catch (err: any) {
+      console.error('❌ Error en login:', err);
       setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
@@ -71,10 +70,6 @@ export default function LoginScreen({ navigation }: any) {
         {error ? (
           <Text style={LoginStyles.error}>{error}</Text>
         ) : null}
-
-        <TouchableOpacity onPress={() => navigation.navigate('Recuperar')}>
-          <Text style={LoginStyles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
-        </TouchableOpacity>
 
         <TouchableOpacity 
           style={[LoginStyles.button, loading && LoginStyles.buttonDisabled]} 
