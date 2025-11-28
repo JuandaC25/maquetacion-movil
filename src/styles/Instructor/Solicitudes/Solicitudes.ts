@@ -1,0 +1,136 @@
+import { StyleSheet } from 'react-native';
+
+export const SolicitudesStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  notification: {
+    marginTop: 20,
+    marginRight: 1,
+    width: 330,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#0cfc78',
+    overflow: 'hidden',
+  },
+  notificationInner: {
+    position: 'absolute',
+    height: 120,
+    width: 150,
+    top: 12,
+    right: 15,
+    backgroundColor: '#000',
+    borderRadius: 15,
+    padding: 10,
+  },
+  notititle: {
+    color: '#fff',
+    paddingTop: 10,
+    paddingLeft: 20,
+    paddingBottom: 6,
+    fontWeight: '500',
+    fontSize: 30,
+  },
+  notibody: {
+    marginTop: 2,
+    color: '#fff',
+    paddingLeft: 20,
+    fontSize: 14,
+  },
+
+  // Portatil
+  portatilContainer: {
+    marginTop: 15,
+    marginRight: 1,
+    width: 330,
+    height: 128,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#0cfc78',
+    overflow: 'hidden',
+  },
+  portatilImage: {
+    position: 'absolute',
+    height: 120,
+    width: 150,
+    top: 12,
+    right: 15,
+    backgroundColor: '#000',
+    borderRadius: 15,
+    padding: 10,
+  },
+
+  // Equipos de Escritorio
+  escritorioContainer: {
+    marginTop: 20,
+    marginRight: 1,
+    width: 330,
+    height: 128,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#0cfc78',
+    overflow: 'hidden',
+  },
+  escritorioImage: {
+    position: 'absolute',
+    height: 100,
+    width: 240,
+    top: 12,
+    right: -30,
+    backgroundColor: '#000',
+    borderRadius: 15,
+  },
+
+  // Audio/Video
+  audioVideoContainer: {
+    marginTop: 20,
+    marginRight: 1,
+    width: 330,
+    height: 128,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#0cfc78',
+    overflow: 'hidden',
+  },
+  audioVideoImage: {
+    position: 'absolute',
+    height: 120,
+    width: 120,
+    top: 12,
+    right: -1,
+    backgroundColor: '#000',
+    borderRadius: 15,
+    padding: 10,
+  },
+
+  // Elementos
+  elementosContainer: {
+    marginTop: 20,
+    marginRight: 1,
+    width: 330,
+    height: 128,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#0cfc78',
+    overflow: 'hidden',
+  },
+  elementosImage: {
+    position: 'absolute',
+    height: 120,
+    width: 210,
+    top: 12,
+    right: -16,
+    backgroundColor: '#000',
+    borderRadius: 15,
+    padding: 10,
+  },
+});

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-const LOCAL_IP = '172.16.111.139';  // 👈 Cambia esto en cada PC
+const LOCAL_IP = '172.16.100.199';  // 👈 Cambia esto en cada PC
 const API_URL = `http://${LOCAL_IP}:8081`;
 
 const api = axios.create({
@@ -15,7 +15,6 @@ const api = axios.create({
   },
 });
 
-// Interceptor para agregar el token JWT a cada request
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
@@ -38,7 +37,6 @@ api.interceptors.response.use(
     console.log('❌ URL:', error.config?.url);
     
     if (error.response?.status === 401) {
-      // Token expirado o inválido
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
     }

@@ -1,21 +1,17 @@
 import { StyleSheet } from 'react-native';
 
-export const HeaderStyles = StyleSheet.create({
+export const HeaderComponentStyles = StyleSheet.create({
   header: {
     backgroundColor: '#3fbb34',
-    paddingVertical: 15,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: 'bold',
     marginTop: 20,
     marginLeft: 'auto',
@@ -23,30 +19,45 @@ export const HeaderStyles = StyleSheet.create({
     color: '#fff',
   },
   menuButton: {
-    padding: 5,
+    marginTop: 20,
   },
   menuIcon: {
     fontSize: 28,
     color: '#fff',
     fontWeight: 'bold',
   },
-  modalOverlay: {
-    flex: 1,
+  drawerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    zIndex: 999,
   },
-  menuContainer: {
+  drawer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 280,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    minHeight: 300,
+    zIndex: 1000,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  menuTitle: {
-    fontSize: 22,
+  drawerHeader: {
+    backgroundColor: '#3fbb34',
+    padding: 20,
+    paddingTop: 50,
+  },
+  drawerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+    color: '#fff',
   },
   menuItem: {
     paddingVertical: 15,
@@ -69,5 +80,13 @@ export const HeaderStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  gestureArea: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
+    zIndex: 100,
   },
 });
