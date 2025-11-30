@@ -9,6 +9,7 @@ export const HeaderComponentStyles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    height: 75,
   },
   headerTitle: {
     fontSize: 30,
@@ -68,6 +69,16 @@ export const HeaderComponentStyles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     color: '#333',
+  },
+  themeToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#f8f8f8',
   },
   closeButton: {
     backgroundColor: '#007bff',

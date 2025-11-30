@@ -3,9 +3,55 @@ import { StyleSheet } from 'react-native';
 export const SolicitudesStyles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#000000ff',
+  },
+  
+  // Tabs Menu
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#1a1a1a',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: '#2a2a2a',
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    backgroundColor: '#2a2a2a',
+  },
+  activeTab: {
+    backgroundColor: '#3fbb34',
+  },
+  tabIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#888888',
+  },
+  activeTabText: {
+    color: '#ffffff',
+  },
+  
+  // Content Layout
+  content: {
+    flex: 1,
+    padding: 10,
+  },
+  textContainer: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    zIndex: 1, 
   },
 
   notification: {

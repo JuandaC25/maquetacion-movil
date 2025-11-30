@@ -57,14 +57,13 @@ export default function ReportesScreen({ navigation }: any) {
       console.log('Token obtenido:', token ? 'Sí hay token' : 'No hay token');
       console.log('Token value:', token);
       
-      // Asegurar que el token tenga el prefijo Bearer
       const authHeader = token 
         ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
         : '';
       
       console.log('Authorization header:', authHeader.substring(0, 30) + '...');
       
-      const response = await fetch('http://172.16.100.199:8081/api/problemas/descripcion', {
+      const response = await fetch('http://192.168.0.7:8081/api/problemas/descripcion', {
         method: 'GET',
         headers: {
           'Authorization': authHeader,
@@ -168,7 +167,7 @@ export default function ReportesScreen({ navigation }: any) {
           ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
           : '';
         
-        const uploadResponse = await fetch('http://172.16.100.199:8081/api/tickets/upload-images', {
+        const uploadResponse = await fetch('http://192.168.0.7:8081/api/tickets/upload-images', {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -195,7 +194,7 @@ export default function ReportesScreen({ navigation }: any) {
 
       await Promise.all(
         formData.problemasSeleccionados.map(async idProblema => {
-          const response = await fetch('http://172.16.100.199:8081/api/tickets', {
+          const response = await fetch('http://192.168.0.7:8081/api/tickets', {
             method: 'POST',
             headers: {
               'Authorization': authHeader,

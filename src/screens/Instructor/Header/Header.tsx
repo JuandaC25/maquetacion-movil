@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions, PanResponder } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Dimensions, PanResponder, Switch } from 'react-native';
 import { HeaderComponentStyles } from '../../../styles/Instructor/Header/Header';
+import { useTheme } from '../../../context/ThemeContext';
 
 const DRAWER_WIDTH = 280;
 
@@ -12,6 +13,7 @@ interface HeaderWithDrawerProps {
 export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawerProps) {
   const [menuVisible, setMenuVisible] = useState(false);
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  const { theme, toggleTheme, colors } = useTheme();
 
   useEffect(() => {
     Animated.timing(translateX, {
@@ -106,12 +108,19 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
           <Text style={HeaderComponentStyles.menuItemText}>Historial</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity 
-          style={[HeaderComponentStyles.menuItem, HeaderComponentStyles.closeButton]}
-          onPress={() => setMenuVisible(false)}
-        >
-          <Text style={HeaderComponentStyles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
+        {/* Toggle de Tema */}
+        <View style={HeaderComponentStyles.themeToggleContainer}>
+          <Text style={HeaderComponentStyles.menuItemText}>
+            {theme === 'dark' ? '🌙 Tema Oscuro' : '☀️ Tema Claro'}
+          </Text>
+          <Switch
+            value={theme === 'light'}
+            onValueChange={toggleTheme}
+            trackColor={{ false: '#2a2a2a', true: '#3fbb34' }}
+            thumbColor={theme === 'light' ? '#ffffff' : '#f4f3f4'}
+            ios_backgroundColor="#2a2a2a"
+          />
+        </View>
       </Animated.View>
 
       {/* Área de gestos para abrir el drawer */}
