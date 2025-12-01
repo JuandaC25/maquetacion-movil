@@ -14,8 +14,9 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent
 } from 'react-native';
+import DatePickerModal from '../../../components/DatePickerModal';
 import { EspaciosStyles } from '../../../styles/Instructor/Solicitudes/Espacios';
-import { espaciosService } from '../../../services/Api';
+import { espaciosService, solicitudesService } from '../../../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
@@ -44,6 +45,9 @@ export default function EspaciosContent({ navigation }: any) {
     ambient: '',
     num_ficha: '',
   });
+  // DatePicker states
+  const [showDatePicker, setShowDatePicker] = useState<{ field: 'fecha_ini' | 'fecha_fn' | 'hora_ini' | 'hora_fn' | null, visible: boolean, mode?: 'date' | 'time' }>({ field: null, visible: false });
+  const [tempDate, setTempDate] = useState(new Date());
 
   useEffect(() => {
     cargarEspacios();
@@ -90,17 +94,34 @@ export default function EspaciosContent({ navigation }: any) {
       return;
     }
 
+    // Validaciones de fechas y horas
+    const fechaInicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
+    const fechaFin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+    const ahora = new Date();
+    // Redondear fechas a minutos (sin segundos ni ms)
+    fechaInicio.setSeconds(0, 0);
+    fechaFin.setSeconds(0, 0);
+    ahora.setSeconds(0, 0);
+
+    // Si la fecha de inicio es hoy, validar hora
+    const esHoy = fechaInicio.getFullYear() === ahora.getFullYear() &&
+                 fechaInicio.getMonth() === ahora.getMonth() &&
+                 fechaInicio.getDate() === ahora.getDate();
+    if (esHoy && fechaInicio < ahora) {
+      Alert.alert('Error', 'No puedes apartar una hora anterior a la actual');
+      return;
+    }
+
+    // Siempre validar que la hora de fin sea posterior a la de inicio
+    if (fechaFin <= fechaInicio) {
+      Alert.alert('Error', 'La fecha y hora de fin debe ser posterior a la de inicio');
+      return;
+    }
+
+    // Enviar la solicitud al backend
     try {
       const user = await AsyncStorage.getItem('user');
       const userData = user ? JSON.parse(user) : null;
-
-      const fechaInicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
-      const fechaFin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
-
-      if (fechaFin <= fechaInicio) {
-        Alert.alert('Error', 'La fecha y hora de fin debe ser posterior a la de inicio');
-        return;
-      }
 
       const pad = (n: number) => String(n).padStart(2, '0');
       const formatLocal = (d: Date) => {
@@ -117,6 +138,7 @@ export default function EspaciosContent({ navigation }: any) {
         id_esp: espacioSeleccionado.id,
       };
 
+      await solicitudesService.create(solicitudData);
       Alert.alert('Éxito', 'Solicitud enviada correctamente');
       handleCloseModal();
     } catch (err: any) {
@@ -263,22 +285,44 @@ export default function EspaciosContent({ navigation }: any) {
                 <Text style={EspaciosStyles.formLabel}>Fecha y Hora de Inicio</Text>
                 <View style={EspaciosStyles.formRow}>
                   <View style={EspaciosStyles.formHalfInput}>
-                    <TextInput
-                      style={EspaciosStyles.input}
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#666"
-                      value={form.fecha_ini}
-                      onChangeText={(text) => setForm({...form, fecha_ini: text})}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTempDate(form.fecha_ini ? new Date(form.fecha_ini) : new Date());
+                        setShowDatePicker({ field: 'fecha_ini', visible: true, mode: 'date' });
+                      }}
+                    >
+                      <View pointerEvents="none">
+                        <TextInput
+                          style={EspaciosStyles.input}
+                          placeholder="YYYY-MM-DD"
+                          placeholderTextColor="#666"
+                          value={form.fecha_ini}
+                          editable={false}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                   <View style={EspaciosStyles.formHalfInput}>
-                    <TextInput
-                      style={EspaciosStyles.input}
-                      placeholder="HH:MM"
-                      placeholderTextColor="#666"
-                      value={form.hora_ini}
-                      onChangeText={(text) => setForm({...form, hora_ini: text})}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        let d = new Date();
+                        if (form.fecha_ini && form.hora_ini) {
+                          d = new Date(form.fecha_ini + 'T' + form.hora_ini + ':00');
+                        }
+                        setTempDate(d);
+                        setShowDatePicker({ field: 'hora_ini', visible: true, mode: 'time' });
+                      }}
+                    >
+                      <View pointerEvents="none">
+                        <TextInput
+                          style={EspaciosStyles.input}
+                          placeholder="HH:MM"
+                          placeholderTextColor="#666"
+                          value={form.hora_ini}
+                          editable={false}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -288,25 +332,77 @@ export default function EspaciosContent({ navigation }: any) {
                 <Text style={EspaciosStyles.formLabel}>Fecha y Hora de Fin</Text>
                 <View style={EspaciosStyles.formRow}>
                   <View style={EspaciosStyles.formHalfInput}>
-                    <TextInput
-                      style={EspaciosStyles.input}
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#666"
-                      value={form.fecha_fn}
-                      onChangeText={(text) => setForm({...form, fecha_fn: text})}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTempDate(form.fecha_fn ? new Date(form.fecha_fn) : new Date());
+                        setShowDatePicker({ field: 'fecha_fn', visible: true, mode: 'date' });
+                      }}
+                    >
+                      <View pointerEvents="none">
+                        <TextInput
+                          style={EspaciosStyles.input}
+                          placeholder="YYYY-MM-DD"
+                          placeholderTextColor="#666"
+                          value={form.fecha_fn}
+                          editable={false}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                   <View style={EspaciosStyles.formHalfInput}>
-                    <TextInput
-                      style={EspaciosStyles.input}
-                      placeholder="HH:MM"
-                      placeholderTextColor="#666"
-                      value={form.hora_fn}
-                      onChangeText={(text) => setForm({...form, hora_fn: text})}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        let d = new Date();
+                        if (form.fecha_fn && form.hora_fn) {
+                          d = new Date(form.fecha_fn + 'T' + form.hora_fn + ':00');
+                        }
+                        setTempDate(d);
+                        setShowDatePicker({ field: 'hora_fn', visible: true, mode: 'time' });
+                      }}
+                    >
+                      <View pointerEvents="none">
+                        <TextInput
+                          style={EspaciosStyles.input}
+                          placeholder="HH:MM"
+                          placeholderTextColor="#666"
+                          value={form.hora_fn}
+                          editable={false}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
+      {/* DatePickerModal único para fecha y hora */}
+      <DatePickerModal
+        visible={showDatePicker.visible}
+        mode={showDatePicker.mode || 'date'}
+        value={tempDate}
+        onChange={(event, date) => {
+          if (event.type === 'set' && date) {
+            if (showDatePicker.mode === 'date') {
+              const yyyy = date.getFullYear();
+              const mm = String(date.getMonth() + 1).padStart(2, '0');
+              const dd = String(date.getDate()).padStart(2, '0');
+              if (showDatePicker.field === 'fecha_ini') {
+                setForm(f => ({ ...f, fecha_ini: `${yyyy}-${mm}-${dd}`, fecha_fn: `${yyyy}-${mm}-${dd}` }));
+              } else if (showDatePicker.field === 'fecha_fn') {
+                setForm(f => ({ ...f, fecha_fn: `${yyyy}-${mm}-${dd}` }));
+              }
+            } else if (showDatePicker.mode === 'time') {
+              const hh = String(date.getHours()).padStart(2, '0');
+              const min = String(date.getMinutes()).padStart(2, '0');
+              if (showDatePicker.field === 'hora_ini') {
+                setForm(f => ({ ...f, hora_ini: `${hh}:${min}` }));
+              } else if (showDatePicker.field === 'hora_fn') {
+                setForm(f => ({ ...f, hora_fn: `${hh}:${min}` }));
+              }
+            }
+          }
+          setShowDatePicker({ field: null, visible: false });
+        }}
+        onClose={() => setShowDatePicker({ field: null, visible: false })}
+      />
 
               {/* Ambiente */}
               <View style={EspaciosStyles.formGroup}>
