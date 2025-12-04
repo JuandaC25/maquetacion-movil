@@ -24,7 +24,10 @@ export default function LoginScreen({ navigation }: any) {
       const userRoles = userData?.roles || [];
       console.log('👤 Roles:', userRoles);
       
-      if (userRoles.includes('INSTRUCTOR')) {
+      if ((userData.email || username) === 'admin@tech.com') {
+        console.log('🎯 Navegando a AdminDashboard...');
+        navigation.replace('AdminDashboard');
+      } else if (userRoles.includes('INSTRUCTOR')) {
         console.log('🎯 Navegando a Solicitudes...');
         navigation.replace('Solicitudes');
       } else {
