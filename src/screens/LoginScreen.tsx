@@ -38,7 +38,11 @@ export default function LoginScreen({ navigation }: any) {
       }
     } catch (err: any) {
       console.error('❌ Error en login:', err);
-      setError(err.message || 'Error al iniciar sesión');
+      if (err?.response?.status === 403) {
+        setError('Credenciales incorrectas o permisos insuficientes. Verifica tu usuario y contraseña.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }

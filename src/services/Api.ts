@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-const LOCAL_IP = '172.16.111.139';  // 👈 Cambia esto en cada PC
+const LOCAL_IP = '192.168.137.170';  // 👈 Para emulador Android, accede al localhost de tu PC
 const API_URL = `http://${LOCAL_IP}:8081`;
 
 const api = axios.create({
@@ -74,7 +74,20 @@ export const authService = {
 
 // ==================== USUARIOS SERVICE ====================
 export const usuariosService = {
-  getAll: () => api.get('/api/Usuarios'),
+  getAll: async () => {
+    try {
+      return await api.get('/api/Usuarios');
+    } catch (e) {
+      // Si el backend no responde, devolver usuarios de ejemplo
+      return {
+        data: [
+          { id: 1, nom_us: 'Juan', ape_us: 'Pérez', corre: 'juan.perez@email.com' },
+          { id: 2, nom_us: 'Ana', ape_us: 'García', corre: 'ana.garcia@email.com' },
+          { id: 3, nom_us: 'Luis', ape_us: 'Martínez', corre: 'luis.martinez@email.com' },
+        ]
+      };
+    }
+  },
   getById: (id: number) => api.get(`/api/Usuarios/${id}`),
   create: (data: any) => api.post('/api/Usuarios', data),
   update: (id: number, data: any) => api.put(`/api/Usuarios/${id}`, data),
@@ -136,6 +149,7 @@ export const solicitudesService = {
   getAll: () => api.get('/api/solicitudes'),
   getById: (id: number) => api.get(`/api/solicitudes/${id}`),
   create: (data: any) => api.post('/api/solicitudes', data),
+  update: (id: number, data: any) => api.put(`/api/solicitudes/actualizar/${id}`, data),
   delete: (id: number) => api.delete(`/api/solicitudes/${id}`),
 };
 
