@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { categoriasService, subcategoriasService } from '../../services/Api';
@@ -16,6 +17,7 @@ type Subcategoria = {
 };
 
 const CategoriasAdmin = () => {
+  const { colors } = useTheme();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,19 +76,19 @@ const CategoriasAdmin = () => {
 
   const renderCategorias = () => (
     loading ? (
-      <ActivityIndicator size="large" color="#09b41a" style={{ marginTop: 40 }} />
+      <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
     ) : (
       <FlatList
         data={categorias}
         keyExtractor={item => item.id_cat.toString()}
         contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
-          <View style={styles.cardPresentation}>
-            <View style={styles.iconContainer}>
-              <MaterialIcons name="category" size={44} color="#09b41a" />
+          <View style={[styles.cardPresentation, { backgroundColor: colors.cardBackground, shadowColor: colors.shadow, borderColor: colors.primary }]}> 
+            <View style={[styles.iconContainer, { backgroundColor: colors.background }]}> 
+              <MaterialIcons name="category" size={44} color={colors.primary} />
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.catName}>{item.nom_cat}</Text>
+              <Text style={[styles.catName, { color: colors.primary }]}>{item.nom_cat}</Text>
             </View>
           </View>
         )}
@@ -100,7 +102,7 @@ const CategoriasAdmin = () => {
       (item) => item && typeof item.id_subcat !== 'undefined' && item.id_subcat !== null
     );
     if (validSubcats.length === 0) {
-      return <Text style={{textAlign:'center', color:'#888', marginTop:40}}>No hay subcategorías</Text>;
+      return <Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 40 }}>No hay subcategorías</Text>;
     }
     return (
       <FlatList
@@ -108,14 +110,14 @@ const CategoriasAdmin = () => {
         keyExtractor={item => String(item.id_subcat)}
         contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
-          <View style={styles.cardPresentation}>
-            <View style={styles.iconContainer}>
-              <MaterialIcons name="category" size={44} color="#09b41a" />
+          <View style={[styles.cardPresentation, { backgroundColor: colors.cardBackground, shadowColor: colors.shadow, borderColor: colors.primary }]}> 
+            <View style={[styles.iconContainer, { backgroundColor: colors.background }]}> 
+              <MaterialIcons name="category" size={44} color={colors.primary} />
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.catName}>{item.nom_subcat}</Text>
+              <Text style={[styles.catName, { color: colors.primary }]}>{item.nom_subcat}</Text>
               {item.nom_cat && (
-                <Text style={styles.catSubLabel}>Categoría: {item.nom_cat}</Text>
+                <Text style={[styles.catSubLabel, { color: colors.primaryLight }]}>Categoría: {item.nom_cat}</Text>
               )}
             </View>
           </View>
@@ -125,21 +127,21 @@ const CategoriasAdmin = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{activeTab === 'categorias' ? 'Categorías' : 'Subcategorías'}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      <Text style={[styles.title, { color: colors.primary }]}>{activeTab === 'categorias' ? 'Categorías' : 'Subcategorías'}</Text>
       {/* Tabs para cambiar entre categorías y subcategorías */}
       <View style={styles.tabsRow}>
         <TouchableOpacity
-          style={activeTab === 'categorias' ? styles.activeTab : styles.inactiveTab}
+          style={[activeTab === 'categorias' ? styles.activeTab : styles.inactiveTab, { backgroundColor: activeTab === 'categorias' ? colors.primary : colors.cardBackground, shadowColor: colors.shadow }]}
           onPress={() => setActiveTab('categorias')}
         >
-          <Text style={activeTab === 'categorias' ? styles.activeTabText : styles.inactiveTabText}>Categorías</Text>
+          <Text style={[activeTab === 'categorias' ? styles.activeTabText : styles.inactiveTabText, { color: activeTab === 'categorias' ? colors.cardBackground : colors.textPrimary }]}>Categorías</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={activeTab === 'subcategorias' ? styles.activeTab : styles.inactiveTab}
+          style={[activeTab === 'subcategorias' ? styles.activeTab : styles.inactiveTab, { backgroundColor: activeTab === 'subcategorias' ? colors.primary : colors.cardBackground, shadowColor: colors.shadow }]}
           onPress={() => setActiveTab('subcategorias')}
         >
-          <Text style={activeTab === 'subcategorias' ? styles.activeTabText : styles.inactiveTabText}>Ver las subcategorías</Text>
+          <Text style={[activeTab === 'subcategorias' ? styles.activeTabText : styles.inactiveTabText, { color: activeTab === 'subcategorias' ? colors.cardBackground : colors.textPrimary }]}>Ver las subcategorías</Text>
         </TouchableOpacity>
       </View>
       {activeTab === 'categorias' ? renderCategorias() : renderSubcategorias()}
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    color: '#09b41a',
+    // color: '#09b41a',
     fontWeight: 'bold',
     marginTop: 32,
     marginBottom: 22,
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   },
   catName: {
     fontSize: 22,
-    color: '#09b41a',
+    // color: '#09b41a',
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 2,

@@ -9,41 +9,49 @@ export interface Colors {
   cardBackground: string;
   modalBackground: string;
   inputBackground: string;
-  
+
   // Textos
   textPrimary: string;
   textSecondary: string;
   textTertiary: string;
-  
+  title: string;
+
   // Acentos
   primary: string;
   primaryLight: string;
   success: string;
   error: string;
   warning: string;
-  
+
   // Bordes
   border: string;
   borderLight: string;
   borderDark: string;
-  
+
   // Otros
   overlay: string;
   shadow: string;
   disabled: string;
+
+  // Botones
+  buttonPrimary: string;
+  buttonCancel: string;
 }
 
 const darkColors: Colors = {
   // Fondos
-  background: '#000000',
-  cardBackground: '#1a1a1a',
-  modalBackground: '#1a1a1a',
-  inputBackground: '#2a2a2a',
+  background: '#232838', // azul oscuro tipo Discord
+  cardBackground: '#2c3142',
+  modalBackground: '#2c3142',
+  inputBackground: '#35394a',
   
   // Textos
-  textPrimary: '#ffffff',
-  textSecondary: '#cccccc',
+  textPrimary: '#bfc2c9', // gris claro para texto normal
+  textSecondary: '#bfc2c9',
   textTertiary: '#888888',
+    
+  // Títulos (verde)
+  title: '#3fbb34',
   
   // Acentos
   primary: '#3fbb34',
@@ -61,6 +69,10 @@ const darkColors: Colors = {
   overlay: 'rgba(0, 0, 0, 0.8)',
   shadow: '#000000',
   disabled: '#555555',
+
+  // Botones
+  buttonPrimary: '#3fbb34',
+  buttonCancel: '#35394a',
 };
 
 const lightColors: Colors = {
@@ -74,6 +86,7 @@ const lightColors: Colors = {
   textPrimary: '#1a1a1a',
   textSecondary: '#4a4a4a',
   textTertiary: '#888888',
+  title: '#3fbb34',
   
   // Acentos
   primary: '#3fbb34',
@@ -91,6 +104,10 @@ const lightColors: Colors = {
   overlay: 'rgba(0, 0, 0, 0.5)',
   shadow: '#000000',
   disabled: '#cccccc',
+
+  // Botones
+  buttonPrimary: '#3fbb34',
+  buttonCancel: '#e0e0e0',
 };
 
 interface ThemeContextType {

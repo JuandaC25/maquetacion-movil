@@ -1,3 +1,4 @@
+import { useTheme } from '../../context/ThemeContext';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -19,6 +20,7 @@ type Elemento = {
 
 
 const InventarioAdmin = () => {
+  const { colors } = useTheme();
   const [elementos, setElementos] = useState<Elemento[]>([]);
   const [loading, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -119,48 +121,51 @@ const InventarioAdmin = () => {
       })
     : [];
 
+  const [showEstadoModal, setShowEstadoModal] = useState(false);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
       {message && (
-        <View style={{backgroundColor: '#e0f7fa', padding: 10, margin: 10, borderRadius: 8}}>
-          <Text style={{color: '#00796b', textAlign: 'center'}}>{message}</Text>
+        <View style={{backgroundColor: colors.inputBackground, padding: 10, margin: 10, borderRadius: 8}}>
+          <Text style={{color: colors.textPrimary, textAlign: 'center'}}>{message}</Text>
         </View>
       )}
       <Text style={styles.title}>Inventario</Text>
       <View style={styles.searchContainer}>
-        <MaterialIcons name="search" size={20} color="#3b82f6" style={{ marginRight: 8 }} />
+        <MaterialIcons name="search" size={20} color={colors.primary} style={{ marginRight: 8 }} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.inputBackground, color: colors.textPrimary }]}
           placeholder="Buscar por nombre, categoría, serie o marca..."
+          placeholderTextColor={colors.textSecondary}
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
       </View>
       {loading ? (
-        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={elementosFiltrados}
           keyExtractor={item => (item && item.id !== undefined && item.id !== null ? item.id.toString() : Math.random().toString())}
           contentContainerStyle={{ paddingBottom: 30 }}
           renderItem={({ item }) => (
-            <View style={styles.inventoryCard}>
+            <View style={[styles.inventoryCard, { backgroundColor: colors.cardBackground }]}> 
               <View style={styles.inventoryBadge} />
               <View style={styles.inventoryIconWrap}>
-                {item.categoria === 'Portátil' && <MaterialIcons name="laptop" size={60} color="#28a745" style={styles.inventoryIcon} />}
-                {item.categoria === 'Equipo de Escritorio' && <MaterialIcons name="desktop-windows" size={60} color="#28a745" style={styles.inventoryIcon} />}
-                {item.categoria === 'Televisor' && <MaterialIcons name="tv" size={60} color="#28a745" style={styles.inventoryIcon} />}
-                {item.categoria === 'Accesorio' && <MaterialIcons name="settings" size={60} color="#28a745" style={styles.inventoryIcon} />}
-                {['Portátil','Equipo de Escritorio','Televisor','Accesorio'].indexOf(item.categoria) === -1 && <MaterialIcons name="devices" size={60} color="#28a745" style={styles.inventoryIcon} />}
+                {item.categoria === 'Portátil' && <MaterialIcons name="laptop" size={60} color={colors.success} style={styles.inventoryIcon} />}
+                {item.categoria === 'Equipo de Escritorio' && <MaterialIcons name="desktop-windows" size={60} color={colors.success} style={styles.inventoryIcon} />}
+                {item.categoria === 'Televisor' && <MaterialIcons name="tv" size={60} color={colors.success} style={styles.inventoryIcon} />}
+                {item.categoria === 'Accesorio' && <MaterialIcons name="settings" size={60} color={colors.success} style={styles.inventoryIcon} />}
+                {['Portátil','Equipo de Escritorio','Televisor','Accesorio'].indexOf(item.categoria) === -1 && <MaterialIcons name="devices" size={60} color={colors.success} style={styles.inventoryIcon} />}
               </View>
               <View style={styles.inventoryInfoWrap}>
-                <Text style={styles.inventoryName}>{item.nombre ? `Nombre: ${item.nombre}` : 'Nombre: (sin dato)'}</Text>
-                <Text style={styles.inventoryCategoria}>{item.categoria ? `Categoría: ${item.categoria}` : 'Categoría: (sin dato)'}</Text>
-                <Text style={styles.inventorySerie}>{item.serie ? `Serie: ${item.serie}` : 'Serie: (sin dato)'}</Text>
-                <Text style={styles.inventoryMarca}>{item.marca ? `Marca: ${item.marca}` : 'Marca: (sin dato)'}</Text>
-                <Text style={styles.inventoryMarca}>{item.estado !== undefined ? `Estado: ${item.estado}` : 'Estado: (sin dato)'}</Text>
-                <Text style={styles.inventoryMarca}>{item.observaciones ? `Observaciones: ${item.observaciones}` : 'Observaciones: (sin dato)'}</Text>
-                <Text style={styles.inventoryMarca}>{item.componentes ? `Componentes: ${item.componentes}` : 'Componentes: (sin dato)'}</Text>
+                <Text style={[styles.inventoryName, { color: colors.success }]}>{item.nombre ? `Nombre: ${item.nombre}` : 'Nombre: (sin dato)'}</Text>
+                <Text style={[styles.inventoryCategoria, { color: colors.textSecondary }]}>{item.categoria ? `Categoría: ${item.categoria}` : 'Categoría: (sin dato)'}</Text>
+                <Text style={[styles.inventorySerie, { color: colors.textPrimary }]}>{item.serie ? `Serie: ${item.serie}` : 'Serie: (sin dato)'}</Text>
+                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.marca ? `Marca: ${item.marca}` : 'Marca: (sin dato)'}</Text>
+                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.estado !== undefined ? `Estado: ${item.estado}` : 'Estado: (sin dato)'}</Text>
+                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.observaciones ? `Observaciones: ${item.observaciones}` : 'Observaciones: (sin dato)'}</Text>
+                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.componentes ? `Componentes: ${item.componentes}` : 'Componentes: (sin dato)'}</Text>
               </View>
               <TouchableOpacity style={styles.inventoryEditBtn} onPress={() => handleEdit(item)}>
                 <MaterialIcons name="edit" size={32} color="#fff" />
@@ -172,34 +177,50 @@ const InventarioAdmin = () => {
 
       <Modal visible={editModalVisible} animationType="slide" transparent>
         <View style={styles.modalBg}>
-          <View style={styles.webModalContent}>
-            <Text style={styles.webModalTitle}>Editar Elemento</Text>
-            <View style={styles.webModalBody}>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Nombre</Text>
-                <TextInput style={styles.webInput} value={editData.nombre} onChangeText={v => setEditData({ ...editData, nombre: v })} placeholder="Nombre" />
+            <View style={[styles.webModalContent, { backgroundColor: colors.cardBackground }]}> 
+            <Text style={[styles.webModalTitle, { color: colors.success }]}>Editar Elemento</Text>
+            <View style={[styles.webModalBody, { backgroundColor: colors.background }]}> 
+              <View style={styles.webFieldGroup}><Text style={[styles.webLabel, { color: colors.textPrimary }]}>Estado</Text>
+                <TouchableOpacity
+                  style={[styles.webInput, { backgroundColor: colors.inputBackground, justifyContent: 'center' }]}
+                  onPress={() => setShowEstadoModal(true)}
+                >
+                  <Text style={{ color: colors.textPrimary }}>
+                    {editData.estado === '1' ? 'Activo' : 'Inactivo'}
+                  </Text>
+                </TouchableOpacity>
+                {/* Modal para seleccionar estado */}
+                {showEstadoModal && (
+                  <Modal
+                    visible={showEstadoModal}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowEstadoModal(false)}
+                  >
+                    <View style={styles.modalBg}>
+                      <View style={[styles.webModalContent, { backgroundColor: colors.cardBackground, maxWidth: 300 }]}> 
+                        <Text style={[styles.webModalTitle, { color: colors.title, fontSize: 18 }]}>Selecciona estado</Text>
+                        <TouchableOpacity onPress={() => { setEditData({ ...editData, estado: '1' }); setShowEstadoModal(false); }} style={{ padding: 14 }}>
+                          <Text style={{ color: colors.textPrimary }}>Activo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => { setEditData({ ...editData, estado: '0' }); setShowEstadoModal(false); }} style={{ padding: 14 }}>
+                          <Text style={{ color: colors.textPrimary }}>Inactivo</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                )}
               </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Estado</Text>
-                <TextInput style={styles.webInput} value={editData.estado} onChangeText={v => setEditData({ ...editData, estado: v })} placeholder="1=Activo, 0=Inactivo" keyboardType="numeric" />
+              <View style={styles.webFieldGroup}><Text style={[styles.webLabel, { color: colors.textPrimary }]}>Observaciones</Text>
+                <TextInput style={[styles.webInput, { backgroundColor: colors.inputBackground, color: colors.textPrimary }]} value={editData.observaciones} onChangeText={v => setEditData({ ...editData, observaciones: v })} placeholder="Observaciones" multiline placeholderTextColor={colors.textSecondary} />
               </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Observaciones</Text>
-                <TextInput style={styles.webInput} value={editData.observaciones} onChangeText={v => setEditData({ ...editData, observaciones: v })} placeholder="Observaciones" multiline />
-              </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Componentes</Text>
-                <TextInput style={styles.webInput} value={editData.componentes} onChangeText={v => setEditData({ ...editData, componentes: v })} placeholder="Componentes" multiline />
-              </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Serie</Text>
-                <TextInput style={styles.webInput} value={editData.serie} onChangeText={v => setEditData({ ...editData, serie: v })} placeholder="Serie" />
-              </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Marca</Text>
-                <TextInput style={styles.webInput} value={editData.marca} onChangeText={v => setEditData({ ...editData, marca: v })} placeholder="Marca" />
-              </View>
-              <View style={styles.webFieldGroup}><Text style={styles.webLabel}>Categoría</Text>
-                <TextInput style={styles.webInput} value={editData.categoria} onChangeText={v => setEditData({ ...editData, categoria: v })} placeholder="Categoría" />
+              <View style={styles.webFieldGroup}><Text style={[styles.webLabel, { color: colors.textPrimary }]}>Componentes</Text>
+                <TextInput style={[styles.webInput, { backgroundColor: colors.inputBackground, color: colors.textPrimary }]} value={editData.componentes} onChangeText={v => setEditData({ ...editData, componentes: v })} placeholder="Componentes" multiline placeholderTextColor={colors.textSecondary} />
               </View>
             </View>
             <View style={styles.webModalActions}>
-              <TouchableOpacity style={styles.webCancelBtn} onPress={() => setEditModalVisible(false)}>
-                <Text style={styles.webCancelText}>Cancelar</Text>
+              <TouchableOpacity style={[styles.webCancelBtn, { backgroundColor: colors.inputBackground }]} onPress={() => setEditModalVisible(false)}>
+                <Text style={[styles.webCancelText, { color: colors.success }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.webSaveBtn} onPress={handleSave} disabled={saving}>
                 <Text style={styles.webSaveText}>{saving ? 'Guardando...' : 'Guardar'}</Text>
@@ -221,7 +242,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    // color: '#333',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -231,13 +252,13 @@ const styles = StyleSheet.create({
     borderColor: '#e0e6ed',
     borderRadius: 8,
     padding: 10,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     fontSize: 16,
   },
   inventoryCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 22,
     marginVertical: 14,
     marginHorizontal: 8,
@@ -327,7 +348,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   webModalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     width: '90%',
@@ -340,12 +361,12 @@ const styles = StyleSheet.create({
   webModalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#28a745',
+    // color: '#28a745',
     marginBottom: 18,
     textAlign: 'center',
   },
   webModalBody: {
-    backgroundColor: '#fcfcfc',
+    // backgroundColor: '#fcfcfc',
     borderRadius: 8,
     paddingVertical: 8,
     marginBottom: 10,
@@ -364,7 +385,7 @@ const styles = StyleSheet.create({
     borderColor: '#e0e6ed',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     fontSize: 16,
   },
   webModalActions: {
@@ -373,7 +394,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   webCancelBtn: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 28,

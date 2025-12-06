@@ -1,3 +1,4 @@
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -33,6 +34,8 @@ interface Solicitud {
   serial?: string;
   cantidad?: string;
   ambiente?: string;
+  id_esp?: any;
+  id_espa?: any;
 }
 
 // Función para cargar solicitudes (debe estar definida en este archivo)
@@ -74,6 +77,8 @@ const ESTADO_IDS: Record<string, number> = {
 };
 
 const SolicitudesElementoAdmin = () => {
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   // Estados para mostrar los modales de selección
   const [showCategoriaModal, setShowCategoriaModal] = useState(false);
   const [showSubcategoriaModal, setShowSubcategoriaModal] = useState(false);
@@ -152,18 +157,28 @@ const SolicitudesElementoAdmin = () => {
   }, []);
 
   // Render principal
+  // Filtrar solo solicitudes de elementos (no espacios)
+  const solicitudesElemento = solicitudes.filter(item => {
+    // Si tiene id_esp o id_espa, es de espacio, no de elemento
+    if (item.id_esp || item.id_espa) return false;
+    // No mostrar si no tiene elemento, categoría ni subcategoría asignada
+    const hasElemento = !!(item.elemento && String(item.elemento).trim() !== '');
+    const hasCategoria = !!(item.categoria && String(item.categoria).trim() !== '');
+    const hasSubcategoria = !!(item.subcategoria && String(item.subcategoria).trim() !== '');
+    return hasElemento || hasCategoria || hasSubcategoria;
+  });
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
       {/* Header alineado a la izquierda, sin botón verde */}
       <View style={{marginBottom: 10, paddingHorizontal: 16, paddingTop: 4}}>
-        <Text style={[styles.title, {textAlign: 'left', fontSize: 22}]}>Solicitudes de Elementos (Admin)</Text>
+        <Text style={[styles.title, { color: colors.title, textAlign: 'left', fontSize: 22 }]}>Solicitudes de Elementos (Admin)</Text>
       </View>
       <View style={styles.solicitudesListWrap}>
         {loading ? (
           <ActivityIndicator size="large" color="#28a745" style={{ marginTop: 40 }} />
         ) : (
           <FlatList
-            data={solicitudes}
+            data={solicitudesElemento}
             keyExtractor={item => item.id?.toString() || Math.random().toString()}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => {
@@ -178,12 +193,12 @@ const SolicitudesElementoAdmin = () => {
                     <MaterialIcons name="assignment" size={48} color="#28a745" style={styles.solicitudIcon} />
                   </View>
                   <View style={styles.solicitudInfoWrap}>
-                    <Text style={styles.solicitudTitulo}>Solicitud #{item.id !== undefined ? item.id : 'Sin número'}</Text>
-                    <Text style={styles.solicitudEstado}>Estado: <Text style={styles.solicitudEstadoValor}>{item.estado !== undefined ? item.estado : 'Sin estado'}</Text></Text>
-                    <Text style={styles.solicitudDetalle}>Fecha: {item.fecha !== undefined ? item.fecha : 'Sin fecha'}</Text>
-                    <Text style={styles.solicitudDetalle}>Solicitante: {item.solicitante !== undefined ? item.solicitante : 'Sin nombre'}</Text>
-                    <Text style={styles.solicitudDetalle}>Elemento: {item.elemento !== undefined ? item.elemento : 'Sin elemento'}</Text>
-                    <Text style={styles.solicitudDetalle}>Categoría: {item.categoria !== undefined ? item.categoria : 'Sin categoría'}</Text>
+                    <Text style={[styles.solicitudTitulo, { color: colors.title }]}>Solicitud #{item.id !== undefined ? item.id : 'Sin número'}</Text>
+                    <Text style={[styles.solicitudEstado, { color: colors.textPrimary }]}>Estado: <Text style={[styles.solicitudEstadoValor, { color: colors.title }]}>{item.estado !== undefined ? item.estado : 'Sin estado'}</Text></Text>
+                    <Text style={[styles.solicitudDetalle, { color: colors.textPrimary }]}>Fecha: {item.fecha !== undefined ? item.fecha : 'Sin fecha'}</Text>
+                    <Text style={[styles.solicitudDetalle, { color: colors.textPrimary }]}>Solicitante: {item.solicitante !== undefined ? item.solicitante : 'Sin nombre'}</Text>
+                    <Text style={[styles.solicitudDetalle, { color: colors.textPrimary }]}>Elemento: {item.elemento !== undefined ? item.elemento : 'Sin elemento'}</Text>
+                    <Text style={[styles.solicitudDetalle, { color: colors.textPrimary }]}>Categoría: {item.categoria !== undefined ? item.categoria : 'Sin categoría'}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -208,15 +223,16 @@ const SolicitudesElementoAdmin = () => {
         transparent
         onRequestClose={() => setAddModalVisible(false)}
       >
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Nueva Solicitud</Text>
+        <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+          <View style={[styles.modalContent, { backgroundColor: colors.background }]}> 
+            <Text style={[styles.modalTitle, { color: colors.title }]}>Nueva Solicitud</Text>
             {/* Selector de Categoría */}
             <TouchableOpacity
               style={styles.input}
               onPress={() => setShowCategoriaModal(true)}
+              disabled={!!addData.categoria}
             >
-              <Text style={{ color: addData.categoria ? '#212529' : '#aaa' }}>
+              <Text style={{ color: addData.categoria ? colors.textPrimary : '#aaa', fontSize: 15, opacity: 1 }}>
                 {addData.categoria
                   ? (categorias.find((cat: any) => String(cat.id ?? cat.id_cat) === String(addData.categoria))?.nombre ?? categorias.find((cat: any) => String(cat.id ?? cat.id_cat) === String(addData.categoria))?.nom_cat ?? addData.categoria)
                   : 'Selecciona una categoría'}
@@ -230,9 +246,9 @@ const SolicitudesElementoAdmin = () => {
                 animationType="fade"
                 onRequestClose={() => setShowCategoriaModal(false)}
               >
-                <View style={styles.modalBg}>
-                  <View style={[styles.modalContent, {maxHeight: 350}]}> 
-                    <Text style={styles.modalTitle}>Selecciona una categoría</Text>
+                <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+                  <View style={[styles.modalContent, {maxHeight: 350, backgroundColor: colors.background }]}> 
+                    <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona una categoría</Text>
                     <FlatList
                       data={categorias}
                       keyExtractor={item => String(item.id ?? item.id_cat)}
@@ -250,7 +266,7 @@ const SolicitudesElementoAdmin = () => {
                             setShowCategoriaModal(false);
                           }}
                         >
-                          <Text>{item.nombre ?? item.nom_cat}</Text>
+                          <Text style={{ color: colors.textPrimary }}>{item.nombre ?? item.nom_cat}</Text>
                         </TouchableOpacity>
                       )}
                     />
@@ -265,7 +281,7 @@ const SolicitudesElementoAdmin = () => {
               onPress={() => addData.categoria && setShowSubcategoriaModal(true)}
               disabled={!addData.categoria}
             >
-              <Text style={{ color: addData.subcategoria ? '#212529' : '#aaa' }}>
+              <Text style={{ color: addData.subcategoria ? colors.textPrimary : '#aaa', fontSize: 15, opacity: 1 }}>
                 {addData.subcategoria
                   ? (
                       subcategoriasFiltradas.find((sub: any) => String(sub.id ?? sub.id_subcat) === String(addData.subcategoria))?.nom_subcateg
@@ -283,22 +299,22 @@ const SolicitudesElementoAdmin = () => {
                 animationType="fade"
                 onRequestClose={() => setShowSubcategoriaModal(false)}
               >
-                <View style={styles.modalBg}>
-                  <View style={[styles.modalContent, {maxHeight: 350}]}> 
-                    <Text style={styles.modalTitle}>Selecciona una subcategoría</Text>
+                <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+                  <View style={[styles.modalContent, { maxHeight: 350, backgroundColor: colors.background }]}> 
+                    <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona una subcategoría</Text>
                     <FlatList
                       data={subcategoriasFiltradas}
                       keyExtractor={item => String(item.id ?? item.id_subcat)}
                       renderItem={({ item }) => (
                         <TouchableOpacity
-                          style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}
+                          style={{ padding: 12, borderBottomWidth: 1, borderColor: colors.border }}
                           onPress={() => {
                             setAddData(prev => ({ ...prev, subcategoria: String(item.id ?? item.id_subcat), elemento: '' }));
                             setElementosFiltrados(elementos.filter((e: any) => String(e.id_subcat ?? e.id_subcategoria) === String(item.id ?? item.id_subcat)));
                             setShowSubcategoriaModal(false);
                           }}
                         >
-                          <Text>{item.nom_subcateg ?? item.nombre ?? item.nom_subcat}</Text>
+                          <Text style={{ color: colors.textPrimary, fontSize: 15 }}>{item.nom_subcateg ?? item.nombre ?? item.nom_subcat}</Text>
                         </TouchableOpacity>
                       )}
                     />
@@ -313,7 +329,7 @@ const SolicitudesElementoAdmin = () => {
               onPress={() => addData.subcategoria && setShowElementoModal(true)}
               disabled={!addData.subcategoria}
             >
-              <Text style={{ color: addData.elemento ? '#212529' : '#aaa' }}>
+              <Text style={{ color: addData.elemento ? colors.textPrimary : '#aaa', fontSize: 15, opacity: 1 }}>
                 {addData.elemento
                   ? (
                       elementosFiltrados.find((el: any) => String(el.id ?? el.id_elem ?? el.id_elemen ?? el.id_elemento) === String(addData.elemento))?.nom_eleme
@@ -333,21 +349,21 @@ const SolicitudesElementoAdmin = () => {
                 animationType="fade"
                 onRequestClose={() => setShowElementoModal(false)}
               >
-                <View style={styles.modalBg}>
-                  <View style={[styles.modalContent, {maxHeight: 350}]}> 
-                    <Text style={styles.modalTitle}>Selecciona un elemento</Text>
+                <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+                  <View style={[styles.modalContent, { maxHeight: 350, backgroundColor: colors.background }]}> 
+                    <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona un elemento</Text>
                     <FlatList
                       data={elementosFiltrados}
                       keyExtractor={item => String(item.id)}
                       renderItem={({ item }) => (
                         <TouchableOpacity
-                          style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}
+                          style={{ padding: 12, borderBottomWidth: 1, borderColor: colors.border }}
                           onPress={() => {
                             setAddData(prev => ({ ...prev, elemento: String(item.id ?? item.id_elem ?? item.id_elemen ?? item.id_elemento) }));
                             setShowElementoModal(false);
                           }}
                         >
-                          <Text>{item.nom_eleme ?? item.nom_elem ?? item.nombre ?? item.nom_elemento ?? 'Sin nombre'}</Text>
+                          <Text style={{ color: colors.textPrimary, fontSize: 15 }}>{item.nom_eleme ?? item.nom_elem ?? item.nombre ?? item.nom_elemento ?? 'Sin nombre'}</Text>
                         </TouchableOpacity>
                       )}
                     />
@@ -358,8 +374,9 @@ const SolicitudesElementoAdmin = () => {
             {/* Fecha y hora inicio */}
             <TouchableOpacity onPress={() => openPicker('fecha_ini', 'date')}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
                 placeholder="Fecha de inicio (ej: 2025-12-05)"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={addData.fecha_ini.split(' ')[0] || ''}
                 editable={false}
                 pointerEvents="none"
@@ -367,8 +384,9 @@ const SolicitudesElementoAdmin = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => openPicker('fecha_ini', 'time')}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
                 placeholder="Hora de inicio (ej: 14:30)"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={addData.fecha_ini.split(' ')[1] || ''}
                 editable={false}
                 pointerEvents="none"
@@ -377,8 +395,9 @@ const SolicitudesElementoAdmin = () => {
             {/* Fecha y hora fin */}
             <TouchableOpacity onPress={() => openPicker('fecha_fin', 'date')}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
                 placeholder="Fecha de fin (ej: 2025-12-05)"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={addData.fecha_fin.split(' ')[0] || ''}
                 editable={false}
                 pointerEvents="none"
@@ -386,8 +405,9 @@ const SolicitudesElementoAdmin = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => openPicker('fecha_fin', 'time')}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
                 placeholder="Hora de fin (ej: 16:00)"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={addData.fecha_fin.split(' ')[1] || ''}
                 editable={false}
                 pointerEvents="none"
@@ -403,22 +423,22 @@ const SolicitudesElementoAdmin = () => {
             />
             {/* Validación de formato */}
             {(!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_fin)) && (addData.fecha_ini || addData.fecha_fin) ? (
-              <Text style={{color:'red',fontSize:13,marginBottom:8}}>
+                <Text style={{ color: isDark ? '#ff6b6b' : '#d32f2f', fontSize: 13, marginBottom: 8 }}>
                   El formato debe ser: 2025-12-05 14:30 <Text style={{fontWeight:'bold'}}>o</Text> 2025-12-05T14:30
               </Text>
             ) : null}
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
               placeholder="Cantidad"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={isDark ? '#aaa' : '#555'}
               keyboardType="numeric"
               value={addData.cantidad}
               onChangeText={text => setAddData(prev => ({ ...prev, cantidad: text }))}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
               placeholder="Ambiente"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={isDark ? '#aaa' : '#555'}
               value={addData.ambiente}
               onChangeText={text => setAddData(prev => ({ ...prev, ambiente: text }))}
             />
@@ -500,40 +520,40 @@ const SolicitudesElementoAdmin = () => {
       transparent
       onRequestClose={() => setEditModalVisible(false)}
     >
-      <View style={styles.modalBg}>
-        <View style={[styles.modalContent, {backgroundColor: '#232734'}]}>
-          <Text style={[styles.modalTitle, {color: '#fff', fontWeight: 'bold', fontSize: 20, textAlign: 'center', marginBottom: 18}]}>Detalle de Solicitud</Text>
-          <Text style={{color: '#fff', marginBottom: 8, fontWeight: 'bold'}}>Cantidad</Text>
+      <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+        <View style={[styles.modalContent, { backgroundColor: colors.background }]}> 
+          <Text style={[styles.modalTitle, { color: colors.title, fontWeight: 'bold', fontSize: 20, textAlign: 'center', marginBottom: 18 }]}>Detalle de Solicitud</Text>
+          <Text style={{ color: colors.textPrimary, marginBottom: 8, fontWeight: 'bold' }}>Cantidad</Text>
           <TextInput
-            style={[styles.input, {backgroundColor: '#232734', color: '#fff', borderColor: '#28a745'}]}
+            style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
             placeholder="Cantidad"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={isDark ? '#aaa' : '#555'}
             keyboardType="numeric"
             value={editCantidad}
             onChangeText={setEditCantidad}
           />
-          <Text style={{color: '#fff', marginBottom: 8, fontWeight: 'bold', marginTop: 12}}>Estado</Text>
-          <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16}}>
-            {['Pendiente','Aprobado','Rechazado','Cancelado','Finalizado'].map(estado => (
+          <Text style={{ color: colors.textPrimary, marginBottom: 8, fontWeight: 'bold', marginTop: 12 }}>Estado</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+            {['Pendiente', 'Aprobado', 'Rechazado', 'Cancelado', 'Finalizado'].map(estado => (
               <TouchableOpacity
                 key={estado}
-                style={[
-                  {paddingHorizontal:16, paddingVertical:8, borderRadius:18, margin:4, borderWidth:2},
+                style={[ 
+                  { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18, margin: 4, borderWidth: 2 },
                   editEstado === estado
-                    ? {backgroundColor:'#28a745', borderColor:'#28a745'}
-                    : {backgroundColor:'#232734', borderColor:'#28a745'}
+                    ? { backgroundColor: colors.primary, borderColor: colors.primary }
+                    : { backgroundColor: colors.inputBackground, borderColor: colors.primary }
                 ]}
                 onPress={() => setEditEstado(estado)}
               >
-                <Text style={{color: editEstado === estado ? '#fff' : '#28a745', fontWeight:'bold'}}>{estado}</Text>
+                <Text style={{ color: editEstado === estado ? '#fff' : colors.primary, fontWeight: 'bold' }}>{estado}</Text>
               </TouchableOpacity>
             ))}
           </View>
-          <View style={[styles.modalActions, {marginTop: 18}]}> 
-            <Button title="Cancelar" color="#888" onPress={() => setEditModalVisible(false)} />
+          <View style={[styles.modalActions, { marginTop: 18 }]}> 
+            <Button title="Cancelar" color={isDark ? '#888' : '#444'} onPress={() => setEditModalVisible(false)} />
             <Button
               title="Guardar"
-              color="#28a745"
+              color={colors.primary}
               onPress={async () => {
                 if (!selectedSolicitud) return;
                 if (!editEstado) {
@@ -584,7 +604,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#212529',
+    // color: '#212529',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -593,7 +613,7 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   solicitudCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     marginHorizontal: 16,
     marginVertical: 6,
     padding: 16,
@@ -676,7 +696,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     width: '90%',
     maxWidth: 500,
     maxHeight: '90%',
@@ -686,13 +706,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#212529',
+    // color: '#212529',
     marginBottom: 20,
     textAlign: 'center',
   },
   // Form styles
   input: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e9ecef',
     borderRadius: 8,

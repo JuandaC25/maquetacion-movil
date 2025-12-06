@@ -1,3 +1,4 @@
+import { useTheme } from '../../context/ThemeContext';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView, Image } from 'react-native';
 import ReservaEspacioCard, { ReservaEspacio } from './ReservaEspacioCard';
@@ -5,6 +6,8 @@ import DatePickerModal from '../../components/DatePickerModal';
 import { espaciosService, solicitudesService, authService } from '../../services/Api';
 
 const SolicitudesEspacioAdmin = () => {
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   type Espacio = {
     id: number;
     nom_espa: string;
@@ -152,12 +155,12 @@ const SolicitudesEspacioAdmin = () => {
       imagen = null;
     }
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.background }]}> 
         {imagen && (
           <Image source={{ uri: imagen.startsWith('http') ? imagen : `http://192.168.20.60:8081${imagen}` }} style={styles.imagen} />
         )}
-        <Text style={styles.titulo}>{item.nom_espa}</Text>
-        <Text style={styles.descripcion}>{item.descripcion}</Text>
+        <Text style={[styles.titulo, { color: colors.title }]}>{item.nom_espa}</Text>
+        <Text style={[styles.descripcion, { color: colors.textPrimary }]}>{item.descripcion}</Text>
         <TouchableOpacity style={styles.boton} onPress={() => abrirReserva(item)}>
           <Text style={styles.botonTexto}>Reservar</Text>
         </TouchableOpacity>
@@ -166,124 +169,136 @@ const SolicitudesEspacioAdmin = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom:40}}>
-      <Text style={styles.header}>Espacios Disponibles</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
-      ) : error ? (
-        <View style={{marginTop:40}}>
-          <Text style={styles.error}>{error}</Text>
-        </View>
-      ) : (
-        <>
-          {espacios.length === 0 ? (
-            <Text style={{textAlign:'center',marginTop:40,color:'#888',fontSize:16}}>No hay espacios registrados.</Text>
-          ) : (
-            <View style={styles.gridContainer}>
-              {espacios.map((item, idx) => (
-                <View key={item.id} style={styles.gridItem}>
-                  {renderEspacio({item})}
-                </View>
-              ))}
-            </View>
-          )}
-          <Text style={[styles.header, {marginTop:32}]}>Solicitudes de Espacio</Text>
-          {solicitudes.length === 0 ? (
-            <Text style={{textAlign:'center',marginTop:20,color:'#888',fontSize:16}}>No hay solicitudes registradas.</Text>
-          ) : (
-            solicitudes.map((item) => {
-              // Mapeo robusto del ID de solicitud
-              const solicitudId = item.id ?? item.id_soli ?? item._id ?? null;
-              const espacio = espacios.find(e => e.id === (item.id_esp || item.id_espa));
-              let imagen = undefined;
-              try {
-                const imgs = espacio?.imagenes ? JSON.parse(espacio.imagenes) : [];
-                imagen = imgs.length > 0 ? (imgs[0].startsWith('http') ? imgs[0] : `http://192.168.20.60:8081${imgs[0]}`) : undefined;
-              } catch { imagen = undefined; }
-              // Estado puede venir como string ("Aprobado") o número (1,2,3), priorizamos el string
-              let estadoTexto = '';
-              if (typeof item.est_soli === 'string' && item.est_soli.trim() !== '') {
-                estadoTexto = item.est_soli;
-              } else if (typeof item.estado === 'string' && item.estado.trim() !== '') {
-                estadoTexto = item.estado;
-              } else {
-                const estadoNum = Number(item.estadosoli ?? item.est_soli ?? item.estado ?? 1);
-                const estadoMap: any = { 1: 'Pendiente', 2: 'Aprobado', 3: 'Rechazado' };
-                estadoTexto = estadoMap[estadoNum] || 'Pendiente';
+    <>
+      <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
+        <Text style={[styles.header, { color: colors.title }]}>Espacios Disponibles</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
+        ) : error ? (
+          <View style={{ marginTop: 40 }}>
+            <Text style={styles.error}>{error}</Text>
+          </View>
+        ) : (
+          <>
+            {espacios.length === 0 ? (
+              <Text style={{ textAlign: 'center', marginTop: 40, color: colors.textPrimary, fontSize: 16 }}>No hay espacios registrados.</Text>
+            ) : (
+              <View style={styles.gridContainer}>
+                {espacios.map((item, idx) => (
+                  <View key={item.id} style={styles.gridItem}>
+                    {renderEspacio({ item })}
+                  </View>
+                ))}
+              </View>
+            )}
+            <Text style={[styles.header, { color: colors.title, marginTop: 32 }]}>Solicitudes de Espacio</Text>
+            {(() => {
+              // Solo solicitudes de espacio: deben tener id_esp o id_espa y NO deben tener campos de equipo/elemento
+              const isEspacioRequest = (item: any) => {
+                const equipoKeys = ['elemento', 'elementos', 'equipo', 'ids_elem', 'id_elemento', 'categoria', 'subcategoria', 'id_categoria', 'id_subcategoria'];
+                const hasEspacioId = !!(item.id_esp || item.id_espa);
+                const isEquipo = equipoKeys.some(key => item[key] && (!Array.isArray(item[key]) || item[key].length > 0));
+                return hasEspacioId && !isEquipo;
+              };
+              const solicitudesEspacio = solicitudes.filter(isEspacioRequest);
+              if (solicitudesEspacio.length === 0) {
+                return <Text style={{ textAlign: 'center', marginTop: 20, color: colors.textPrimary, fontSize: 16 }}>No hay solicitudes registradas.</Text>;
               }
-              const reserva: ReservaEspacio = {
-                id: solicitudId,
-                nom_espa: espacio?.nom_espa || 'Espacio',
-                usuario: item.nom_usu || 'Usuario',
-                ambient: item.ambient || '',
-                num_ficha: item.num_ficha || item.num_fich || '',
-                fecha_ini: item.fecha_ini?.replace('T', ', ') || '',
-                fecha_fn: item.fecha_fn?.replace('T', ', ') || '',
-                estado: estadoTexto,
-                imagen,
-                _locked: !!item._locked,
-              };
-              const actualizarEstado = async (nuevoEstado: number) => {
-                if (!solicitudId) {
-                  setError('ID de solicitud no válido');
-                  return;
-                }
+              return solicitudesEspacio.map((item) => {
+                // Mapeo robusto del ID de solicitud
+                const solicitudId = item.id ?? item.id_soli ?? item._id ?? null;
+                const espacio = espacios.find(e => e.id === (item.id_esp || item.id_espa));
+                let imagen = undefined;
                 try {
-                  // Actualización optimista: cambia el estado localmente primero y marca como bloqueada
-                  setSolicitudes(prev => prev.map(s => {
-                    const id = s.id ?? s.id_soli ?? s._id ?? null;
-                    if (id === solicitudId) {
-                      return { ...s, est_soli: nuevoEstado, estadosoli: nuevoEstado, estado: nuevoEstado, _locked: true };
-                    }
-                    return s;
-                  }));
-                  const resp = await solicitudesService.update(solicitudId, { est_soli: nuevoEstado });
-                  console.log('RESPUESTA update solicitud:', resp?.data);
-                  let msg = '';
-                  if (nuevoEstado === 2) msg = '¡Solicitud aprobada correctamente!';
-                  else if (nuevoEstado === 3) msg = '¡Solicitud rechazada correctamente!';
-                  else if (nuevoEstado === 1) msg = '¡Solicitud marcada como pendiente!';
-                  else msg = 'Estado actualizado.';
-                  if (typeof window === 'undefined') {
-                    const { Alert } = require('react-native');
-                    Alert.alert('Éxito', msg);
-                  } else {
-                    alert(msg);
-                  }
-                  // Refrescar desde backend para asegurar consistencia
-                  setTimeout(() => { cargarSolicitudes(); }, 500);
-                } catch (err) {
-                  setError('No se pudo actualizar el estado.');
+                  const imgs = espacio?.imagenes ? JSON.parse(espacio.imagenes) : [];
+                  imagen = imgs.length > 0 ? (imgs[0].startsWith('http') ? imgs[0] : `http://192.168.20.60:8081${imgs[0]}`) : undefined;
+                } catch { imagen = undefined; }
+                // Estado puede venir como string ("Aprobado") o número (1,2,3), priorizamos el string
+                let estadoTexto = '';
+                if (typeof item.est_soli === 'string' && item.est_soli.trim() !== '') {
+                  estadoTexto = item.est_soli;
+                } else if (typeof item.estado === 'string' && item.estado.trim() !== '') {
+                  estadoTexto = item.estado;
+                } else {
+                  const estadoNum = Number(item.estadosoli ?? item.est_soli ?? item.estado ?? 1);
+                  const estadoMap: any = { 1: 'Pendiente', 2: 'Aprobado', 3: 'Rechazado' };
+                  estadoTexto = estadoMap[estadoNum] || 'Pendiente';
                 }
-              };
-              return (
-                <ReservaEspacioCard
-                  key={solicitudId}
-                  reserva={reserva}
-                  onAprobar={() => actualizarEstado(2)}
-                  onRechazar={() => actualizarEstado(3)}
-                  onPendiente={() => actualizarEstado(1)}
-                />
-              );
-            })
-          )}
-        </>
-      )}
+                const reserva: ReservaEspacio = {
+                  id: solicitudId,
+                  nom_espa: espacio?.nom_espa || 'Espacio',
+                  usuario: item.nom_usu || 'Usuario',
+                  ambient: item.ambient || '',
+                  num_ficha: item.num_ficha || item.num_fich || '',
+                  fecha_ini: item.fecha_ini?.replace('T', ', ') || '',
+                  fecha_fn: item.fecha_fn?.replace('T', ', ') || '',
+                  estado: estadoTexto,
+                  imagen,
+                  _locked: !!item._locked,
+                };
+                const actualizarEstado = async (nuevoEstado: number) => {
+                  if (!solicitudId) {
+                    setError('ID de solicitud no válido');
+                    return;
+                  }
+                  try {
+                    // Actualización optimista: cambia el estado localmente primero y marca como bloqueada
+                    setSolicitudes(prev => prev.map(s => {
+                      const id = s.id ?? s.id_soli ?? s._id ?? null;
+                      if (id === solicitudId) {
+                        return { ...s, est_soli: nuevoEstado, estadosoli: nuevoEstado, estado: nuevoEstado, _locked: true };
+                      }
+                      return s;
+                    }));
+                    const resp = await solicitudesService.update(solicitudId, { est_soli: nuevoEstado });
+                    console.log('RESPUESTA update solicitud:', resp?.data);
+                    let msg = '';
+                    if (nuevoEstado === 2) msg = '¡Solicitud aprobada correctamente!';
+                    else if (nuevoEstado === 3) msg = '¡Solicitud rechazada correctamente!';
+                    else if (nuevoEstado === 1) msg = '¡Solicitud marcada como pendiente!';
+                    else msg = 'Estado actualizado.';
+                    if (typeof window === 'undefined') {
+                      const { Alert } = require('react-native');
+                      Alert.alert('Éxito', msg);
+                    } else {
+                      alert(msg);
+                    }
+                    // Refrescar desde backend para asegurar consistencia
+                    setTimeout(() => { cargarSolicitudes(); }, 500);
+                  } catch (err) {
+                    setError('No se pudo actualizar el estado.');
+                  }
+                };
+                return (
+                  <ReservaEspacioCard
+                    key={solicitudId}
+                    reserva={reserva}
+                    onAprobar={() => actualizarEstado(2)}
+                    onRechazar={() => actualizarEstado(3)}
+                    onPendiente={() => actualizarEstado(1)}
+                  />
+                );
+              });
+            })()}
+          </>
+        )}
+      </ScrollView>
       <Modal visible={showReservaModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Reservar {espacioSeleccionado?.nom_espa || ''}</Text>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
+          <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
+            <Text style={[styles.modalTitle, { color: colors.title }]}>Reservar {espacioSeleccionado?.nom_espa || ''}</Text>
             <ScrollView>
-              <Text style={{color:'#888',marginBottom:4,fontSize:13}}>
+              <Text style={{ color: colors.textPrimary, marginBottom: 4, fontSize: 13 }}>
                 Formato: 2025-12-05 14:30 (año-mes-día hora:minutos)
               </Text>
-                <Text style={{color:'#888',marginBottom:4,fontSize:13}}>
-                  Formato válido: 2025-12-05 14:30 <Text style={{fontWeight:'bold'}}>o</Text> 2025-12-05T14:30 (año-mes-día hora:minutos)
-                </Text>
+              <Text style={{ color: colors.textPrimary, marginBottom: 4, fontSize: 13 }}>
+                Formato válido: 2025-12-05 14:30 <Text style={{ fontWeight: 'bold' }}>o</Text> 2025-12-05T14:30 (año-mes-día hora:minutos)
+              </Text>
               <TouchableOpacity onPress={() => openPicker('fecha_ini', 'date')}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Fecha de inicio (ej: 2025-12-05)"
+                  placeholderTextColor={isDark ? '#aaa' : '#555'}
                   value={reservaForm.fecha_ini.split(' ')[0] || ''}
                   editable={false}
                   pointerEvents="none"
@@ -291,8 +306,9 @@ const SolicitudesEspacioAdmin = () => {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openPicker('fecha_ini', 'time')}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Hora de inicio (ej: 14:30)"
+                  placeholderTextColor={isDark ? '#aaa' : '#555'}
                   value={reservaForm.fecha_ini.split(' ')[1] || ''}
                   editable={false}
                   pointerEvents="none"
@@ -300,8 +316,9 @@ const SolicitudesEspacioAdmin = () => {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openPicker('fecha_fn', 'date')}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Fecha de fin (ej: 2025-12-05)"
+                  placeholderTextColor={isDark ? '#aaa' : '#555'}
                   value={reservaForm.fecha_fn.split(' ')[0] || ''}
                   editable={false}
                   pointerEvents="none"
@@ -309,35 +326,38 @@ const SolicitudesEspacioAdmin = () => {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openPicker('fecha_fn', 'time')}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Hora de fin (ej: 16:00)"
+                  placeholderTextColor={isDark ? '#aaa' : '#555'}
                   value={reservaForm.fecha_fn.split(' ')[1] || ''}
                   editable={false}
                   pointerEvents="none"
                 />
               </TouchableOpacity>
-                            {/* DateTimePicker modal */}
-                            <DatePickerModal
-                              visible={showPicker.visible}
-                              mode={showPicker.mode}
-                              value={tempDate}
-                              onChange={onPickerChange}
-                              onClose={() => setShowPicker({field: null, mode: 'date', visible: false})}
-                            />
+              {/* DateTimePicker modal */}
+              <DatePickerModal
+                visible={showPicker.visible}
+                mode={showPicker.mode}
+                value={tempDate}
+                onChange={onPickerChange}
+                onClose={() => setShowPicker({ field: null, mode: 'date', visible: false })}
+              />
               {(!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_fn)) && (reservaForm.fecha_ini || reservaForm.fecha_fn) ? (
-                <Text style={{color:'red',fontSize:13,marginBottom:8}}>
-                    El formato debe ser: 2025-12-05 14:30 <Text style={{fontWeight:'bold'}}>o</Text> 2025-12-05T14:30
+                <Text style={{ color: 'red', fontSize: 13, marginBottom: 8 }}>
+                  El formato debe ser: 2025-12-05 14:30 <Text style={{ fontWeight: 'bold' }}>o</Text> 2025-12-05T14:30
                 </Text>
               ) : null}
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textPrimary }]}
                 placeholder="Ambiente"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={reservaForm.ambient}
                 onChangeText={v => setReservaForm(f => ({ ...f, ambient: v }))}
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textPrimary }]}
                 placeholder="Número de ficha"
+                placeholderTextColor={isDark ? '#aaa' : '#555'}
                 value={reservaForm.num_ficha}
                 onChangeText={v => setReservaForm(f => ({ ...f, num_ficha: v }))}
                 keyboardType="numeric"
@@ -349,7 +369,7 @@ const SolicitudesEspacioAdmin = () => {
                 <TouchableOpacity
                   style={[styles.boton, (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_fn)) ? { backgroundColor: '#bbb' } : null]}
                   onPress={reservarEspacio}
-                    disabled={saving || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_fn)}
+                  disabled={saving || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_fn)}
                 >
                   <Text style={styles.botonTexto}>{saving ? 'Reservando...' : 'Confirmar'}</Text>
                 </TouchableOpacity>
@@ -358,15 +378,14 @@ const SolicitudesEspacioAdmin = () => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', color: 'rgb(9,180,26)', marginBottom: 16, textAlign: 'center' },
+  container: { flex: 1, /* backgroundColor: '#fff', */ padding: 16 },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 14,
     padding: 16,
     marginBottom: 18,
@@ -378,21 +397,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 6,
     elevation: 2,
+    // backgroundColor dinámico
   },
   titulo: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: 'rgb(9,180,26)',
     marginBottom: 6,
     fontFamily: 'sans-serif-medium',
     letterSpacing: 0.2,
     textAlign: 'center',
     textTransform: 'uppercase',
+    // color dinámico
   },
-  descripcion: { fontSize: 15, color: '#444', marginBottom: 10, textAlign: 'center' },
+  descripcion: { fontSize: 15, marginBottom: 10, textAlign: 'center' },
   imagen: { width: '100%', height: 140, borderRadius: 10, marginBottom: 8 },
   boton: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: 'rgb(9,180,26)',
     paddingVertical: 9,
@@ -416,8 +436,8 @@ const styles = StyleSheet.create({
   },
   error: { color: 'red', textAlign: 'center', marginTop: 20 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: '#fff', borderRadius: 12, padding: 24, width: '90%', maxWidth: 400 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#1976d2', marginBottom: 16, textAlign: 'center' },
+  modalContent: { borderRadius: 12, padding: 24, width: '90%', maxWidth: 400 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, marginBottom: 12, fontSize: 16 },
   gridContainer: {
     flexDirection: 'row',

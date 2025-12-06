@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,27 +26,48 @@ const adminSections = [
 
 const AdminDashboard = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AdminStackParamList>>();
+  const { theme, colors, toggleTheme } = useTheme();
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.gradientBg}>
-        <Text style={styles.title}>
-          <Text style={{ color: '#fff', textShadowColor: '#0a7d13', textShadowOffset: {width: 1, height: 2}, textShadowRadius: 6 }}>Panel de </Text>
-          <Text style={{ color: '#fff', fontWeight: 'bold', textShadowColor: '#0a7d13', textShadowOffset: {width: 1, height: 2}, textShadowRadius: 6 }}>Administrador</Text>
-        </Text>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}> 
+      <View style={[styles.gradientBg, { backgroundColor: colors.primary, shadowColor: colors.shadow }]}> 
+        <Text style={[styles.title, { color: colors.textPrimary, textShadowColor: colors.primaryLight }]}>Panel de <Text style={{ fontWeight: 'bold' }}>Administrador</Text></Text>
+        {/* Botón de cambio de tema */}
+        <View style={{ position: 'absolute', top: 18, right: 18, zIndex: 10 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: theme === 'dark' ? colors.cardBackground : '#fff',
+              borderRadius: 24,
+              padding: 10,
+              borderWidth: 2,
+              borderColor: colors.primary,
+              elevation: 7,
+              shadowColor: colors.shadow,
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.22,
+              shadowRadius: 8,
+            }}
+            onPress={toggleTheme}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name={theme === 'dark' ? 'dark-mode' : 'light-mode'} size={28} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.menuContainer}>
         {adminSections.map((section, idx) => (
           <TouchableOpacity
             key={section.route}
-            style={[styles.card, { backgroundColor: '#e8f5e8', borderColor: '#12bb1a', borderWidth: 1.5, shadowColor: '#12bb1a' }]}
+            style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.primary, borderWidth: 1.5, shadowColor: colors.shadow }]}
             activeOpacity={0.85}
             onPress={() => navigation.navigate(section.route as keyof AdminStackParamList)}
           >
-            <View style={styles.iconContainer}>{section.icon}</View>
-            <Text style={styles.cardText}>{section.label}</Text>
+            <View style={[styles.iconContainer, { backgroundColor: colors.background, shadowColor: colors.shadow }]}>
+              {React.cloneElement(section.icon, { color: colors.primary })}
+            </View>
+            <Text style={[styles.cardText, { color: colors.primary }]}>{section.label}</Text>
             <View style={styles.arrow}>
-              <MaterialIcons name="arrow-forward-ios" size={22} color="#12bb1a" />
+              <MaterialIcons name="arrow-forward-ios" size={22} color={colors.primary} />
             </View>
           </TouchableOpacity>
         ))}
@@ -113,7 +135,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginRight: 18,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 12,
     padding: 8,
     elevation: 2,

@@ -2,6 +2,7 @@
 import React, { FC, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { ticketsService } from '../../services/Api';
+import { useTheme } from '../../context/ThemeContext';
 
 const estadoInfo = (estado: number | string) => {
   switch (Number(estado)) {
@@ -15,6 +16,7 @@ const estadoInfo = (estado: number | string) => {
 const ReportesAdmin: FC = () => {
   const [tickets, setTickets] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
+  const { colors } = useTheme();
   const [modalTicket, setModalTicket] = React.useState<any | null>(null);
   const [modalHistorial, setModalHistorial] = React.useState<any | null>(null);
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
@@ -37,8 +39,8 @@ const ReportesAdmin: FC = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>TICKETS</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.title }]}>TICKETS</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
       ) : (
@@ -64,8 +66,8 @@ const ReportesAdmin: FC = () => {
                   <Text style={styles.iconEmojiModern}>🎫</Text>
                 </View>
                 <View style={styles.cardContentOriginal}>
-                  <Text style={styles.cardTitleOriginal}>{nombre}</Text>
-                  <Text style={styles.cardElemOriginal}>{elemento}</Text>
+                  <Text style={[styles.cardTitleOriginal, { color: colors.title }]}>{nombre}</Text>
+                  <Text style={[styles.cardElemOriginal, { color: colors.textPrimary }]}>{elemento}</Text>
                 </View>
                 {isExpanded && (
                   <View style={styles.cardFooterModern}>
@@ -89,20 +91,20 @@ const ReportesAdmin: FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContentFull}>
             <View style={styles.modalHeaderFull}>
-              <Text style={styles.modalTitleFull}>Detalles del Ticket</Text>
+              <Text style={[styles.modalTitleFull, { color: colors.title }]}>Detalles del Ticket</Text>
             </View>
             <View style={styles.modalBodyFull}>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Número del Ticket:</Text><Text style={styles.modalValueFull}>{modalTicket?.id_tickets ?? modalTicket?.id ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Fecha de inicio:</Text><Text style={styles.modalValueFull}>{modalTicket?.fecha_in ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Fecha de fin:</Text><Text style={styles.modalValueFull}>{modalTicket?.fecha_fin ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Ambiente:</Text><Text style={styles.modalValueFull}>{modalTicket?.ambient ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Problema:</Text><Text style={styles.modalValueFull}>{modalTicket?.Obser ?? modalTicket?.nom_problm ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Usuario:</Text><Text style={styles.modalValueFull}>{modalTicket?.nom_usu ?? '-'}</Text></View>
-              <View style={styles.modalRowFull}><Text style={styles.modalLabelFull}>Nombre del Elemento:</Text><Text style={styles.modalValueFull}>{modalTicket?.nom_elem ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Número del Ticket:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.id_tickets ?? modalTicket?.id ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Fecha de inicio:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.fecha_in ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Fecha de fin:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.fecha_fin ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Ambiente:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.ambient ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Problema:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.Obser ?? modalTicket?.nom_problm ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Usuario:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.nom_usu ?? '-'}</Text></View>
+              <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Nombre del Elemento:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.nom_elem ?? '-'}</Text></View>
               <View style={styles.modalRowFull}>
-                <Text style={styles.modalLabelFull}>Estado:</Text>
+                <Text style={[styles.modalLabelFull, { color: colors.title }]}>Estado:</Text>
                 <View style={styles.estadoBadgeFull}>
-                  <Text style={{ fontSize: 16 }}>{estadoInfo(modalTicket?.estado ?? modalTicket?.id_est_tick).label}</Text>
+                  <Text style={{ fontSize: 16, color: colors.textPrimary }}>{estadoInfo(modalTicket?.estado ?? modalTicket?.id_est_tick).label}</Text>
                 </View>
               </View>
             </View>
@@ -124,30 +126,30 @@ const ReportesAdmin: FC = () => {
               <Text style={styles.modalTitleFull}>Historial de tickets</Text>
             </View>
             <View style={styles.modalBodyFull}>
-              <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10 }]}>Trazabilidad — Entrada #{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
+              <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10, color: colors.title }]}>Trazabilidad — Entrada #{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                 <View>
-                  <Text style={[styles.modalLabelFull, { color: '#14532d', fontWeight: 'bold' }]}>Fecha</Text>
-                  <Text style={styles.modalValueFull}>{modalHistorial?.fecha_in?.toString().split('T')[0] ?? '-'}</Text>
+                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Fecha</Text>
+                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.fecha_in?.toString().split('T')[0] ?? '-'}</Text>
                 </View>
                 <View>
-                  <Text style={[styles.modalLabelFull, { color: '#14532d', fontWeight: 'bold' }]}>Usuario</Text>
-                  <Text style={styles.modalValueFull}>{modalHistorial?.nom_usu ?? '-'}</Text>
+                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Usuario</Text>
+                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.nom_usu ?? '-'}</Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                 <View>
-                  <Text style={[styles.modalLabelFull, { color: '#14532d', fontWeight: 'bold' }]}>Elemento</Text>
-                  <Text style={styles.modalValueFull}>{modalHistorial?.nom_elem ?? '-'}</Text>
+                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Elemento</Text>
+                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.nom_elem ?? '-'}</Text>
                 </View>
                 <View>
-                  <Text style={[styles.modalLabelFull, { color: '#14532d', fontWeight: 'bold' }]}>ID interno</Text>
-                  <Text style={styles.modalValueFull}>{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
+                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>ID interno</Text>
+                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
                 </View>
               </View>
-              <Text style={[styles.modalLabelFull, { color: '#14532d', fontWeight: 'bold', marginTop: 10 }]}>Observación</Text>
+              <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold', marginTop: 10 }]}>Observación</Text>
               <View style={{ backgroundColor: '#f1f8f4', borderRadius: 8, padding: 8, minHeight: 32, marginBottom: 10 }}>
-                <Text style={styles.modalValueFull}>{modalHistorial?.Obser ?? '-'}</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.Obser ?? '-'}</Text>
               </View>
             </View>
             <View style={styles.modalFooterFull}>
@@ -165,7 +167,7 @@ const ReportesAdmin: FC = () => {
 const styles = StyleSheet.create({
       // --- MODAL DETALLE TICKET FULL ---
       modalContentFull: {
-        backgroundColor: '#fff',
+        // backgroundColor: '#fff',
         borderRadius: 14,
         width: '92%',
         maxWidth: 500,
@@ -265,7 +267,7 @@ const styles = StyleSheet.create({
       alignSelf: 'center',
       marginTop: -18,
       marginBottom: 6,
-      backgroundColor: '#fff',
+      // backgroundColor: '#fff',
       borderRadius: 16,
       paddingVertical: 2,
       paddingHorizontal: 16,
@@ -340,13 +342,13 @@ const styles = StyleSheet.create({
       textAlign: 'center',
     },
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', color: 'rgb(9,180,26)', marginBottom: 16, textAlign: 'center' },
+  header: { fontSize: 24, fontWeight: 'bold', /* color: 'rgb(9,180,26)', */ marginBottom: 16, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingBottom: 40 },
   ribbon: {
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderTopRightRadius: 18,
     borderBottomLeftRadius: 18,
     paddingVertical: 6,
@@ -407,7 +409,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   cardOriginal: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 18,
     marginBottom: 24,
     shadowColor: '#000',
@@ -457,14 +459,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 12,
     padding: 24,
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
   },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#1976d2', marginBottom: 16, textAlign: 'center' },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', /* color: '#1976d2', */ marginBottom: 16, textAlign: 'center' },
 });
 
 export default ReportesAdmin;
