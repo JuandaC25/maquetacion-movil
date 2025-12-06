@@ -5,8 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-const LOCAL_IP = '192.168.137.170';  // 👈 Para emulador Android, accede al localhost de tu PC
+// Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
+const LOCAL_IP = '192.168.20.60';  // Ejemplo: '192.168.1.100'
 const API_URL = `http://${LOCAL_IP}:8081`;
+console.log('[API] URL base usada:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,11 +17,16 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar el token de Authorization automáticamente (excepto en /auth/login)
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = token; 
+    if (!config.headers) config.headers = {};
+    // No agregar token en login
+    if (config.url && !config.url.includes('/auth/login')) {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers['Authorization'] = token;
+      }
     }
     return config;
   },
@@ -47,19 +54,22 @@ api.interceptors.response.use(
 // ==================== AUTH SERVICE ====================
 export const authService = {
   login: async (username: string, password: string) => {
+    // El backend espera 'username' y 'password' en el payload
     const response = await api.post('/auth/login', { username, password });
-    if (response.data.token) {
-      await AsyncStorage.setItem('token', response.data.token);
+    const data = response.data as any;
+    if (data.token) {
+      await AsyncStorage.setItem('token', data.token);
     }
-    return response.data;
+    return data;
   },
 
   getMe: async () => {
     const response = await api.get('/auth/me');
-    if (response.data) {
-      await AsyncStorage.setItem('user', JSON.stringify(response.data));
+    const data = response.data as any;
+    if (data) {
+      await AsyncStorage.setItem('user', JSON.stringify(data));
     }
-    return response.data;
+    return data;
   },
 
   logout: async () => {

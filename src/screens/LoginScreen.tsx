@@ -15,33 +15,38 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(true);
     try {
       console.log('🔐 Iniciando login...');
-      const response = await authService.login(username, password);
-      console.log('✅ Login exitoso, token recibido');
-      
+      console.log('Login payload:', { username, password });
+      const response = await authService.login(username.trim(), password);
+      console.log('✅ Login exitoso, token recibido:', response);
+
       console.log('📡 Obteniendo datos del usuario...');
       const userData = await authService.getMe();
       console.log('✅ Datos del usuario:', userData);
-      const userRoles = userData?.roles || [];
+      const userRoles = userData?.roles || userData?.role || [];
       console.log('👤 Roles:', userRoles);
-      
-      if ((userData.email || username) === 'admin@tech.com') {
+
+      if ((userData.email || userData.correo || username) === 'admin@tech.com') {
         console.log('🎯 Navegando a AdminDashboard...');
         navigation.replace('AdminDashboard');
-      } else if (userRoles.includes('INSTRUCTOR')) {
+      } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
         console.log('🎯 Navegando a Solicitudes...');
         navigation.replace('Solicitudes');
       } else {
         Alert.alert(
           'Login exitoso',
-          `Bienvenido ${userData.nombre || username}\nRoles: ${userRoles.join(', ')}`
+          `Bienvenido ${userData.nombre || userData.nom_usu || username}\nRoles: ${userRoles.join(', ')}`
         );
       }
     } catch (err: any) {
-      console.error('❌ Error en login:', err);
-      if (err?.response?.status === 403) {
+      console.error('❌ Error en login:', err, err?.response?.data);
+      if (err?.response?.status === 403 || err?.response?.status === 401) {
         setError('Credenciales incorrectas o permisos insuficientes. Verifica tu usuario y contraseña.');
+      } else if (err?.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err?.message) {
+        setError(err.message);
       } else {
-        setError(err.message || 'Error al iniciar sesión');
+        setError('Error al iniciar sesión');
       }
     } finally {
       setLoading(false);

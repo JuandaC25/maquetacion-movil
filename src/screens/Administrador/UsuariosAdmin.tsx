@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { usuariosService } from '../../services/Api';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Usuario = {
   id: number;
@@ -27,7 +28,7 @@ const UsuariosAdmin = () => {
     setLoading(true);
     try {
       const res = await usuariosService.getAll();
-      setUsuarios(res.data || []);
+      setUsuarios(res.data as Usuario[] || []);
     } catch (e) {
       setUsuarios([]);
     }

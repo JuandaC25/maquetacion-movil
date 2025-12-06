@@ -15,10 +15,10 @@ import DatePickerModal from '../../components/DatePickerModal';
 // ...existing code...
 import { solicitudesService } from '../../services/Api';
 
-const fetchSolicitudes = async (setSolicitudes: any, setLoading: any) => {
+const fetchSolicitudes = async (setSolicitudes: React.Dispatch<React.SetStateAction<Solicitud[]>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
   setLoading(true);
   try {
-    const response = await solicitudesService.getAll();
+    const response: any = await solicitudesService.getAll();
     // axios responde con { data: [...] }
     const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
     const mapped = data.map((s: any) => ({
@@ -29,7 +29,7 @@ const fetchSolicitudes = async (setSolicitudes: any, setLoading: any) => {
       elemento: s.elemento ?? s.nom_elem ?? '',
       categoria: s.categoria ?? s.nom_cat ?? '',
     }));
-    setSolicitudes(mapped);
+    setSolicitudes(mapped as Solicitud[]);
   } catch (e) {
     setSolicitudes([]);
   }
@@ -152,11 +152,11 @@ const SolicitudesElementoAdmin = () => {
     // Cargar categorías y subcategorías al montar
     (async () => {
       const catRes = await import('../../services/Api').then(m => m.categoriasService.getAll());
-      setCategorias(catRes.data);
+      setCategorias(catRes.data as any[]);
       const subcatRes = await import('../../services/Api').then(m => m.subcategoriasService.getAll());
-      setSubcategorias(subcatRes.data);
+      setSubcategorias(subcatRes.data as any[]);
       const elemRes = await import('../../services/Api').then(m => m.elementosService.getAll());
-      setElementos(elemRes.data);
+      setElementos(elemRes.data as any[]);
     })();
   }, []);
 

@@ -30,7 +30,7 @@ const CategoriasAdmin = () => {
     setLoading(true);
     try {
       const res = await categoriasService.getAll();
-      setCategorias(res.data || []);
+      setCategorias(res.data as Categoria[] || []);
     } catch (e) {
       setCategorias([
         { id_cat: 1, nom_cat: 'Electrónica' },
@@ -46,7 +46,7 @@ const CategoriasAdmin = () => {
       const res = await subcategoriasService.getAll();
       console.log('Respuesta subcategoriasService.getAll:', res.data);
       // Normalizar los datos recibidos del backend para asegurar los campos correctos
-      let data = res.data || [];
+      let data: any = res.data || [];
       // Si el backend responde con { data: [...] }
       if (Array.isArray(data)) {
         // Mapear los campos reales del DTO: id, nom_subcateg, nom_cat

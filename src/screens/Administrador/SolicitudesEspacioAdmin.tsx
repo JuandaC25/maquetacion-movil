@@ -73,7 +73,7 @@ const SolicitudesEspacioAdmin = () => {
     try {
       const res = await solicitudesService.getAll();
       console.log('RESPUESTA getAll solicitudes:', res?.data);
-      setSolicitudes(res.data || []);
+      setSolicitudes(res.data as any[] || []);
     } catch (err) {
       setError('No se pudo cargar solicitudes.');
     }
@@ -91,7 +91,7 @@ const SolicitudesEspacioAdmin = () => {
     try {
       setLoading(true);
       const res = await espaciosService.getAll();
-      setEspacios(res.data || []);
+      setEspacios(res.data as Espacio[] || []);
     } catch (err) {
       setError('No se pudo cargar espacios. ¿Sesión expirada o sin permisos?');
     } finally {
