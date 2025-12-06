@@ -3,9 +3,8 @@ import { StyleSheet } from 'react-native';
 export const LoginStyles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     padding: 20,
-    paddingBottom: 130,
   },
   formBox: {
     backgroundColor: 'rgba(255,255,255,0.80)',
