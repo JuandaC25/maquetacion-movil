@@ -13,6 +13,7 @@ import InventarioAdmin from './src/screens/Administrador/InventarioAdmin';
 import SolicitudesElementoAdmin from './src/screens/Administrador/SolicitudesElementoAdmin';
 import SolicitudesEspacioAdmin from './src/screens/Administrador/SolicitudesEspacioAdmin';
 import ReportesAdmin from './src/screens/Administrador/ReportesAdmin';
+import PortatilesScreen from './src/screens/Instructor/PortatilesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ export default function App() {
           <Stack.Screen name="SolicitudesElementoAdmin" component={SolicitudesElementoAdmin} />
           <Stack.Screen name="SolicitudesEspacioAdmin" component={SolicitudesEspacioAdmin} />
           <Stack.Screen name="ReportesAdmin" component={ReportesAdmin} />
+          <Stack.Screen name="PortatilesScreen" component={PortatilesScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

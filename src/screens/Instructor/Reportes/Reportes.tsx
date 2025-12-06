@@ -63,7 +63,7 @@ export default function ReportesScreen({ navigation }: any) {
       
       console.log('Authorization header:', authHeader.substring(0, 30) + '...');
       
-      const response = await fetch('http://192.168.0.7:8081/api/problemas/descripcion', {
+      const response = await fetch('http://192.168.1.90:8081/api/problemas/descripcion', {
         method: 'GET',
         headers: {
           'Authorization': authHeader,
