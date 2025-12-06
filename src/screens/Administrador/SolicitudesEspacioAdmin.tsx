@@ -1,6 +1,6 @@
 import { useTheme } from '../../context/ThemeContext';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView, Image, Dimensions } from 'react-native';
 import ReservaEspacioCard, { ReservaEspacio } from './ReservaEspacioCard';
 import DatePickerModal from '../../components/DatePickerModal';
 import { espaciosService, solicitudesService, authService } from '../../services/Api';
@@ -146,24 +146,93 @@ const SolicitudesEspacioAdmin = () => {
     }
   };
 
+  // Carrusel y paginación de imágenes como en Instructor
+  const [activeSlides, setActiveSlides] = useState<{ [key: number]: number }>({});
+  const { width } = Dimensions.get('window');
+  const cardWidth = width - 30;
   const renderEspacio = ({ item }: { item: Espacio }) => {
-    let imagen = null;
+    let imagenes: string[] = [];
     try {
-      const imgs = item.imagenes ? JSON.parse(item.imagenes) : [];
-      imagen = imgs.length > 0 ? imgs[0] : null;
+      imagenes = item.imagenes ? JSON.parse(item.imagenes) : [];
     } catch {
-      imagen = null;
+      imagenes = [];
     }
+    if (imagenes.length === 0) {
+      imagenes = ['http://192.168.20.60:8081/imagenes/imagenes_espacios/default.jpg'];
+    }
+    const currentSlide = activeSlides[item.id] || 0;
     return (
-      <View style={[styles.card, { backgroundColor: colors.background }]}> 
-        {imagen && (
-          <Image source={{ uri: imagen.startsWith('http') ? imagen : `http://192.168.20.60:8081${imagen}` }} style={styles.imagen} />
-        )}
-        <Text style={[styles.titulo, { color: colors.title }]}>{item.nom_espa}</Text>
-        <Text style={[styles.descripcion, { color: colors.textPrimary }]}>{item.descripcion}</Text>
-        <TouchableOpacity style={styles.boton} onPress={() => abrirReserva(item)}>
-          <Text style={styles.botonTexto}>Reservar</Text>
-        </TouchableOpacity>
+      <View style={{
+        borderRadius: 14,
+        backgroundColor: colors.background,
+        marginBottom: 18,
+        alignSelf: 'center',
+        width: cardWidth,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+        elevation: 2,
+        overflow: 'hidden',
+      }}>
+        {/* Carrusel de imágenes */}
+        <View style={{ width: cardWidth, height: 180, backgroundColor: '#222' }}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={e => {
+              const contentOffsetX = e.nativeEvent.contentOffset.x;
+              const slide = Math.round(contentOffsetX / cardWidth);
+              setActiveSlides(prev => ({ ...prev, [item.id]: slide }));
+            }}
+            scrollEventThrottle={16}
+            style={{ width: cardWidth }}
+          >
+            {imagenes.map((img, idx) => {
+              const fullUrl = img.startsWith('http') ? img : `http://192.168.20.60:8081${img}`;
+              return (
+                <Image
+                  key={idx}
+                  source={{ uri: fullUrl }}
+                  style={{ width: cardWidth, height: 180, resizeMode: 'cover' }}
+                />
+              );
+            })}
+          </ScrollView>
+          {/* Paginación */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 4, position: 'absolute', bottom: 8, width: '100%' }}>
+            {imagenes.map((_, idx) => (
+              <View
+                key={idx}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  marginHorizontal: 2,
+                  backgroundColor: currentSlide === idx ? 'rgb(9,180,26)' : '#555',
+                }}
+              />
+            ))}
+          </View>
+        </View>
+        <View style={{ padding: 16 }}>
+          <Text style={{ color: 'rgb(9,180,26)', fontSize: 20, fontWeight: 'bold', marginBottom: 2, textTransform: 'lowercase' }}>{item.nom_espa}</Text>
+          <Text style={{ color: colors.textPrimary, fontSize: 15, marginBottom: 16 }}>{item.descripcion}</Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'rgb(9,180,26)',
+              borderRadius: 8,
+              paddingVertical: 12,
+              alignItems: 'center',
+              marginTop: 8,
+              width: '100%',
+            }}
+            onPress={() => abrirReserva(item)}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Apartar espacio</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -183,13 +252,11 @@ const SolicitudesEspacioAdmin = () => {
             {espacios.length === 0 ? (
               <Text style={{ textAlign: 'center', marginTop: 40, color: colors.textPrimary, fontSize: 16 }}>No hay espacios registrados.</Text>
             ) : (
-              <View style={styles.gridContainer}>
-                {espacios.map((item, idx) => (
-                  <View key={item.id} style={styles.gridItem}>
-                    {renderEspacio({ item })}
-                  </View>
-                ))}
-              </View>
+              espacios.map((item) => (
+                <View key={item.id} style={{ marginBottom: 18 }}>
+                  {renderEspacio({ item })}
+                </View>
+              ))
             )}
             <Text style={[styles.header, { color: colors.title, marginTop: 32 }]}>Solicitudes de Espacio</Text>
             {(() => {

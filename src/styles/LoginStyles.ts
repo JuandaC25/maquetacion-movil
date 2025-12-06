@@ -3,12 +3,12 @@ import { StyleSheet } from 'react-native';
 export const LoginStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     padding: 20,
+    paddingBottom: 130,
   },
   formBox: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.80)',
     borderRadius: 10,
     padding: 20,
     shadowColor: '#000',
@@ -44,7 +44,7 @@ export const LoginStyles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#00C12B',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',

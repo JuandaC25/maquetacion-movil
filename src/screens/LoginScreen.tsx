@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/Api';
 import { LoginStyles } from '../styles/LoginStyles';
@@ -54,7 +54,11 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   return (
-    <View style={LoginStyles.container}>
+    <ImageBackground
+      source={require('../../assets/login-bg.png')}
+      style={LoginStyles.container}
+      resizeMode="cover"
+    >
       <View style={LoginStyles.formBox}>
         <Text style={LoginStyles.title}>Iniciar sesión</Text>
 
@@ -95,6 +99,6 @@ export default function LoginScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
