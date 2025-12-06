@@ -1,14 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView } from 'react-native';
+// Estados posibles (puedes ajustar los valores según tu backend)
+const ESTADOS = [
+  { label: 'Activo', value: 1 },
+  { label: 'Inactivo', value: 2 },
+];
+
+// Tipo para rol
+type Rol = {
+  id: number;
+  nom_rol: string;
+};
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { usuariosService } from '../../services/Api';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Usuario = {
-  id: number;
-  nom_us: string;
-  ape_us: string;
+  id_usuari: number;
+  nom_usua: string;
+  ape_usua: string;
   corre: string;
+  num_docu?: string | number;
+  id_rol?: number;
+  nom_est?: number;
 };
 
 const UsuariosAdmin = () => {
@@ -17,8 +31,58 @@ const UsuariosAdmin = () => {
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editData, setEditData] = useState({ nom_us: '', ape_us: '', corre: '' });
+  const [editData, setEditData] = useState({ nom_us: '', ape_us: '', corre: '', password: '', rol: null as null | number, estado: null as null | number });
   const [saving, setSaving] = useState(false);
+  const [roles, setRoles] = useState<Rol[]>([]);
+  const [showRolModal, setShowRolModal] = useState(false);
+  const [showEstadoModal, setShowEstadoModal] = useState(false);
+
+  // Cargar roles al montar
+  // Usar la misma IP base que Api.ts
+  useEffect(() => {
+    (async () => {
+      try {
+        const LOCAL_IP = '192.168.20.60'; // Debe coincidir con Api.ts
+        const res = await fetch(`http://${LOCAL_IP}:8081/api/roles`);
+        let data = [];
+        try {
+          // Intenta parsear solo si hay contenido
+          const text = await res.text();
+          if (text && text.trim().length > 0) {
+            data = JSON.parse(text);
+          } else {
+            data = [];
+          }
+        } catch (jsonErr) {
+          data = [];
+          console.warn('[WARN] Respuesta de roles no es JSON válido');
+        }
+        // Si no hay roles, usar fallback hardcodeado
+        let rolesToSet = [];
+        if (Array.isArray(data) && data.length > 0) {
+          rolesToSet = data;
+        } else if (Array.isArray(data.data) && data.data.length > 0) {
+          rolesToSet = data.data;
+        } else {
+          // Fallback igual que la web
+          rolesToSet = [
+            { id: 1, nom_rol: 'Instructor' },
+            { id: 3, nom_rol: 'Técnico' },
+            { id: 2, nom_rol: 'Administrador' },
+          ];
+        }
+        setRoles(rolesToSet);
+      } catch (e) {
+        // Si hay error de red, fallback hardcodeado
+        setRoles([
+          { id: 1, nom_rol: 'Instructor' },
+          { id: 3, nom_rol: 'Técnico' },
+          { id: 2, nom_rol: 'Administrador' },
+        ]);
+        console.error('[ERROR] Error al cargar roles:', e);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     fetchUsuarios();
@@ -28,7 +92,7 @@ const UsuariosAdmin = () => {
     setLoading(true);
     try {
       const res = await usuariosService.getAll();
-      setUsuarios(res.data as Usuario[] || []);
+      setUsuarios((res.data as Usuario[]) || []);
     } catch (e) {
       setUsuarios([]);
     }
@@ -37,7 +101,14 @@ const UsuariosAdmin = () => {
 
   const handleEdit = (user: Usuario) => {
     setSelectedUser(user);
-    setEditData({ nom_us: user.nom_us, ape_us: user.ape_us, corre: user.corre });
+    setEditData({
+      nom_us: user.nom_usua,
+      ape_us: user.ape_usua,
+      corre: user.corre,
+      password: '',
+      rol: user.id_rol || null,
+      estado: user.nom_est || 1,
+    });
     setEditModalVisible(true);
   };
 
@@ -45,15 +116,25 @@ const UsuariosAdmin = () => {
     if (!selectedUser) return;
     setSaving(true);
     try {
-      await usuariosService.update((selectedUser as Usuario).id, editData);
+      // Construir payload para el backend
+      const payload = {
+        nom_us: editData.nom_us,
+        ape_us: editData.ape_us,
+        corre: editData.corre,
+        password: editData.password || undefined,
+        id_rl: editData.rol,
+        est_usu: editData.estado,
+      };
+      await usuariosService.update((selectedUser as Usuario).id_usuari, payload);
       fetchUsuarios();
     } catch (e) {}
     setSaving(false);
   };
 
   const filteredUsuarios = usuarios.filter(u =>
-    `${u.nom_us} ${u.ape_us}`.toLowerCase().includes(search.toLowerCase()) ||
-    (u.corre || '').toLowerCase().includes(search.toLowerCase())
+    `${u.nom_usua} ${u.ape_usua}`.toLowerCase().includes(search.toLowerCase()) ||
+    (u.corre || '').toLowerCase().includes(search.toLowerCase()) ||
+    (u.num_docu ? String(u.num_docu).includes(search) : false)
   );
 
   return (
@@ -73,7 +154,7 @@ const UsuariosAdmin = () => {
       ) : (
         <FlatList
           data={filteredUsuarios}
-          keyExtractor={item => (item && item.id ? item.id.toString() : Math.random().toString())}
+          keyExtractor={item => (item && item.id_usuari ? item.id_usuari.toString() : Math.random().toString())}
           contentContainerStyle={{ paddingBottom: 30 }}
           renderItem={({ item }) => (
             <View style={styles.cardPresentation}>
@@ -81,8 +162,11 @@ const UsuariosAdmin = () => {
                 <FontAwesome5 name="user" size={54} color="#28a745" style={styles.avatarIcon} />
               </View>
               <View style={styles.infoContainer}>
-                <Text style={styles.userName}>{item.nom_us} {item.ape_us}</Text>
+                <Text style={styles.userName}>{item.nom_usua} {item.ape_usua}</Text>
                 <Text style={styles.userEmail}>{item.corre}</Text>
+                {item.num_docu ? (
+                  <Text style={styles.userEmail}>Identidad: {item.num_docu}</Text>
+                ) : null}
               </View>
               <TouchableOpacity style={styles.editBtnPresentation} onPress={() => handleEdit(item)}>
                 <MaterialIcons name="edit" size={28} color="#fff" />
@@ -96,25 +180,110 @@ const UsuariosAdmin = () => {
         <View style={styles.modalBg}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Editar Usuario</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre"
-              value={editData.nom_us}
-              onChangeText={v => setEditData({ ...editData, nom_us: v })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Apellido"
-              value={editData.ape_us}
-              onChangeText={v => setEditData({ ...editData, ape_us: v })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Correo"
-              value={editData.corre}
-              onChangeText={v => setEditData({ ...editData, corre: v })}
-              keyboardType="email-address"
-            />
+            <ScrollView>
+              <TextInput
+                style={styles.input}
+                placeholder="Nombre"
+                value={editData.nom_us}
+                onChangeText={v => setEditData({ ...editData, nom_us: v })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Apellido"
+                value={editData.ape_us}
+                onChangeText={v => setEditData({ ...editData, ape_us: v })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Correo"
+                value={editData.corre}
+                onChangeText={v => setEditData({ ...editData, corre: v })}
+                keyboardType="email-address"
+              />
+              {/* Campo para cambiar contraseña */}
+              <TextInput
+                style={styles.input}
+                placeholder="Nueva contraseña (dejar vacío para no cambiar)"
+                value={editData.password}
+                onChangeText={v => setEditData({ ...editData, password: v })}
+                secureTextEntry
+              />
+              {/* Selector de Rol */}
+              <TouchableOpacity style={styles.input} onPress={() => setShowRolModal(true)}>
+                <Text style={{ color: editData.rol ? '#212529' : '#aaa' }}>
+                  {editData.rol
+                    ? (roles.find(r => r.id === editData.rol)?.nom_rol || 'Seleccionar rol')
+                    : 'Seleccionar rol'}
+                </Text>
+              </TouchableOpacity>
+              <Modal visible={showRolModal} transparent animationType="fade" onRequestClose={() => setShowRolModal(false)}>
+                <View style={styles.modalBg}>
+                  <View style={[styles.modalContent, {maxHeight: 350}]}> 
+                    <Text style={styles.modalTitle}>Selecciona un rol</Text>
+                    {roles.length === 0 ? (
+                      <Text style={{textAlign:'center',color:'red',marginTop:20}}>No hay roles disponibles</Text>
+                    ) : (
+                      <FlatList
+                        data={roles}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => {
+                          // Bloquear Administrador si ya existe uno (igual que la web)
+                          const isAdmin = item.nom_rol.toLowerCase().includes('admin');
+                          const adminExists = usuarios.some(u => {
+                            const r = roles.find(r2 => r2.id === u.id_rol);
+                            return r && r.nom_rol.toLowerCase().includes('admin');
+                          });
+                          return (
+                            <TouchableOpacity
+                              style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee', opacity: isAdmin && adminExists ? 0.5 : 1 }}
+                              disabled={isAdmin && adminExists}
+                              onPress={() => {
+                                setEditData(prev => ({ ...prev, rol: item.id }));
+                                setShowRolModal(false);
+                              }}
+                            >
+                              <Text style={isAdmin && adminExists ? { color: 'gray' } : {}}>
+                                {item.nom_rol}{isAdmin && adminExists ? ' (Bloqueado)' : ''}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        }}
+                      />
+                    )}
+                  </View>
+                </View>
+              </Modal>
+              {/* Selector de Estado */}
+              <TouchableOpacity style={styles.input} onPress={() => setShowEstadoModal(true)}>
+                <Text style={{ color: editData.estado ? '#212529' : '#aaa' }}>
+                  {editData.estado
+                    ? (ESTADOS.find(e => e.value === editData.estado)?.label || 'Seleccionar estado')
+                    : 'Seleccionar estado'}
+                </Text>
+              </TouchableOpacity>
+              <Modal visible={showEstadoModal} transparent animationType="fade" onRequestClose={() => setShowEstadoModal(false)}>
+                <View style={styles.modalBg}>
+                  <View style={[styles.modalContent, {maxHeight: 250}]}> 
+                    <Text style={styles.modalTitle}>Selecciona un estado</Text>
+                    <FlatList
+                      data={ESTADOS}
+                      keyExtractor={item => item.value.toString()}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}
+                          onPress={() => {
+                            setEditData(prev => ({ ...prev, estado: item.value }));
+                            setShowEstadoModal(false);
+                          }}
+                        >
+                          <Text>{item.label}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </View>
+              </Modal>
+            </ScrollView>
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditModalVisible(false)}>
                 <Text style={{ color: '#28a745', fontWeight: 'bold' }}>Cancelar</Text>

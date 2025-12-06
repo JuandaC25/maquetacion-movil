@@ -1,41 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  ActivityIndicator,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-  Button,
-  StyleSheet,
-  ScrollView
-} from 'react-native';
-import DatePickerModal from '../../components/DatePickerModal';
-// ...existing code...
-import { solicitudesService } from '../../services/Api';
-
-const fetchSolicitudes = async (setSolicitudes: React.Dispatch<React.SetStateAction<Solicitud[]>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
-  setLoading(true);
-  try {
-    const response: any = await solicitudesService.getAll();
-    // axios responde con { data: [...] }
-    const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-    const mapped = data.map((s: any) => ({
-      id: s.id ?? s.id_soli ?? s._id ?? null,
-      estado: s.estado ?? s.est_soli ?? s.estado_solicitud ?? '',
-      fecha: s.fecha ?? s.fecha_ini ?? s.fecha_inicio ?? '',
-      solicitante: s.solicitante ?? s.nom_usu ?? s.usuario ?? '',
-      elemento: s.elemento ?? s.nom_elem ?? '',
-      categoria: s.categoria ?? s.nom_cat ?? '',
-    }));
-    setSolicitudes(mapped as Solicitud[]);
-  } catch (e) {
-    setSolicitudes([]);
-  }
-  setLoading(false);
-};
+import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import DatePickerModal from '../../components/DatePickerModal';
+import { solicitudesService } from '../../services/Api';
+// ...resto del archivo sin cambios...
+
 // Interfaces necesarias
 interface Categoria {
   id?: number;
@@ -65,7 +34,28 @@ interface Solicitud {
   cantidad?: string;
   ambiente?: string;
 }
-// ...existing code...
+
+// Función para cargar solicitudes (debe estar definida en este archivo)
+const fetchSolicitudes = async (setSolicitudes: React.Dispatch<React.SetStateAction<Solicitud[]>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+  setLoading(true);
+  try {
+    const response: any = await solicitudesService.getAll();
+    // axios responde con { data: [...] }
+    const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+    const mapped = data.map((s: any) => ({
+      id: s.id ?? s.id_soli ?? s._id ?? null,
+      estado: s.estado ?? s.est_soli ?? s.estado_solicitud ?? '',
+      fecha: s.fecha ?? s.fecha_ini ?? s.fecha_inicio ?? '',
+      solicitante: s.solicitante ?? s.nom_usu ?? s.usuario ?? '',
+      elemento: s.elemento ?? s.nom_elem ?? '',
+      categoria: s.categoria ?? s.nom_cat ?? '',
+    }));
+    setSolicitudes(mapped as Solicitud[]);
+  } catch (e) {
+    setSolicitudes([]);
+  }
+  setLoading(false);
+};
 
 const ESTADOS: Record<number, string> = {
   1: 'Pendiente',
@@ -110,7 +100,8 @@ const SolicitudesElementoAdmin = () => {
     cantidad: '',
     ambiente: '',
     detalles: '',
-    serial: ''
+    serial: '',
+    espacio: '', // Nuevo campo para id_esp si lo necesitas
   });
 
   // Estados y helpers para los pickers de fecha/hora
@@ -442,25 +433,59 @@ const SolicitudesElementoAdmin = () => {
                       alert('Por favor, completa los campos obligatorios.');
                       return;
                     }
-                    // Validar cantidad máxima 2
                     if (addData.cantidad && Number(addData.cantidad) > 2) {
                       alert('La cantidad máxima permitida es 2 equipos.');
                       return;
                     }
-                    await solicitudesService.create({
-                      elemento: addData.elemento,
-                      categoria: addData.categoria,
-                      subcategoria: addData.subcategoria,
-                      fecha_ini: addData.fecha_ini,
-                      fecha_fin: addData.fecha_fin,
-                      cantidad: addData.cantidad,
-                      ambiente: addData.ambiente,
-                    });
+                    // Obtener usuario actual para id_usu y token para debug
+                    const apiModule = await import('../../services/Api');
+                    const user = await apiModule.authService.getCurrentUser();
+                    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+                    const token = await AsyncStorage.getItem('token');
+                    console.log('[DEBUG] Usuario actual:', user);
+                    console.log('[DEBUG] Token actual:', token);
+                    const id_usu = user?.id || user?.id_usu || null;
+                    if (!id_usu) {
+                      alert('No se pudo obtener el usuario actual.');
+                      return;
+                    }
+                    // Construir payload para el backend
+                    // Formatear fechas con 'T' para LocalDateTime
+                    const toIsoLocal = (str: string) => str.replace(' ', 'T');
+                    const payload = {
+                      fecha_ini: addData.fecha_ini ? toIsoLocal(addData.fecha_ini) : '',
+                      fecha_fn: addData.fecha_fin ? toIsoLocal(addData.fecha_fin) : '',
+                      ambient: addData.ambiente,
+                      num_fich: 0, // Si tienes este dato, cámbialo
+                      cantid: addData.cantidad ? Number(addData.cantidad) : 1,
+                      id_estado_soli: 1, // 1 = Pendiente
+                      mensaj: addData.detalles || '',
+                      id_categoria: addData.categoria ? Number(addData.categoria) : null,
+                      id_subcategoria: addData.subcategoria ? Number(addData.subcategoria) : null,
+                      id_usu,
+                      id_esp: addData.espacio ? Number(addData.espacio) : null, // Si tienes selector de espacio
+                      ids_elem: addData.elemento ? [Number(addData.elemento)] : [],
+                    };
+                    // Limpia los campos null para evitar problemas (type-safe)
+                    const cleanPayload = Object.fromEntries(
+                      Object.entries(payload).filter(([_, v]) => v !== null && v !== undefined)
+                    );
+                    await solicitudesService.create(cleanPayload);
                     setAddModalVisible(false);
-                    setAddData({ elemento: '', categoria: '', subcategoria: '', fecha_ini: '', fecha_fin: '', cantidad: '', ambiente: '', detalles: '', serial: '' });
+                    setAddData({ elemento: '', categoria: '', subcategoria: '', fecha_ini: '', fecha_fin: '', cantidad: '', ambiente: '', detalles: '', serial: '', espacio: '' });
                     fetchSolicitudes(setSolicitudes, setLoading);
-                  } catch (e) {
-                    alert('Error al crear la solicitud.');
+                  } catch (e: any) {
+                    // Mostrar el error real del backend si existe
+                    let msg = 'Error al crear la solicitud.';
+                    if (e?.response?.data) {
+                      msg += '\n' + JSON.stringify(e.response.data);
+                    } else if (e?.message) {
+                      msg += '\n' + e.message;
+                    } else if (typeof e === 'string') {
+                      msg += '\n' + e;
+                    }
+                    console.log('❌ Error al crear solicitud:', e);
+                    alert(msg);
                   }
                 }}
               />
