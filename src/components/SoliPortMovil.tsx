@@ -42,31 +42,39 @@ const getCurrentDate = () => {
 }
 
 
-const SoliPortMovil = forwardRef((props, ref) => {
-  const [equipos, setEquipos] = useState<Equipo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categoria, setCategoria] = useState<'computo' | 'multimedia'>('computo');
-  const [isModalVisible, setIsModalVisible] = useState(false); 
 
-  // 3. Estados para el control de DatePickers
+const SoliPortMovil = forwardRef((props, ref) => {
+  const [equipos, setEquipos] = useState<Equipo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [categoria, setCategoria] = useState<'computo' | 'multimedia'>('computo');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados para categorías y subcategorías
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [subcategorias, setSubcategorias] = useState<any[]>([]);
+  const [elementosPorSubcategoria, setElementosPorSubcategoria] = useState<Equipo[]>([]);
+
+  // Estados para el control de DatePickers
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
   const [currentPickerTarget, setCurrentPickerTarget] = useState<PickerTargetKey | null>(null);
 
-  const [form, setForm] = useState<SolicitudForm>({
-    // Inicialización con la fecha y hora actual (Punto 2)
-    fecha_ini: getCurrentDate(),
-    hora_ini: getCurrentTime(),
-    fecha_fn: '',
-    hora_fn: '',
-    ambient: '',
-    num_ficha: '',
-    id_subcategoria: '', // Valor inicial del Picker
-  });
+  const USER_ID = 1; // Temporal, deberías obtenerlo del contexto de autenticación
 
-  const fetchEquipos = useCallback(async () => {
+  const initialFormState: SolicitudForm = {
+    fecha_ini: getCurrentDate(),
+    hora_ini: getCurrentTime(),
+    fecha_fn: getCurrentDate(),
+    hora_fn: "",
+    ambient: "",
+    num_ficha: "",
+    id_subcategoria: "",
+  };
+
+  const [form, setForm] = useState<SolicitudForm>(initialFormState);  const fetchEquipos = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -83,10 +91,8 @@ const SoliPortMovil = forwardRef((props, ref) => {
       console.error('Error al cargar los equipos:', err);
       setError('Error al cargar los equipos. Verifica la conexión o la URL.');
     }
-    setLoading(false);
-  }, [categoria]);
-
-  const [subcategorias, setSubcategorias] = useState<any[]>([]);
+    setLoading(false);
+  }, [categoria]);
 
   // Obtener subcategorías reales del backend
   const fetchSubcategorias = useCallback(async () => {
@@ -214,7 +220,7 @@ const SoliPortMovil = forwardRef((props, ref) => {
       <View style={styles.cuadroGeneral}>
         <View style={styles.tituloEquiposRow}>
           <Text style={styles.tituloCuadro}>{categoria === 'computo' ? 'Portátiles' : 'Portátil de Edición'}</Text>
-          <Text style={styles.equiposDisponiblesVerde}>Equipos: {equipos.filter(e => e.disponible).length}</Text>
+          <Text style={styles.equiposDisponiblesVerde}>Equipos: {equipos.filter((e: Equipo) => e.disponible).length}</Text>
         </View>
         <Text style={styles.subtituloCuadro}>Visualiza aquí los detalles generales de los portátiles disponibles</Text>
 
