@@ -13,7 +13,10 @@ import InventarioAdmin from './src/screens/Administrador/InventarioAdmin';
 import SolicitudesElementoAdmin from './src/screens/Administrador/SolicitudesElementoAdmin';
 import SolicitudesEspacioAdmin from './src/screens/Administrador/SolicitudesEspacioAdmin';
 import ReportesAdmin from './src/screens/Administrador/ReportesAdmin';
-import PortatilesScreen from './src/screens/Instructor/PortatilesScreen';
+import Portatiles from './src/screens/Instructor/Solicitudes/Portatiles';
+import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
+import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
+import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,7 +40,10 @@ export default function App() {
           <Stack.Screen name="SolicitudesElementoAdmin" component={SolicitudesElementoAdmin} />
           <Stack.Screen name="SolicitudesEspacioAdmin" component={SolicitudesEspacioAdmin} />
           <Stack.Screen name="ReportesAdmin" component={ReportesAdmin} />
-          <Stack.Screen name="PortatilesScreen" component={PortatilesScreen} />
+          <Stack.Screen name="PortatilesScreen" component={Portatiles} />
+          <Stack.Screen name="EscritorioScreen" component={EquipoMesa} />
+          <Stack.Screen name="AudioVideoScreen" component={AudioVideo} />
+          <Stack.Screen name="ElementosScreen" component={Elementos} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

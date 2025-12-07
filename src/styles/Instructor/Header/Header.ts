@@ -9,18 +9,18 @@ export const HeaderComponentStyles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    height: 75,
+    height: 60,
   },
   headerTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 5,
     marginLeft: 'auto',
     marginRight: 'auto',
     color: '#fff',
   },
   menuButton: {
-    marginTop: 20,
+    marginTop: 5,
   },
   menuIcon: {
     fontSize: 28,
