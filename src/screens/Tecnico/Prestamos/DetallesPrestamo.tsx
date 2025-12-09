@@ -8,6 +8,8 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
+import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
+import { SolicitudesTecnicoStyles } from '../../../styles/Tecnico/Solicitudes/SolicitudesTecnico';
 import { prestamosService } from '../../../services/Api';
 
 interface Prestamo {
@@ -34,16 +36,25 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
   const cambiarEstado = async (nuevoEstado: number) => {
     try {
       setActualizando(true);
-      await prestamosService.update(prestamo.id_prest, {
-        id_estado_prestamo: nuevoEstado,
-      });
+      
+      // Preparar el objeto de actualización con los datos correctos
+      const datosActualizacion = {
+        id_prest: prestamo.id_prest,
+        estado: nuevoEstado, // 0 = Finalizado
+      };
+      
+      console.log('Actualizando préstamo con:', datosActualizacion);
+      
+      await prestamosService.update(prestamo.id_prest, datosActualizacion);
 
-      const estadoNombre = nuevoEstado === 3 ? 'Devuelto' : 'Actualizado';
+      const estadoNombre = nuevoEstado === 0 ? 'Finalizado' : 'Actualizado';
 
       Alert.alert('Éxito', `Préstamo marcado como: ${estadoNombre}`);
       navigation.goBack();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al actualizar:', error);
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
       Alert.alert('Error', 'No se pudo actualizar el préstamo');
     } finally {
       setActualizando(false);
@@ -53,7 +64,7 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
 
   const confirmarAccion = () => {
     if (accionActual === 'devolver') {
-      cambiarEstado(3); // 3 = Devuelto
+      cambiarEstado(0); // 0 = Finalizado
     }
   };
 
@@ -61,8 +72,8 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
     switch (accionActual) {
       case 'devolver':
         return {
-          titulo: '¿Marcar como devuelto?',
-          mensaje: 'Cambiarás el estado del préstamo a "Devuelto"',
+          titulo: '¿Marcar como finalizado?',
+          mensaje: 'Cambiarás el estado del préstamo a "Finalizado"',
         };
       default:
         return { titulo: '', mensaje: '' };
@@ -72,69 +83,52 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
   const textoModal = getTextoModal();
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* Header */}
-      <View style={{ backgroundColor: '#3fbb34', paddingTop: 50, paddingBottom: 20, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View>
-          <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff', marginBottom: 5 }}>
-            {prestamo.nom_elem}
-          </Text>
-          <View
-            style={{
-              backgroundColor: '#FFC107',
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
-              alignSelf: 'flex-start',
+    <View style={SolicitudesTecnicoStyles.container}>
+      <HeaderTecnico title="Detalles de Préstamo" navigation={navigation} />
+      
+      <ScrollView style={SolicitudesTecnicoStyles.contentContainer}>
+        <View style={SolicitudesTecnicoStyles.filterContainer}>
+          {/* Botón para volver */}
+          <TouchableOpacity
+            style={{ 
+              alignSelf: 'flex-end', 
+              marginBottom: 15, 
+              padding: 5,
+              backgroundColor: '#e0e0e0',
+              borderRadius: 50,
+              width: 30,
+              height: 30,
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
+            onPress={() => navigation.goBack()}
           >
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#fff' }}>
-              {prestamo.nom_estado}
-            </Text>
-          </View>
-        </View>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{
-            width: 30,
-            height: 30,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#e0e0e0',
-            borderRadius: 4,
-          }}
-        >
-          <Text style={{ fontSize: 16, color: '#666' }}>✕</Text>
-        </TouchableOpacity>
-      </View>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#666' }}>✕</Text>
+          </TouchableOpacity>
 
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 20 }}>
-        {/* Categoría */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: '#999', marginBottom: 8 }}>
-            CATEGORÍA
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333' }}>
-            {prestamo.nom_cat}
-          </Text>
-        </View>
-
-        {/* Información General */}
-        <View style={{ backgroundColor: '#f9f9f9', padding: 12, borderRadius: 6, marginBottom: 20 }}>
-          <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Usuario que Toma en Préstamo
+          {/* Tarjeta de Detalles */}
+          <View style={SolicitudesTecnicoStyles.tarjeta}>
+            <Text style={SolicitudesTecnicoStyles.cardModelo}>
+              {prestamo.nom_elem}
             </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
+
+            <Text style={SolicitudesTecnicoStyles.cardInfo}>
+              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>ID Préstamo: </Text>
+              {prestamo.id_prest}
+            </Text>
+
+            <Text style={SolicitudesTecnicoStyles.cardInfo}>
+              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Categoría: </Text>
+              {prestamo.nom_cat}
+            </Text>
+
+            <Text style={SolicitudesTecnicoStyles.cardInfo}>
+              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Usuario: </Text>
               {prestamo.nom_usu}
             </Text>
-          </View>
 
-          <View style={{ marginBottom: 0 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Fecha de Inicio del Préstamo
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
+            <Text style={SolicitudesTecnicoStyles.cardInfo}>
+              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Fecha de Inicio: </Text>
               {new Date(prestamo.fecha_ini).toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'long',
@@ -143,142 +137,133 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
                 minute: '2-digit',
               })}
             </Text>
-          </View>
-        </View>
 
-        {/* Estado Actual */}
-        <View style={{ marginBottom: 30 }}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-            Estado Actual
-          </Text>
-          <Text style={{ fontSize: 14, color: '#FFC107', fontWeight: '700' }}>
-            {prestamo.nom_estado}
-          </Text>
-          <Text style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-            Este préstamo está activo y en posesión del usuario.
-          </Text>
+            <Text style={SolicitudesTecnicoStyles.cardInfo}>
+              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Estado: </Text>
+              {prestamo.nom_estado}
+            </Text>
+          </View>
+
+          {/* Botones de Acción */}
+          <View style={{ marginTop: 20, gap: 10, flexDirection: 'row' }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                padding: 12,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderColor: '#3fbb34',
+                borderRadius: 5,
+                alignItems: 'center',
+              }}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={{ color: '#3fbb34', fontWeight: 'bold', fontSize: 14 }}>Cancelar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                padding: 12,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderColor: '#3fbb34',
+                borderRadius: 5,
+                alignItems: 'center',
+              }}
+              onPress={() => abrirModal('devolver')}
+              disabled={actualizando}
+            >
+              <Text style={{ color: '#3fbb34', fontWeight: 'bold', fontSize: 14 }}>
+                {actualizando ? 'Cargando...' : 'Finalizar'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
-      {/* Botones de Acción */}
-      <View style={{ paddingHorizontal: 16, paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#e0e0e0' }}>
-        <TouchableOpacity
-          onPress={() => abrirModal('devolver')}
-          style={{
-            backgroundColor: '#fff',
-            borderWidth: 2,
-            borderColor: '#3fbb34',
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-            borderRadius: 4,
-            alignItems: 'center',
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
-            ✓ Marcar como Devuelto
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{
-            backgroundColor: '#3fbb34',
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-            borderRadius: 4,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-            Volver
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Modal de Confirmación */}
+      {/* Modal de Confirmación Mejorado */}
       <Modal
         visible={modalVisible}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
           <View
             style={{
               backgroundColor: '#fff',
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 20,
+              borderRadius: 16,
+              paddingHorizontal: 24,
+              paddingVertical: 28,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 10,
+              maxWidth: '95%',
             }}
           >
-            {/* Botón Cerrar */}
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                width: 30,
-                height: 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#e0e0e0',
-                borderRadius: 4,
-              }}
-            >
-              <Text style={{ fontSize: 16, color: '#666' }}>✕</Text>
-            </TouchableOpacity>
+            {/* Icono Decorativo */}
+            <View style={{ alignItems: 'center', marginBottom: 16 }}>
+              <View style={{ 
+                width: 60, 
+                height: 60, 
+                borderRadius: 30, 
+                backgroundColor: '#FFF8DC', 
+                justifyContent: 'center', 
+                alignItems: 'center' 
+              }}>
+                <Text style={{ fontSize: 32 }}>⚠️</Text>
+              </View>
+            </View>
 
             {/* Título */}
-            <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8, marginRight: 30 }}>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: '#333', marginBottom: 8, textAlign: 'center' }}>
               {textoModal.titulo}
             </Text>
 
             {/* Mensaje */}
-            <Text style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 24, textAlign: 'center', lineHeight: 20 }}>
               {textoModal.mensaje}
             </Text>
 
             {/* Botones */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                disabled={actualizando}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#3fbb34',
-                  paddingVertical: 12,
-                  borderRadius: 4,
-                  alignItems: 'center',
-                }}
-              >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-                  No
-                </Text>
-              </TouchableOpacity>
-
+            <View style={{ gap: 10 }}>
               <TouchableOpacity
                 onPress={confirmarAccion}
                 disabled={actualizando}
                 style={{
-                  flex: 1,
-                  backgroundColor: '#fff',
-                  borderWidth: 2,
-                  borderColor: '#3fbb34',
+                  backgroundColor: '#3fbb34',
                   paddingVertical: 12,
-                  borderRadius: 4,
+                  borderRadius: 5,
                   alignItems: 'center',
                 }}
               >
                 {actualizando ? (
-                  <ActivityIndicator color="#3fbb34" size="small" />
+                  <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
-                    Sí
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+                    ✓ Confirmar
                   </Text>
                 )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                disabled={actualizando}
+                style={{
+                  backgroundColor: '#fff',
+                  paddingVertical: 12,
+                  borderRadius: 5,
+                  alignItems: 'center',
+                  borderWidth: 2,
+                  borderColor: '#3fbb34',
+                }}
+              >
+                <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
+                  ✕ Cancelar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

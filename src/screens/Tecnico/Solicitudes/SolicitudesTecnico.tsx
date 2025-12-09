@@ -8,11 +8,13 @@ import {
   FlatList,
   ActivityIndicator,
   Modal,
+  Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { authService } from '../../../services/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Solicitud {
   id_soli: number;
@@ -36,10 +38,24 @@ interface Subcategoria {
   id_cat: number;
 }
 
+interface Elemento {
+  id: number;
+  nom_elemento: string;
+  marca: string;
+  sub_categoria: { id: number; nom_subcateg: string };
+}
+
+interface ElementoSeleccionado {
+  id: number;
+  nom_elemento: string;
+  cantidad: number;
+}
+
 export default function SolicitudesTecnico({ navigation }: any) {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
+  const [elementos, setElementos] = useState<Elemento[]>([]);
   const [categoriaFiltro, setCategoriaFiltro] = useState('');
   const [subcategoriaFiltro, setSubcategoriaFiltro] = useState('');
   const [busquedaMarca, setBusquedaMarca] = useState('');
@@ -67,7 +83,6 @@ export default function SolicitudesTecnico({ navigation }: any) {
         authService.obtenerSubcategorias(),
       ]);
       
-      // Las respuestas ya contienen los datos directamente
       setSolicitudes(Array.isArray(dataSolicitudes) ? dataSolicitudes : []);
       setCategorias(Array.isArray(dataCategorias) ? dataCategorias : []);
       setSubcategorias(Array.isArray(dataSubcategorias) ? dataSubcategorias : []);
@@ -123,6 +138,15 @@ export default function SolicitudesTecnico({ navigation }: any) {
 
   const irPagina = (n: number) => {
     setPaginaActual(Math.min(Math.max(1, n), totalPaginas));
+  };
+
+  // Filtrar elementos según la solicitud seleccionada
+  const obtenerElementosFiltrados = (solicitud: Solicitud) => {
+    return elementos.filter(elem => {
+      // Filtrar por subcategoría de la solicitud
+      const mismaSubcategoria = elem.sub_categoria?.nom_subcateg === solicitud.nom_subcateg;
+      return mismaSubcategoria;
+    });
   };
 
   const generarDiasDelMes = (fecha: Date) => {
