@@ -166,6 +166,10 @@ export const authService = {
 
 // ==================== USUARIOS SERVICE ====================
 export const usuariosService = {
+    updateProfile: async (data: any) => {
+      const config = await withAuth();
+      return api.put('/api/Usuarios/perfil/me', data, config);
+    },
   getAll: async () => {
     try {
       const config = await withAuth();
