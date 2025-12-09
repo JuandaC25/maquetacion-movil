@@ -319,13 +319,13 @@ export default function Equipo_Mesa({ navigation }: any) {
               animationType="slide"
               transparent={true}
               onRequestClose={() => setModalVisible(false)}
-            >
-              <View style={styles.modalBackground}>
-                <ScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}> 
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Solicitud de Equipo</Text>
-                        
-                        <Text style={styles.modalText}>Fecha inicio</Text>
+            >
+              <View style={styles.modalBackground}>
+                <ScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Solicitud de Equipo</Text>
+
+                    <Text style={styles.modalText}>Fecha inicio</Text>
                         <TextInput style={styles.modalInput} value={form.fecha_ini} editable={false} />
 
                         <Text style={styles.modalText}>Hora inicio</Text>
@@ -373,17 +373,17 @@ export default function Equipo_Mesa({ navigation }: any) {
                           onChangeText={v => setForm(f => ({ ...f, num_ficha: v }))} 
                           keyboardType="numeric"
                         />
-                        <Text style={styles.modalText}>Categoría</Text>
-                        <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1', fontWeight: 'bold' }]}> 
-                          {getCategoriaNombre()}
-                        </Text>
+                        <Text style={styles.modalText}>Categoría</Text>
+                        <View style={[styles.modalInput, { backgroundColor: '#e3f2fd' }]}>
+                          <Text style={{ color: '#0d47a1', fontWeight: 'bold' }}>{getCategoriaNombre()}</Text>
+                        </View>
 
-                        <Text style={styles.modalText}>Subcategoría</Text>
-                        <Text style={[styles.modalInput, { backgroundColor: '#f5f5f5', color: '#555' }]}>
-                          {subcatInfo?.nombre}
-                        </Text>
+                        <Text style={styles.modalText}>Subcategoría</Text>
+                        <View style={[styles.modalInput, { backgroundColor: '#f5f5f5' }]}>
+                          <Text style={{ color: '#555' }}>{subcatInfo?.nombre}</Text>
+                        </View>
 
-                        <View style={{ marginTop: 10 }}>
+                        <View style={{ marginTop: 10 }}>
                           <Button title="Enviar Solicitud" color="#4caf50" onPress={handleSubmitSolicitud} />
                           <View style={{ marginTop: 10 }}>
                               <Button title="Cancelar" color="#dc3545" onPress={() => setModalVisible(false)} />
