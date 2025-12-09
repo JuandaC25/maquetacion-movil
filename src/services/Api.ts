@@ -1,3 +1,14 @@
+export const trazabilidadService = {
+  getByTicketId: async (ticketId: number | string) => {
+    const authConfig = await withAuth();
+    console.log('[TRAZABILIDAD] Configuración de autorización enviada:', authConfig);
+    return api.get(`/api/trazabilidad/ticket/${ticketId}`, authConfig);
+  },
+};
+// ==================== ROLES SERVICE ====================
+export const rolesService = {
+  getAll: async () => api.get('/api/roles', await withAuth()),
+};
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -6,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
 // Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-const LOCAL_IP = '192.168.0.7';  // Ejemplo: '192.168.1.100'
+const LOCAL_IP = '192.168.0.103';  // IP actualizada según el usuario
 const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
@@ -22,6 +33,7 @@ const api = axios.create({
 const withAuth = async (config: any = {}) => {
   if (!config.headers) config.headers = {};
   const token = await AsyncStorage.getItem('token');
+  console.log('[AUTH] Token usado en petición:', token);
   if (token) {
     // Asegura que el token siempre se envía como 'Bearer <token>'
     config.headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
