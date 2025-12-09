@@ -11,90 +11,121 @@ import {
 import { ticketsService } from '../../../services/Api';
 
 interface Ticket {
-  id_ticket: number;
-  num_ticket: string;
-  nom_problema: string;
-  nom_cat: string;
-  nom_elem: string;
-  nom_usu: string;
-  fecha_creacion: string;
-  fecha_actualizacion: string;
-  id_estado_ticket: number;
-  nom_estado: string;
-  descripcion?: string;
+  id_tickets?: number;
+  id_ticket?: number;
+  num_ticket?: string;
+  nom_problema?: string;
+  nom_problm?: string;
+  nom_cat?: string;
+  nom_elem?: string;
+  nom_usu?: string;
+  fecha_creacion?: string;
+  fecha_in?: string;
+  fecha_actualizacion?: string;
+  id_estado_ticket?: number;
+  id_est_tick?: number;
+  nom_estado?: string;
+  tip_est_ticket?: string;
+  ambient?: string;
+  obser?: string;
+  observaciones?: string;
 }
 
 const DetallesTicket = ({ route, navigation }: any) => {
   const { ticket } = route.params;
+  const [loading, setLoading] = useState(false);
+  const [estadoActual, setEstadoActual] = useState(ticket.nom_estado);
   const [modalVisible, setModalVisible] = useState(false);
-  const [accionActual, setAccionActual] = useState('');
-  const [actualizando, setActualizando] = useState(false);
+  const [modalAction, setModalAction] = useState<string | null>(null);
 
-  const abrirModal = (accion: string) => {
-    setAccionActual(accion);
+  const obtenerIdEstado = (estado: string): number => {
+    const estados: { [key: string]: number } = {
+      'Abierto': 1,
+      'En Proceso': 1,  // Estado 1 = Activo/En Proceso
+      'Resuelto': 3,
+      'Cerrado': 4,
+    };
+    return estados[estado] || 1;
+  };
+
+  const cambiarEstado = async (nuevoEstado: string) => {
+    try {
+      setLoading(true);
+      const nuevoIdEstado = obtenerIdEstado(nuevoEstado);
+      // Obtener ID del ticket de múltiples variantes posibles
+      const ticketId = ticket.id_tickets || ticket.id_ticket;
+      
+      console.log('🔍 Ticket objeto recibido:', {
+        id_tickets: ticket.id_tickets,
+        id_ticket: ticket.id_ticket,
+        ticketIdUsado: ticketId,
+        allKeys: Object.keys(ticket)
+      });
+      
+      if (!ticketId) {
+        console.error('❌ ERROR CRÍTICO: No se pudo obtener el ID del ticket');
+        Alert.alert('Error', 'No se pudo identificar el ticket');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('📤 Enviando actualización:', {
+        ticketId: ticketId,
+        id_est_tick: nuevoIdEstado,
+        nuevoEstado: nuevoEstado
+      });
+      
+      const datosActualizacion = {
+        id_ticket: ticketId,
+        id_est_tick: nuevoIdEstado,
+      };
+      
+      const respuesta = await ticketsService.update(ticketId, datosActualizacion);
+      console.log('✅ Respuesta del servidor:', respuesta);
+      console.log('✅ Status:', respuesta?.status);
+      console.log('✅ Data:', respuesta?.data);
+      
+      setEstadoActual(nuevoEstado);
+      setModalVisible(false);
+      setModalAction(null);
+      
+      const mensaje = nuevoEstado === 'En Proceso' 
+        ? 'Ticket tomado correctamente' 
+        : 'Ticket cancelado correctamente';
+      Alert.alert('Éxito', mensaje);
+      
+      // Volver a la lista después de 1 segundo
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
+    } catch (error: any) {
+      console.error('❌ Error al actualizar ticket:', error);
+      console.error('Detalles del error:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.message || 'No se pudo actualizar el ticket');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función independiente para Tomar
+  const abrirModalTomar = () => {
+    setModalAction('tomar');
     setModalVisible(true);
   };
 
-  const cambiarEstado = async (nuevoEstado: number) => {
-    try {
-      setActualizando(true);
-      await ticketsService.update(ticket.id_ticket, {
-        id_estado_ticket: nuevoEstado,
-      });
-
-      const estadoNombre =
-        nuevoEstado === 1 ? 'Abierto' :
-        nuevoEstado === 2 ? 'En Proceso' :
-        nuevoEstado === 3 ? 'Resuelto' : 'Cerrado';
-
-      Alert.alert('Éxito', `Ticket actualizado a: ${estadoNombre}`);
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error al actualizar:', error);
-      Alert.alert('Error', 'No se pudo actualizar el ticket');
-    } finally {
-      setActualizando(false);
-      setModalVisible(false);
-    }
-  };
-
-  const obtenerIdEstado = (nombreEstado: string) => {
-    switch (nombreEstado?.toLowerCase()) {
-      case 'abierto':
-        return 1;
-      case 'en proceso':
-        return 2;
-      case 'resuelto':
-        return 3;
-      case 'cerrado':
-        return 4;
-      default:
-        return 1;
-    }
+  // Función independiente para Cancelar
+  const abrirModalCancelar = () => {
+    setModalAction('cancelar');
+    setModalVisible(true);
   };
 
   const confirmarAccion = () => {
-    if (accionActual === 'enProceso') {
-      cambiarEstado(2);
-    } else if (accionActual === 'resolver') {
-      cambiarEstado(3);
-    }
-  };
-
-  const getTextoModal = () => {
-    switch (accionActual) {
-      case 'enProceso':
-        return {
-          titulo: '¿Iniciar trabajo?',
-          mensaje: 'Cambiarás el estado a "En Proceso"',
-        };
-      case 'resolver':
-        return {
-          titulo: '¿Resolver ticket?',
-          mensaje: 'Cambiarás el estado a "Resuelto"',
-        };
-      default:
-        return { titulo: '', mensaje: '' };
+    if (modalAction === 'tomar') {
+      cambiarEstado('En Proceso');
+    } else if (modalAction === 'cancelar') {
+      // Solo cierra el modal sin cambiar estado
+      setModalVisible(false);
+      setModalAction(null);
     }
   };
 
@@ -113,271 +144,345 @@ const DetallesTicket = ({ route, navigation }: any) => {
     }
   };
 
-  const textoModal = getTextoModal();
-
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* Header */}
-      <View style={{ backgroundColor: '#3fbb34', paddingTop: 50, paddingBottom: 20, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View>
-          <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff', marginBottom: 5 }}>
-            Ticket #{ticket.num_ticket}
+    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+      {/* Header Verde Premium */}
+      <View style={{ backgroundColor: '#3fbb34', paddingTop: 50, paddingBottom: 30, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 5 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', fontWeight: '600', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+            Número de Ticket
+          </Text>
+          <Text style={{ fontSize: 32, fontWeight: '800', color: '#fff', marginBottom: 12 }}>
+            #{ticket.id_tickets || ticket.id_ticket || ticket.num_ticket}
           </Text>
           <View
             style={{
-              backgroundColor: getColorEstado(ticket.nom_estado),
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
               alignSelf: 'flex-start',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.5)',
             }}
           >
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#fff' }}>
-              {ticket.nom_estado}
+            <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>
+              {ticket.tip_est_ticket || ticket.nom_estado || 'Pendiente'}
             </Text>
           </View>
         </View>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{
-            width: 30,
-            height: 30,
+            width: 40,
+            height: 40,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: '#e0e0e0',
-            borderRadius: 4,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: 8,
           }}
         >
-          <Text style={{ fontSize: 16, color: '#666' }}>✕</Text>
+          <Text style={{ fontSize: 20, color: '#fff' }}>✕</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 20 }}>
-        {/* Problema */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: '#999', marginBottom: 8 }}>
-            PROBLEMA
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333' }}>
-            {ticket.nom_problema}
-          </Text>
-        </View>
-
-        {/* Descripción */}
-        {ticket.descripcion && (
-          <View style={{ marginBottom: 20 }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: '#999', marginBottom: 8 }}>
-              DESCRIPCIÓN
+      <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 20 }}>
+          {/* Problema - Destacado */}
+          <View style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              ⚠️ Problema Reportado
             </Text>
-            <Text style={{ fontSize: 14, color: '#555', lineHeight: 20 }}>
-              {ticket.descripcion}
-            </Text>
-          </View>
-        )}
-
-        {/* Información General */}
-        <View style={{ backgroundColor: '#f9f9f9', padding: 12, borderRadius: 6, marginBottom: 20 }}>
-          <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Categoría
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
-              {ticket.nom_cat}
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a', lineHeight: 28 }}>
+              {ticket.nom_problm || ticket.nom_problema || ticket.descripcion || 'Sin descripción'}
             </Text>
           </View>
 
-          <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Elemento/Equipo
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
-              {ticket.nom_elem}
-            </Text>
+          {/* Grid de 2x2 - Información Principal */}
+          <View style={{ marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+              {/* Categoría */}
+              <View style={{ flex: 1, backgroundColor: '#fff', padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  🏷️ Categoría
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#333' }}>
+                  {ticket.nom_cat || 'N/A'}
+                </Text>
+              </View>
+              {/* Equipo */}
+              <View style={{ flex: 1, backgroundColor: '#fff', padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  ⚙️ Equipo
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#333' }}>
+                  {ticket.nom_elem || ticket.nom_elemento || 'N/A'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              {/* Reportado por */}
+              <View style={{ flex: 1, backgroundColor: '#fff', padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  👤 Usuario
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#333' }}>
+                  {ticket.nom_usu || 'Desconocido'}
+                </Text>
+              </View>
+              {/* Ubicación */}
+              <View style={{ flex: 1, backgroundColor: '#fff', padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  📍 Ubicación
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#333' }}>
+                  {ticket.ambient || 'No especificada'}
+                </Text>
+              </View>
+            </View>
           </View>
 
-          <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Reportado por
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
-              {ticket.nom_usu}
-            </Text>
+          {/* Fechas */}
+          <View style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                📅 Fecha de Creación
+              </Text>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333' }}>
+                {ticket.fecha_in ? new Date(ticket.fecha_in).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }) : 'N/A'}
+              </Text>
+            </View>
+            {ticket.fecha_actualizacion && (
+              <View>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  🔄 Última Actualización
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#333' }}>
+                  {new Date(ticket.fecha_actualizacion).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </Text>
+              </View>
+            )}
           </View>
 
-          <View style={{ marginBottom: 0 }}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-              Fecha de Creación
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>
-              {new Date(ticket.fecha_creacion).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-          </View>
-        </View>
-
-        {/* Última Actualización */}
-        <View style={{ marginBottom: 30 }}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: '#999', marginBottom: 4 }}>
-            Última Actualización
-          </Text>
-          <Text style={{ fontSize: 13, color: '#666' }}>
-            {new Date(ticket.fecha_actualizacion).toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Text>
+          {/* Observaciones si existen */}
+          {(ticket.obser || ticket.observaciones) && (
+            <View style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 20, borderLeftWidth: 4, borderLeftColor: '#FF9800', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                📝 Observaciones
+              </Text>
+              <Text style={{ fontSize: 14, color: '#555', lineHeight: 22 }}>
+                {ticket.obser || ticket.observaciones}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
-      {/* Botones de Acción */}
-      <View style={{ paddingHorizontal: 16, paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#e0e0e0' }}>
-        {ticket.nom_estado?.toLowerCase() === 'abierto' && (
-          <TouchableOpacity
-            onPress={() => abrirModal('enProceso')}
-            style={{
-              backgroundColor: '#fff',
-              borderWidth: 2,
-              borderColor: '#3fbb34',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 4,
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
-              Iniciar Trabajo
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {ticket.nom_estado?.toLowerCase() === 'en proceso' && (
-          <TouchableOpacity
-            onPress={() => abrirModal('resolver')}
-            style={{
-              backgroundColor: '#fff',
-              borderWidth: 2,
-              borderColor: '#3fbb34',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 4,
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
-              Marcar como Resuelto
-            </Text>
-          </TouchableOpacity>
-        )}
-
+      {/* Botones de Acción - Fixed Footer */}
+      <View style={{ paddingHorizontal: 16, paddingVertical: 16, paddingBottom: 24, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0', gap: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 8, elevation: 5 }}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={abrirModalTomar}
+          disabled={loading}
           style={{
             backgroundColor: '#3fbb34',
-            paddingVertical: 12,
+            paddingVertical: 14,
             paddingHorizontal: 16,
-            borderRadius: 4,
+            borderRadius: 8,
             alignItems: 'center',
+            opacity: loading ? 0.6 : 1,
           }}
         >
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-            Volver
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>
+              ✓ Tomar Ticket
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={abrirModalCancelar}
+          disabled={loading}
+          style={{
+            backgroundColor: '#fff',
+            borderWidth: 2,
+            borderColor: '#999',
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            borderRadius: 8,
+            alignItems: 'center',
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#999' }}>
+            ✕ Cerrar
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modal de Confirmación */}
+      {/* Modal para Tomar */}
       <Modal
-        visible={modalVisible}
+        visible={modalVisible && modalAction === 'tomar'}
         transparent
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
           <View
             style={{
               backgroundColor: '#fff',
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 20,
+              borderRadius: 16,
+              paddingHorizontal: 24,
+              paddingVertical: 30,
+              width: '100%',
+              shadowColor: '#000',
+              shadowOpacity: 0.3,
+              shadowRadius: 12,
+              elevation: 10,
             }}
           >
-            {/* Botón Cerrar */}
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                width: 30,
-                height: 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#e0e0e0',
-                borderRadius: 4,
-              }}
-            >
-              <Text style={{ fontSize: 16, color: '#666' }}>✕</Text>
-            </TouchableOpacity>
+            {/* Icono de check */}
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: '#e8f5e9', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 36, color: '#3fbb34' }}>✓</Text>
+              </View>
+            </View>
 
             {/* Título */}
-            <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8, marginRight: 30 }}>
-              {textoModal.titulo}
+            <Text style={{ fontSize: 20, fontWeight: '800', color: '#1a1a1a', marginBottom: 12, textAlign: 'center' }}>
+              ¿Tomar este Ticket?
             </Text>
 
             {/* Mensaje */}
-            <Text style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>
-              {textoModal.mensaje}
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 28, textAlign: 'center', lineHeight: 22 }}>
+              El estado cambiará a <Text style={{ fontWeight: '700', color: '#3fbb34' }}>En Proceso</Text> y empezarás a trabajar en él.
             </Text>
 
             {/* Botones */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+            <View style={{ gap: 12 }}>
+              <TouchableOpacity
+                onPress={confirmarAccion}
+                disabled={loading}
+                style={{
+                  backgroundColor: '#3fbb34',
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
+                    ✓ Sí, Tomar Ticket
+                  </Text>
+                )}
+              </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
-                disabled={actualizando}
+                disabled={loading}
                 style={{
-                  flex: 1,
-                  backgroundColor: '#3fbb34',
-                  paddingVertical: 12,
-                  borderRadius: 4,
+                  backgroundColor: '#f5f5f5',
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: '#e0e0e0',
+                }}
+              >
+                <Text style={{ color: '#666', fontWeight: '700', fontSize: 15 }}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal para Cerrar */}
+      <Modal
+        visible={modalVisible && modalAction === 'cancelar'}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              paddingHorizontal: 24,
+              paddingVertical: 30,
+              width: '100%',
+              shadowColor: '#000',
+              shadowOpacity: 0.3,
+              shadowRadius: 12,
+              elevation: 10,
+            }}
+          >
+            {/* Icono de cerrar */}
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 36, color: '#999' }}>✕</Text>
+              </View>
+            </View>
+
+            {/* Título */}
+            <Text style={{ fontSize: 20, fontWeight: '800', color: '#1a1a1a', marginBottom: 12, textAlign: 'center' }}>
+              Cerrar Detalles
+            </Text>
+
+            {/* Mensaje */}
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 28, textAlign: 'center', lineHeight: 22 }}>
+              El ticket permanecerá en la lista sin cambios.
+            </Text>
+
+            {/* Botones */}
+            <View style={{ gap: 12 }}>
+              <TouchableOpacity
+                onPress={confirmarAccion}
+                disabled={loading}
+                style={{
+                  backgroundColor: '#999',
+                  paddingVertical: 14,
+                  borderRadius: 8,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-                  No
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
+                  ✕ Cerrar
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={confirmarAccion}
-                disabled={actualizando}
+                onPress={() => setModalVisible(false)}
+                disabled={loading}
                 style={{
-                  flex: 1,
-                  backgroundColor: '#fff',
-                  borderWidth: 2,
-                  borderColor: '#3fbb34',
-                  paddingVertical: 12,
-                  borderRadius: 4,
+                  backgroundColor: '#f5f5f5',
+                  paddingVertical: 14,
+                  borderRadius: 8,
                   alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: '#e0e0e0',
                 }}
               >
-                {actualizando ? (
-                  <ActivityIndicator color="#3fbb34" size="small" />
-                ) : (
-                  <Text style={{ color: '#3fbb34', fontWeight: '700', fontSize: 14 }}>
-                    Sí
-                  </Text>
-                )}
+                <Text style={{ color: '#666', fontWeight: '700', fontSize: 15 }}>
+                  Volver
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -414,49 +414,108 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
               </TouchableOpacity>
             ))}
 
-            {/* Paginación */}
+            {/* Paginación Mejorada */}
             {prestamosFiltrados.length > 0 && (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#e0e0e0', backgroundColor: '#fafafa', marginTop: 12 }}>
-                <TouchableOpacity
-                  onPress={() => setPaginaActual(Math.max(1, paginaActual - 1))}
-                  disabled={paginaActual === 1}
-                  style={{ opacity: paginaActual === 1 ? 0.5 : 1 }}
-                >
-                  <Text style={{ fontSize: 24, color: '#3fbb34', fontWeight: '700' }}>◄</Text>
-                </TouchableOpacity>
+              <View style={{ 
+                paddingHorizontal: 16, 
+                paddingVertical: 16, 
+                marginTop: 12,
+                backgroundColor: '#fff',
+                borderRadius: 8,
+              }}>
+                {/* Indicador de página */}
+                <View style={{ 
+                  alignItems: 'center', 
+                  marginBottom: 12,
+                }}>
+                  <Text style={{ 
+                    fontSize: 14, 
+                    color: '#666', 
+                    fontWeight: '600',
+                    marginBottom: 4
+                  }}>
+                    Página {paginaActual} de {totalPaginas}
+                  </Text>
+                  <Text style={{ 
+                    fontSize: 12, 
+                    color: '#999',
+                  }}>
+                    Mostrando {prestamosPagina.length} de {prestamosFiltrados.length} préstamos
+                  </Text>
+                </View>
 
-                <Text style={{ fontSize: 13, color: '#666', fontWeight: '600' }}>
-                  Página {paginaActual} de {totalPaginas}
-                </Text>
+                {/* Botones de navegación */}
+                <View style={{ 
+                  flexDirection: 'row', 
+                  gap: 10,
+                  justifyContent: 'center',
+                }}>
+                  <TouchableOpacity
+                    onPress={() => setPaginaActual(Math.max(1, paginaActual - 1))}
+                    disabled={paginaActual === 1}
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      backgroundColor: paginaActual === 1 ? '#f0f0f0' : '#3fbb34',
+                      borderRadius: 6,
+                      alignItems: 'center',
+                      minWidth: 50,
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ 
+                      fontSize: 16, 
+                      color: paginaActual === 1 ? '#ccc' : '#fff', 
+                      fontWeight: '700' 
+                    }}>
+                      ← Anterior
+                    </Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
-                  disabled={paginaActual === totalPaginas}
-                  style={{ opacity: paginaActual === totalPaginas ? 0.5 : 1 }}
-                >
-                  <Text style={{ fontSize: 24, color: '#3fbb34', fontWeight: '700' }}>►</Text>
-                </TouchableOpacity>
+                  {/* Indicador visual de progreso */}
+                  <View style={{
+                    flex: 1,
+                    height: 6,
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 3,
+                    justifyContent: 'center',
+                    marginHorizontal: 10,
+                  }}>
+                    <View style={{
+                      height: 6,
+                      backgroundColor: '#3fbb34',
+                      borderRadius: 3,
+                      width: `${(paginaActual / totalPaginas) * 100}%`,
+                    }} />
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
+                    disabled={paginaActual === totalPaginas}
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      backgroundColor: paginaActual === totalPaginas ? '#f0f0f0' : '#3fbb34',
+                      borderRadius: 6,
+                      alignItems: 'center',
+                      minWidth: 50,
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ 
+                      fontSize: 16, 
+                      color: paginaActual === totalPaginas ? '#ccc' : '#fff', 
+                      fontWeight: '700' 
+                    }}>
+                      Siguiente →
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </>
         )}
 
-        {/* Botón Recargar */}
-        <TouchableOpacity
-          onPress={cargarDatos}
-          style={{
-            backgroundColor: '#3fbb34',
-            paddingVertical: 12,
-            marginHorizontal: 16,
-            marginVertical: 12,
-            borderRadius: 4,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-            🔄 Recargar Préstamos
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
