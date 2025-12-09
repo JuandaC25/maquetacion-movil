@@ -25,6 +25,10 @@ export default function LoginScreen({ navigation }: any) {
       const userRoles = userData?.roles || userData?.role || [];
       console.log('👤 Roles:', userRoles);
 
+      // Guardar el usuario en AsyncStorage para futuras pantallas
+      await AsyncStorage.setItem('usuario', JSON.stringify(userData));
+      console.log('💾 Usuario guardado en AsyncStorage:', userData);
+
       if ((userData.email || userData.correo || username) === 'admin@tech.com') {
         console.log('🎯 Navegando a AdminDashboard...');
         navigation.replace('AdminDashboard');

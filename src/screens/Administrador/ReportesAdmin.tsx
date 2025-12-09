@@ -2,6 +2,7 @@
 import React, { FC, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { ticketsService } from '../../services/Api';
+import { trazabilidadService } from '../../services/Api';
 import { useTheme } from '../../context/ThemeContext';
 
 const estadoInfo = (estado: number | string) => {
@@ -21,6 +22,57 @@ const ReportesAdmin: FC = () => {
   const [modalHistorial, setModalHistorial] = React.useState<any | null>(null);
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
 
+  // Helper to fetch full ticket/trazabilidad details and resolve user/element names
+  const openHistorialModal = async (ticket: any) => {
+    try {
+      // Fetch trazabilidad history for the ticket
+      const ticketId = ticket.id ?? ticket.id_tickets;
+      const res = await trazabilidadService.getByTicketId(ticketId);
+      const history = Array.isArray(res.data) ? res.data : [];
+      let latest = history.length > 0 ? [...history].sort((a, b) => {
+        const fechaA = new Date(
+          a.fech || a.fecha || a.fecha1 || a.fecha_ini || 0
+        );
+        const fechaB = new Date(
+          b.fech || b.fecha || b.fecha1 || b.fecha_ini || 0
+        );
+        return fechaB - fechaA;
+      })[0] : null;
+      if (latest) {
+        setModalHistorial({
+          id: latest.id_trsa ?? latest.id ?? latest.id_interno ?? latest.id_ticket ?? latest.id_tickets ?? '-',
+          fecha: latest.fech ?? latest.fecha ?? latest.fecha1 ?? latest.fecha_ini ?? '-',
+          usuarioReporta: latest.nom_us_reporta ?? latest.reporta ?? latest.reportado_por ?? latest.usuario_reporta ?? '-',
+          usuario: latest.nom_us ?? latest.nom_usu ?? latest.usuario ?? latest.nombre_usuario ?? latest.tecnico ?? '-',
+          elemento: latest.nom_elemento ?? latest.nom_elem ?? latest.elemento ?? latest.nombre ?? latest.nombreElemento ?? latest.nombre_elemento ?? latest.nombre_elem ?? '-',
+          ticketNum: latest.id_ticet ?? latest.id_ticket ?? latest.id_tickets ?? ticketId ?? '-',
+          observacion: latest.obser ?? latest.obse ?? latest.descripcion ?? latest.respuesta ?? 'Sin respuesta registrada',
+          ...latest
+        });
+      } else {
+        setModalHistorial({
+          id: ticketId ?? '-',
+          fecha: '-',
+          usuarioReporta: '-',
+          usuario: '-',
+          elemento: '-',
+          ticketNum: ticketId ?? '-',
+          observacion: 'Sin respuesta registrada',
+        });
+      }
+    } catch (err) {
+      setModalHistorial({
+        id: ticket.id ?? ticket.id_tickets,
+        fecha: '-',
+        usuarioReporta: '-',
+        usuario: '-',
+        elemento: '-',
+        ticketNum: ticket.id ?? ticket.id_tickets ?? '-',
+        observacion: '-',
+      });
+    }
+  };
+
 
   React.useEffect(() => {
     const fetchTickets = async () => {
@@ -39,7 +91,7 @@ const ReportesAdmin: FC = () => {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
       <Text style={[styles.header, { color: colors.title }]}>TICKETS</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
@@ -55,7 +107,7 @@ const ReportesAdmin: FC = () => {
             return (
               <TouchableOpacity
                 key={id}
-                style={styles.cardOriginal}
+                style={[styles.cardOriginal, { backgroundColor: colors.cardBackground }]}
                 activeOpacity={0.92}
                 onPress={() => setExpandedId(isExpanded ? null : id)}
               >
@@ -74,7 +126,7 @@ const ReportesAdmin: FC = () => {
                     <TouchableOpacity style={[styles.actionBtnModern, { backgroundColor: '#12bb1a' }]} onPress={() => setModalTicket(t)}>
                       <Text style={styles.actionBtnTextModern} numberOfLines={1} ellipsizeMode="tail">VER</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtnModern, { backgroundColor: '#1976d2' }]} onPress={() => setModalHistorial(t)}>
+                    <TouchableOpacity style={[styles.actionBtnModern, { backgroundColor: '#1976d2' }]} onPress={() => openHistorialModal(t)}>
                       <Text style={styles.actionBtnTextModern} numberOfLines={1} ellipsizeMode="tail">TRAZABILIDAD</Text>
                     </TouchableOpacity>
                   </View>
@@ -88,8 +140,8 @@ const ReportesAdmin: FC = () => {
       {/* Modal para ver ticket */}
       {modalTicket && console.log('modalTicket:', modalTicket)}
       <Modal visible={!!modalTicket} transparent animationType="slide" onRequestClose={() => setModalTicket(null)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContentFull}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}> 
+          <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground }]}> 
             <View style={styles.modalHeaderFull}>
               <Text style={[styles.modalTitleFull, { color: colors.title }]}>Detalles del Ticket</Text>
             </View>
@@ -120,36 +172,37 @@ const ReportesAdmin: FC = () => {
 
       {/* Modal para ver trazabilidad */}
       <Modal visible={!!modalHistorial} transparent animationType="slide" onRequestClose={() => setModalHistorial(null)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContentFull}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}> 
+          <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground }]}> 
             <View style={styles.modalHeaderFull}>
-              <Text style={styles.modalTitleFull}>Historial de tickets</Text>
+              <Text style={styles.modalTitleFull}>Historial de entradas</Text>
             </View>
             <View style={styles.modalBodyFull}>
-              <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10, color: colors.title }]}>Trazabilidad — Entrada #{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                <View>
-                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Fecha</Text>
-                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.fecha_in?.toString().split('T')[0] ?? '-'}</Text>
-                </View>
-                <View>
-                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Usuario</Text>
-                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.nom_usu ?? '-'}</Text>
+              <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10, color: colors.title }]}>Trazabilidad — Entrada #{modalHistorial?.id ?? '-'}</Text>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Fecha</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.fecha ?? '-'}</Text>
+              </View>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Reportado por / Respondido por</Text>
+                <View style={{ flexDirection: 'row', gap: 20 }}>
+                  <Text style={{ color: colors.textPrimary }}><Text style={{ fontWeight: 'bold' }}>Reportó:</Text> {modalHistorial?.usuarioReporta ?? '-'}</Text>
+                  <Text style={{ color: colors.textPrimary, marginLeft: 20, borderLeftWidth: 1, borderLeftColor: '#ddd', paddingLeft: 20 }}><Text style={{ fontWeight: 'bold' }}>Respondió (Técnico):</Text> {modalHistorial?.usuario ?? '-'}</Text>
                 </View>
               </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                <View>
-                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Elemento</Text>
-                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.nom_elem ?? '-'}</Text>
-                </View>
-                <View>
-                  <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>ID interno</Text>
-                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.id_tickets ?? modalHistorial?.id ?? '-'}</Text>
-                </View>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Elemento</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.elemento ?? '-'}</Text>
               </View>
-              <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold', marginTop: 10 }]}>Observación</Text>
-              <View style={{ backgroundColor: '#f1f8f4', borderRadius: 8, padding: 8, minHeight: 32, marginBottom: 10 }}>
-                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.Obser ?? '-'}</Text>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>ID interno</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.id ?? '-'}</Text>
+              </View>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Respuesta del Técnico</Text>
+                <View style={{ backgroundColor: '#f1f8f4', borderRadius: 8, padding: 8, minHeight: 32, marginBottom: 10 }}>
+                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.observacion ?? 'Sin respuesta registrada'}</Text>
+                </View>
               </View>
             </View>
             <View style={styles.modalFooterFull}>

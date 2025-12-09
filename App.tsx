@@ -17,6 +17,7 @@ import Portatiles from './src/screens/Instructor/Solicitudes/Portatiles';
 import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
 import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
 import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
+<<<<<<< HEAD
 import SolicitudesTecnico from './src/screens/Tecnico/Solicitudes/SolicitudesTecnico';
 import DetallesSolicitud from './src/screens/Tecnico/Solicitudes/DetallesSolicitud';
 import TicketsTecnico from './src/screens/Tecnico/Tickets/TicketsTecnico';
@@ -25,6 +26,9 @@ import EspaciosTecnico from './src/screens/Tecnico/Espacios/EspaciosTecnico';
 import HistorialTecnico from './src/screens/Tecnico/Historial/HistorialTecnico';
 import PrestamosActivosTecnico from './src/screens/Tecnico/Prestamos/PrestamosActivosTecnico';
 import DetallesPrestamo from './src/screens/Tecnico/Prestamos/DetallesPrestamo';
+=======
+import HistorialPrueba from './src/screens/Instructor/Solicitudes/Historial';
+>>>>>>> 9be8f0722589299f66b5734e064d2a962e85de7f
 
 const Stack = createNativeStackNavigator();
 
@@ -60,6 +64,7 @@ export default function App() {
           <Stack.Screen name="EscritorioScreen" component={EquipoMesa} />
           <Stack.Screen name="AudioVideoScreen" component={AudioVideo} />
           <Stack.Screen name="ElementosScreen" component={Elementos} />
+          <Stack.Screen name="HistorialPrueba" component={HistorialPrueba} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

@@ -42,6 +42,35 @@ export const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+  // Estilos del Modal (copiados de EquipoMesa.ts)
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: width - 100, // Deja 20px de margen a cada lado
+    maxWidth: width,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 8,
+  },
+  modalText: {
+    marginBottom: 8,
+  },
   cardHeader: {
     marginBottom: 20,
     borderBottomWidth: 2,
