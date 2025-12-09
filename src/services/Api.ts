@@ -17,11 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
 // Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-
 const LOCAL_IP = '192.168.1.90'; // IP actualizada según el usuario
 const API_URL = `http://${LOCAL_IP}:8081`;
-const LOCAL_IP = '192.168.1.6';  // Ejemplo: '192.168.1.100' o '192.168.0.103'
-const API_URL = `http://${LOCAL_IP}:8080`;  // Backend en puerto 8080
 console.log('[API] URL base usada:', API_URL);
 
 const api = axios.create({
@@ -74,16 +71,9 @@ export const authService = {
 
   getMe: async () => {
     const config = await withAuth();
-    console.log('[AUTH] Configuración de request:', config);
     const response = await api.get('/auth/me', config);
-    console.log('[AUTH] Respuesta completa:', response);
-    console.log('[AUTH] Response status:', response.status);
-    console.log('[AUTH] Response headers:', response.headers);
     const data = response.data as any;
-    console.log('[AUTH] Tipo de data:', typeof data);
-    console.log('[AUTH] Keys de data:', data ? Object.keys(data) : 'null');
-    console.log('[AUTH] Data completa:', JSON.stringify(data));
-    if (data && data.roles) {
+    if (data) {
       await AsyncStorage.setItem('user', JSON.stringify(data));
     }
     return data;
@@ -131,17 +121,6 @@ export const authService = {
     }
   },
 
-  obtenerElementos: async () => {
-    try {
-      const config = await withAuth();
-      const response = await api.get('/api/elementos', config);
-      return response.data;
-    } catch (error) {
-      console.error('Error al obtener elementos:', error);
-      return [];
-    }
-  },
-
   obtenerPrestamosActivos: async () => {
     try {
       const config = await withAuth();
@@ -149,19 +128,6 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener préstamos activos:', error);
-      return [];
-    }
-  },
-
-  obtenerPrestamosFinalizados: async () => {
-    try {
-      const config = await withAuth();
-      const response = await api.get('/api/prestamos/finalizados', config);
-      console.log('Raw response prestamos finalizados:', response);
-      console.log('response.data:', response.data);
-      return response.data || [];
-    } catch (error) {
-      console.error('Error al obtener préstamos finalizados:', error);
       return [];
     }
   },

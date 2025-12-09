@@ -22,47 +22,26 @@ export default function LoginScreen({ navigation }: any) {
       console.log('📡 Obteniendo datos del usuario...');
       const userData = await authService.getMe();
       console.log('✅ Datos del usuario:', userData);
-      console.log('✅ Tipo de userData:', typeof userData);
-      console.log('✅ Keys de userData:', userData ? Object.keys(userData) : 'null');
-      
-      // Fallback: si userData está vacío, intenta crear un objeto básico
-      let userDataToUse = userData;
-      if (!userData || Object.keys(userData).length === 0) {
-        console.log('⚠️ userData vacío, usando valores por defecto');
-        userDataToUse = {
-          correo: username,
-          roles: [],
-          nombre: username.split('@')[0]
-        };
-      }
-      
-      const userRoles = userDataToUse?.roles || userDataToUse?.role || [];
+      const userRoles = userData?.roles || userData?.role || [];
       console.log('👤 Roles:', userRoles);
 
       // Guardar el usuario en AsyncStorage para futuras pantallas
-      await AsyncStorage.setItem('usuario', JSON.stringify(userDataToUse));
-      console.log('💾 Usuario guardado en AsyncStorage:', userDataToUse);
+      await AsyncStorage.setItem('usuario', JSON.stringify(userData));
+      console.log('💾 Usuario guardado en AsyncStorage:', userData);
 
-      // Normalizar roles a mayúsculas para comparación
-      const normalizedRoles = Array.isArray(userRoles) 
-        ? userRoles.map(r => (typeof r === 'string' ? r.toUpperCase() : r))
-        : [];
-      console.log('🔄 Roles normalizados:', normalizedRoles);
-
-      // Navegar según el rol del usuario
-      if (normalizedRoles.includes('ADMINISTRADOR')) {
+      if ((userData.email || userData.correo || username) === 'admin@tech.com') {
         console.log('🎯 Navegando a AdminDashboard...');
         navigation.replace('AdminDashboard');
-      } else if (normalizedRoles.includes('TECNICO')) {
-        console.log('🎯 Navegando a SolicitudesTecnico...');
-        navigation.replace('SolicitudesTecnico');
-      } else if (normalizedRoles.includes('INSTRUCTOR')) {
+      } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
         console.log('🎯 Navegando a Solicitudes (Instructor)...');
         navigation.replace('Solicitudes');
+      } else if (Array.isArray(userRoles) && userRoles.includes('TECNICO')) {
+        console.log('🎯 Navegando a SolicitudesTecnico...');
+        navigation.replace('SolicitudesTecnico');
       } else {
         Alert.alert(
           'Login exitoso',
-          `Bienvenido ${userData.nombre || userData.nom_usu || username}\nRoles: ${normalizedRoles.join(', ')}`
+          `Bienvenido ${userData.nombre || userData.nom_usu || username}\nRoles: ${userRoles.join(', ')}`
         );
       }
     } catch (err: any) {
