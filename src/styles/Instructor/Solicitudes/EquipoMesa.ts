@@ -3,6 +3,7 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+  // --- Estilos originales del archivo ---
   container: {
     flex: 1,
     backgroundColor: '#000000ff',
@@ -110,24 +111,24 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
   counterContainer: {
-     alignSelf: 'flex-end',
-     marginTop: -10,
-     marginBottom: 10,
-     backgroundColor: '#e8f5e9',
-     paddingVertical: 4,
-     paddingHorizontal: 14,
-     borderRadius: 16,
-     borderWidth: 1.5,
-     borderColor: '#4caf50',
+    alignSelf: 'flex-end',
+    marginTop: -10,
+    marginBottom: 10,
+    backgroundColor: '#e8f5e9',
+    paddingVertical: 4,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#4caf50',
   },
   counterText: {
-     fontSize: 13,
-     fontWeight: '700',
-     color: '#388e3c',
-     letterSpacing: 0.5,
-     textShadowColor: '#fff',
-     textShadowOffset: { width: 0, height: 1 },
-     textShadowRadius: 2,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#388e3c',
+    letterSpacing: 0.5,
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   submitButton: {
     backgroundColor: '#4caf50',
@@ -153,5 +154,53 @@ export const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     padding: 20,
+  },
+  // --- Estilos extraídos del código TSX (anteriormente localStyles) ---
+  
+  // Estilos del Toggle de Categorías
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  // Estilos en línea específicos
+  availableDot: {
+    fontWeight: 'bold',
+    color: '#4caf50',
+    fontSize: 14,
+  },
+  listItemDot: {
+    color: '#4caf50',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  // Estilos del Modal
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: width - 100, // Deja 20px de margen a cada lado
+    maxWidth: width,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 8,
+  },
+  modalText: {
+    marginBottom: 8,
   },
 });

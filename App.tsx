@@ -17,6 +17,7 @@ import Portatiles from './src/screens/Instructor/Solicitudes/Portatiles';
 import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
 import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
 import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
+import HistorialPrueba from './src/screens/Instructor/Solicitudes/Historial';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +45,7 @@ export default function App() {
           <Stack.Screen name="EscritorioScreen" component={EquipoMesa} />
           <Stack.Screen name="AudioVideoScreen" component={AudioVideo} />
           <Stack.Screen name="ElementosScreen" component={Elementos} />
+          <Stack.Screen name="HistorialPrueba" component={HistorialPrueba} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

@@ -103,7 +103,10 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
         
         <TouchableOpacity 
           style={HeaderComponentStyles.menuItem}
-          onPress={() => setMenuVisible(false)}
+          onPress={() => {
+            setMenuVisible(false);
+            navigation.navigate('HistorialPrueba');
+          }}
         >
           <Text style={HeaderComponentStyles.menuItemText}>Historial</Text>
         </TouchableOpacity>
