@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Hisotorial';
+import { styles } from '../../../styles/Instructor/Historial/Historial';
 
 import { solicitudesService, ticketsService, subcategoriasService } from '../../../services/Api';
 

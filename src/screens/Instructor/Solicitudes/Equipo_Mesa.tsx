@@ -169,6 +169,14 @@ export default function Equipo_Mesa({ navigation }: any) {
       return;
     }
 
+    // Validación de hora: la hora de fin debe ser posterior a la hora de inicio
+    const inicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
+    const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+    if (fin <= inicio) {
+      Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
+      return;
+    }
+
     try {
       const idCategoriaNumerico = getCategoriaId();
       // Tomamos el primer equipo activo para obtener el id_subcategoria

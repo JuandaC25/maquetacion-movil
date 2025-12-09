@@ -17,7 +17,7 @@ import Portatiles from './src/screens/Instructor/Solicitudes/Portatiles';
 import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
 import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
 import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
-import HistorialPrueba from './src/screens/Instructor/Solicitudes/Historial';
+import HistorialPrueba from './src/screens/Instructor/Historial/Historial';
 
 const Stack = createNativeStackNavigator();
 

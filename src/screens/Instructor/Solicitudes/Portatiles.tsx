@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -138,6 +137,13 @@ export default function Portatiles({ navigation }: any) {
       }
       if (!form.fecha_ini || !form.hora_ini || !form.fecha_fn || !form.hora_fn || !form.ambient || !form.num_ficha) {
         Alert.alert('Error', 'Por favor, completa todos los campos.');
+        return;
+      }
+      // Validación de hora: la hora de fin debe ser posterior a la hora de inicio
+      const inicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
+      const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+      if (fin <= inicio) {
+        Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
         return;
       }
       try {

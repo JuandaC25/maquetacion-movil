@@ -131,6 +131,13 @@ export default function Audio_video({ navigation }: any) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
+    // Validación de hora: la hora de fin debe ser posterior a la de inicio
+    const inicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
+    const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+    if (fin <= inicio) {
+      Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
+      return;
+    }
     try {
       // Aquí deberías obtener los IDs de los elementos activos, para ejemplo se envía un array vacío
       const idsElem: number[] = [];
@@ -327,12 +334,12 @@ export default function Audio_video({ navigation }: any) {
                   <Text style={styles.modalText}>Categoría</Text>
                   <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1', fontWeight: 'bold' }]}>Multimedia</Text>
                   <Text style={styles.modalText}>Subcategoría</Text>
-                  <View style={{ width: '100%', marginBottom: 10 }}>
+                  <View style={{ width: '100%', marginBottom: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 7 }}>
                     <Picker
                       selectedValue={subcategoriaSeleccionada}
                       onValueChange={(itemValue) => setSubcategoriaSeleccionada(itemValue)}
-                      style={[styles.pickerInput, { height: 40 }]}
-                      itemStyle={{ fontSize: 16, color: '#0d47a1', fontWeight: 'bold' }}
+                      style={[styles.pickerInput, { height: 50}]}
+                      itemStyle={{ fontSize: 16, color: '#000', fontWeight: 'bold' }}
                     >
                       {todasSubcategorias.map(subcat => (
                         <Picker.Item
