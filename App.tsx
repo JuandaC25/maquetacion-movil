@@ -17,6 +17,7 @@ import Portatiles from './src/screens/Instructor/Solicitudes/Portatiles';
 import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
 import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
 import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
+import HistorialPrueba from './src/screens/Instructor/Historial/Historial';
 import SolicitudesTecnico from './src/screens/Tecnico/Solicitudes/SolicitudesTecnico' ;
 import DetallesSolicitud from './src/screens/Tecnico/Solicitudes/DetallesSolicitud';
 import TicketsTecnico from './src/screens/Tecnico/Tickets/TicketsTecnico';
@@ -25,13 +26,13 @@ import EspaciosTecnico from './src/screens/Tecnico/Espacios/EspaciosTecnico';
 import HistorialTecnico from './src/screens/Tecnico/Historial/HistorialTecnico';
 import PrestamosActivosTecnico from './src/screens/Tecnico/Prestamos/PrestamosActivosTecnico';
 import DetallesPrestamo from './src/screens/Tecnico/Prestamos/DetallesPrestamo';
-import HistorialPrueba from './src/screens/Instructor/Solicitudes/Historial';
+
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator 
+        <Stack.Navigator
           initialRouteName="Login"
           screenOptions={{
             headerShown: false,

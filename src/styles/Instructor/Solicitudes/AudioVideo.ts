@@ -166,7 +166,6 @@ export const styles = StyleSheet.create({
     minWidth: '100%',
     backgroundColor: '#fff',
     fontSize: 16,
-    color: '#0d47a1', // Letras más visibles
     fontWeight: 'bold',
   },
 });
