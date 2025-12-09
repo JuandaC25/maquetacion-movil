@@ -29,8 +29,11 @@ export default function LoginScreen({ navigation }: any) {
         console.log('🎯 Navegando a AdminDashboard...');
         navigation.replace('AdminDashboard');
       } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
-        console.log('🎯 Navegando a Solicitudes...');
+        console.log('🎯 Navegando a Solicitudes (Instructor)...');
         navigation.replace('Solicitudes');
+      } else if (Array.isArray(userRoles) && userRoles.includes('TECNICO')) {
+        console.log('🎯 Navegando a SolicitudesTecnico...');
+        navigation.replace('SolicitudesTecnico');
       } else {
         Alert.alert(
           'Login exitoso',
