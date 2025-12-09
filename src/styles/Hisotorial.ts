@@ -3,13 +3,14 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f8f9fa',
+		backgroundColor: '#000000ff',
 	},
 	scrollView: {
 		flex: 1,
 		paddingHorizontal: 10,
 	},
 	tabsContainer: {
+		marginTop: 15,
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		backgroundColor: '#e9ecef',
