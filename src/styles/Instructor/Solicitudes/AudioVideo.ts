@@ -117,4 +117,56 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  // --- Estilos para el modal de solicitud ---
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 28,
+    width: width - 120, // Más delgado
+    maxWidth: width,
+    minHeight: 800,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 7,
+    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    width: '100%',
+    minWidth: '100%',
+    fontSize: 14,
+    backgroundColor: '#fff',
+  },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  pickerInput: {
+    borderWidth: 2,
+    borderColor: '#4caf50',
+    borderRadius: 7,
+    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    width: '100%',
+    minWidth: '100%',
+    backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#0d47a1', // Letras más visibles
+    fontWeight: 'bold',
+  },
 });
