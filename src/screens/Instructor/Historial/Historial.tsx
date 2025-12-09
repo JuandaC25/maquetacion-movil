@@ -17,8 +17,6 @@ import { styles } from '../../../styles/Instructor/Historial/Historial';
 import { solicitudesService, ticketsService, subcategoriasService } from '../../../services/Api';
 
 
-// --- Funciones de Formato (Se mantienen igual) ---
-
 const formatFecha = (fechaString: string): string => {
     if (!fechaString || fechaString === 'N/A') return 'N/A';
     try {
@@ -38,29 +36,27 @@ const getStatusDetails = (estadoValor: string): { text: string; color: string; e
     const estadoTexto = estadoValor?.toString().toLowerCase().trim() || '';
 
     if (estadoTexto.includes('pendiente')) {
-        return { text: 'Pendiente', color: '#ffc107', emoji: '⚠️' }; // warning
+        return { text: 'Pendiente', color: '#ffc107', emoji: '⚠️' };
     }
     if (estadoTexto.includes('aprobado')) {
-        return { text: 'Aprobado', color: '#198754', emoji: '✅' }; // success
+        return { text: 'Aprobado', color: '#198754', emoji: '✅' };
     }
     if (estadoTexto.includes('rechazado')) {
-        return { text: 'Rechazado', color: '#dc3545', emoji: '❌' }; // danger
+        return { text: 'Rechazado', color: '#dc3545', emoji: '❌' };
     }
     if (estadoTexto.includes('en uso')) {
-        return { text: 'En uso', color: '#0d6efd', emoji: '⚙️' }; // primary
+        return { text: 'En uso', color: '#0d6efd', emoji: '⚙️' };
     }
     if (estadoTexto.includes('finalizado')) {
-        return { text: 'Finalizado', color: '#6c757d', emoji: '🏁' }; // secondary
+        return { text: 'Finalizado', color: '#6c757d', emoji: '🏁' };
     }
     if (estadoTexto.includes('cancelado')) {
-        return { text: 'Cancelado', color: '#6c757d', emoji: '🚫' }; // secondary
+        return { text: 'Cancelado', color: '#6c757d', emoji: '🚫' };
     }
 
     return { text: 'Desconocido', color: '#f8f9fa', emoji: '❓' }; 
 };
 
-
-// --- Componente Utilidad de Paginación para Móvil ---
 interface PaginationMovilProps {
     currentPage: number;
     totalPages: number;
@@ -92,8 +88,6 @@ const PaginationMovil = ({ currentPage, totalPages, paginate }: PaginationMovilP
     );
 };
 
-
-// --- Interfaces (Se mantienen igual) ---
 
 interface Solicitud {
     id_soli: number;
@@ -128,7 +122,6 @@ interface SubcategoriaOption {
     nombre: string;
 }
 
-// --- Helper para Extracción de Datos (Se mantiene igual) ---
 const extractData = (response: any) => {
     if (response?.data && Array.isArray(response.data)) {
         return response.data;
@@ -143,9 +136,8 @@ const extractData = (response: any) => {
 };
 
 
-// --- Componente Principal HistorialPedidosMovil ---
+//Componente Principal
 
-// 2. ADAPTAR LA FIRMA DEL COMPONENTE PARA RECIBIR 'navigation'
 export default function HistorialPedidosMovil({ navigation }: any) {
     const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -158,8 +150,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
     const [currentPage, setCurrentPage] = useState(1);
     const [solicitudesPerPage] = useState(5);
     const [activeTab, setActiveTab] = useState('solicitudes'); 
-
-    // --- Funciones de Carga (Con Logs y manejo de datos robusto) ---
 
     const cargarSubcategorias = async () => {
         try {
@@ -206,7 +196,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
             
             const solicitudesDelUsuario = Array.isArray(data) 
                 ? data.filter((sol: Solicitud) => {
-                    // Adaptado para mayor robustez al filtrar por ID
                     return String(sol.id_usu) === String(usuario.id); 
                 })
                 : [];
@@ -274,7 +263,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
         }
     }, [activeTab]);
     
-    // LÓGICA DE FILTRADO (Se mantiene igual)
     const filteredSolicitudes = useMemo(() => {
         if (activeTab !== 'solicitudes') {
             return solicitudes;
@@ -317,21 +305,17 @@ export default function HistorialPedidosMovil({ navigation }: any) {
     const indexOfLastItem = currentPage * solicitudesPerPage;
     const indexOfFirstItem = indexOfLastItem - solicitudesPerPage;
     const currentViewItems: (Solicitud | Ticket)[] = currentItems.slice(indexOfFirstItem, indexOfLastItem);
-
-    // Manejador de cancelación (Se mantiene igual, solo adapté el token a AsyncStorage si fuera necesario)
     const handleCancelStatus = async (id_solicitud: number) => {
         const ESTADO_CANCELADO = 'Cancelado';
         Alert.alert(
-            "Confirmar Cancelación",
-            `¿Estás seguro de que deseas cancelar la solicitud ${id_solicitud}?`,
+            "Cancelar solicitud",
+            "¿Desea cancelar la solicitud?",
             [
                 { text: "No", style: "cancel" },
                 { 
-                    text: "Sí, Cancelar", 
+                    text: "Sí", 
                     onPress: async () => {
-                        // Aquí se usaría AsyncStorage.getItem('auth_token') si el servicio lo requiere
                         try {
-                            // Asumo que 'id_est_soli: 4' es el estado "Cancelado" en tu API
                             await solicitudesService.update(id_solicitud, { id_est_soli: 4 }); 
                             setSolicitudes((prevSolicitudes: Solicitud[]) =>
                                 prevSolicitudes.map((sol: Solicitud) => {
@@ -341,7 +325,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
                                     return sol;
                                 })
                             );
-                            Alert.alert("Éxito", `Solicitud ${id_solicitud} cambiada a ${ESTADO_CANCELADO} correctamente.`);
                         } catch (err) {
                             console.error("Error al cancelar la solicitud:", err);
                             const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
@@ -359,8 +342,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
             setCurrentPage(pageNumber);
         }
     };
-
-    // Funciones de filtro y renderizado (Se mantienen igual)
 
     const handleFilterChange = (id: string) => {
         setSelectedSubcategoriaId(id === 'all' ? null : id);
@@ -481,8 +462,6 @@ export default function HistorialPedidosMovil({ navigation }: any) {
             </View>
         );
     };
-
-    // 3. ENVOLVER EL CONTENIDO EN SafeAreaView Y AÑADIR EL HEADER
     return (
         <SafeAreaView style={styles.container}> 
             {/* 4. Implementación del Header */}
@@ -564,5 +543,3 @@ export default function HistorialPedidosMovil({ navigation }: any) {
         </SafeAreaView>
     ); 
 }
-
-// Importar estilos desde archivo externo
