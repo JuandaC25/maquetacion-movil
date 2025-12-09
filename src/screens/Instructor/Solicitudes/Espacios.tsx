@@ -105,8 +105,8 @@ export default function EspaciosContent({ navigation }: any) {
 
     // Si la fecha de inicio es hoy, validar hora
     const esHoy = fechaInicio.getFullYear() === ahora.getFullYear() &&
-                 fechaInicio.getMonth() === ahora.getMonth() &&
-                 fechaInicio.getDate() === ahora.getDate();
+    fechaInicio.getMonth() === ahora.getMonth() &&
+    fechaInicio.getDate() === ahora.getDate();
     if (esHoy && fechaInicio < ahora) {
       Alert.alert('Error', 'No puedes apartar una hora anterior a la actual');
       return;
