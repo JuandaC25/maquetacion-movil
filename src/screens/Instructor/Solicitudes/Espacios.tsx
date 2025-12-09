@@ -89,8 +89,8 @@ export default function EspaciosContent({ navigation }: any) {
     if (!espacioSeleccionado) return;
 
     // Validación básica
-    if (!form.fecha_ini || !form.hora_ini || !form.fecha_fn || !form.hora_fn || !form.ambient || !form.num_ficha) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+    if (!form.fecha_ini || !form.hora_ini || !form.fecha_fn || !form.hora_fn) {
+      Alert.alert('Error', 'Por favor completa las fechas y horas');
       return;
     }
 
@@ -131,10 +131,8 @@ export default function EspaciosContent({ navigation }: any) {
       const solicitudData = {
         fecha_ini: formatLocal(fechaInicio),
         fecha_fn: formatLocal(fechaFin),
-        ambient: form.ambient,
         estadosoli: 1,
         id_usu: userData?.id || 1,
-        num_fich: form.num_ficha,
         id_esp: espacioSeleccionado.id,
       };
 
