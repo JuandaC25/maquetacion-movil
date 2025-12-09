@@ -40,52 +40,32 @@ const UsuariosAdmin = () => {
   const [showRolModal, setShowRolModal] = useState(false);
   const [showEstadoModal, setShowEstadoModal] = useState(false);
 
-  // Cargar roles al montar
-  // Usar la misma IP base que Api.ts
+  // Obtener roles únicos de los usuarios cargados (como en la web)
   useEffect(() => {
-    (async () => {
-      try {
-        const LOCAL_IP = '192.168.20.60'; // Debe coincidir con Api.ts
-        const res = await fetch(`http://${LOCAL_IP}:8081/api/roles`);
-        let data = [];
-        try {
-          // Intenta parsear solo si hay contenido
-          const text = await res.text();
-          if (text && text.trim().length > 0) {
-            data = JSON.parse(text);
-          } else {
-            data = [];
-          }
-        } catch (jsonErr) {
-          data = [];
-          console.warn('[WARN] Respuesta de roles no es JSON válido');
+    // Obtener roles únicos de los usuarios cargados (como en la web, pero usando el campo correcto)
+    const obtenerRolesUnicos = () => {
+      const rolesMap: { [key: number]: string } = {};
+      usuarios.forEach(u => {
+        if (u.id_rol && u.nom_est !== undefined && u.id_rol > 0) {
+          // Usar el campo correcto para el nombre del rol
+          if (u.id_rol === 1) rolesMap[u.id_rol] = 'Instructor';
+          else if (u.id_rol === 2) rolesMap[u.id_rol] = 'Administrador';
+          else if (u.id_rol === 3) rolesMap[u.id_rol] = 'Técnico';
         }
-        // Si no hay roles, usar fallback hardcodeado
-        let rolesToSet = [];
-        if (Array.isArray(data) && data.length > 0) {
-          rolesToSet = data;
-        } else if (Array.isArray(data.data) && data.data.length > 0) {
-          rolesToSet = data.data;
-        } else {
-          // Fallback igual que la web
-          rolesToSet = [
-            { id: 1, nom_rol: 'Instructor' },
-            { id: 3, nom_rol: 'Técnico' },
-            { id: 2, nom_rol: 'Administrador' },
-          ];
-        }
-        setRoles(rolesToSet);
-      } catch (e) {
-        // Si hay error de red, fallback hardcodeado
-        setRoles([
+      });
+      // Si no hay roles, usar fallback
+      const rolesList = Object.keys(rolesMap).map(id => ({ id: Number(id), nom_rol: rolesMap[Number(id)] })).filter(r => r.nom_rol);
+      if (rolesList.length === 0) {
+        return [
           { id: 1, nom_rol: 'Instructor' },
           { id: 3, nom_rol: 'Técnico' },
           { id: 2, nom_rol: 'Administrador' },
-        ]);
-        console.error('[ERROR] Error al cargar roles:', e);
+        ];
       }
-    })();
-  }, []);
+      return rolesList;
+    };
+    setRoles(obtenerRolesUnicos());
+  }, [usuarios]);
 
   useEffect(() => {
     fetchUsuarios();

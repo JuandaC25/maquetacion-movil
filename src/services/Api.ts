@@ -1,3 +1,14 @@
+export const trazabilidadService = {
+  getByTicketId: async (ticketId: number | string) => {
+    const authConfig = await withAuth();
+    console.log('[TRAZABILIDAD] Configuración de autorización enviada:', authConfig);
+    return api.get(`/api/trazabilidad/ticket/${ticketId}`, authConfig);
+  },
+};
+// ==================== ROLES SERVICE ====================
+export const rolesService = {
+  getAll: async () => api.get('/api/roles', await withAuth()),
+};
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -6,7 +17,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
 // Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-const LOCAL_IP = '192.168.1.90';  // Ejemplo: '192.168.1.100'
+<<<<<<< HEAD
+const LOCAL_IP = '192.168.1.6';  // Ejemplo: '192.168.1.100'
+=======
+const LOCAL_IP = '192.168.0.103';  // IP actualizada según el usuario
+>>>>>>> 9be8f0722589299f66b5734e064d2a962e85de7f
 const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
@@ -22,6 +37,7 @@ const api = axios.create({
 const withAuth = async (config: any = {}) => {
   if (!config.headers) config.headers = {};
   const token = await AsyncStorage.getItem('token');
+  console.log('[AUTH] Token usado en petición:', token);
   if (token) {
     // Asegura que el token siempre se envía como 'Bearer <token>'
     config.headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
@@ -74,6 +90,50 @@ export const authService = {
   getCurrentUser: async () => {
     const userStr = await AsyncStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
+  },
+
+  obtenerSolicitudesPendientes: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/solicitudes/pendientes', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener solicitudes pendientes:', error);
+      throw error;
+    }
+  },
+
+  obtenerCategorias: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/categoria', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener categorías:', error);
+      return [];
+    }
+  },
+
+  obtenerSubcategorias: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/subcategoria', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener subcategorías:', error);
+      return [];
+    }
+  },
+
+  obtenerPrestamosActivos: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/prestamos/activos', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener préstamos activos:', error);
+      return [];
+    }
   },
 };
 
@@ -177,7 +237,11 @@ export const solicitudesService = {
   getAll: async () => api.get('/api/solicitudes', await withAuth()),
   getById: async (id: number) => api.get(`/api/solicitudes/${id}`, await withAuth()),
   create: async (data: any) => api.post('/api/solicitudes', data, await withAuth()),
-  update: async (id: number, data: any) => api.put(`/api/solicitudes/actualizar/${id}`, data, await withAuth()),
+  update: async (id: number, data: any) => {
+    const config = await withAuth();
+    const response = await api.put(`/api/solicitudes/actualizar/${id}`, data, config);
+    return response.data;
+  },
   delete: async (id: number) => api.delete(`/api/solicitudes/${id}`, await withAuth()),
 };
 
@@ -195,6 +259,7 @@ export const ticketsService = {
   getActivos: async () => api.get('/api/tickets/activos', await withAuth()),
   getById: async (id: number) => api.get(`/api/tickets/${id}`, await withAuth()),
   create: async (data: any) => api.post('/api/tickets', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/tickets/${id}`, data, await withAuth()),
   delete: async (id: number) => api.delete(`/api/tickets/${id}`, await withAuth()),
 };
 

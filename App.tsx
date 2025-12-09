@@ -18,14 +18,21 @@ import EquipoMesa from './src/screens/Instructor/Solicitudes/Equipo_Mesa';
 import AudioVideo from './src/screens/Instructor/Solicitudes/Audio_video';
 import Elementos from './src/screens/Instructor/Solicitudes/Elementos';
 import HistorialPrueba from './src/screens/Instructor/Historial/Historial';
+import SolicitudesTecnico from './src/screens/Tecnico/Solicitudes/SolicitudesTecnico' ;
+import DetallesSolicitud from './src/screens/Tecnico/Solicitudes/DetallesSolicitud';
+import TicketsTecnico from './src/screens/Tecnico/Tickets/TicketsTecnico';
+import DetallesTicket from './src/screens/Tecnico/Tickets/DetallesTicket';
+import EspaciosTecnico from './src/screens/Tecnico/Espacios/EspaciosTecnico';
+import HistorialTecnico from './src/screens/Tecnico/Historial/HistorialTecnico';
+import PrestamosActivosTecnico from './src/screens/Tecnico/Prestamos/PrestamosActivosTecnico';
+import DetallesPrestamo from './src/screens/Tecnico/Prestamos/DetallesPrestamo';
 
 const Stack = createNativeStackNavigator();
-
 export default function App() {
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator 
+        <Stack.Navigator
           initialRouteName="Login"
           screenOptions={{
             headerShown: false,
@@ -33,6 +40,14 @@ export default function App() {
         >
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Solicitudes" component={SolicitudesScreen} />
+          <Stack.Screen name="SolicitudesTecnico" component={SolicitudesTecnico} />
+          <Stack.Screen name="DetallesSolicitud" component={DetallesSolicitud} />
+          <Stack.Screen name="Tickets" component={TicketsTecnico} />
+          <Stack.Screen name="DetallesTicket" component={DetallesTicket} />
+          <Stack.Screen name="EspaciosTecnico" component={EspaciosTecnico} />
+          <Stack.Screen name="PrestamosActivos" component={PrestamosActivosTecnico} />
+          <Stack.Screen name="DetallesPrestamo" component={DetallesPrestamo} />
+          <Stack.Screen name="Historial" component={HistorialTecnico} />
           <Stack.Screen name="Reportes" component={ReportesScreen} />
           <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
           <Stack.Screen name="UsuariosAdmin" component={UsuariosAdmin} />
