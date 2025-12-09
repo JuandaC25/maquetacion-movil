@@ -22,6 +22,7 @@ import DetallesSolicitud from './src/screens/Tecnico/Solicitudes/DetallesSolicit
 import TicketsTecnico from './src/screens/Tecnico/Tickets/TicketsTecnico';
 import DetallesTicket from './src/screens/Tecnico/Tickets/DetallesTicket';
 import EspaciosTecnico from './src/screens/Tecnico/Espacios/EspaciosTecnico';
+import DetallesEspacios from './src/screens/Tecnico/Espacios/DetallesEspacios';
 import HistorialTecnico from './src/screens/Tecnico/Historial/HistorialTecnico';
 import PrestamosActivosTecnico from './src/screens/Tecnico/Prestamos/PrestamosActivosTecnico';
 import DetallesPrestamo from './src/screens/Tecnico/Prestamos/DetallesPrestamo';
@@ -41,6 +42,7 @@ export default function App() {
           <Stack.Screen name="Solicitudes" component={SolicitudesScreen} />
           <Stack.Screen name="SolicitudesTecnico" component={SolicitudesTecnico} />
           <Stack.Screen name="DetallesSolicitud" component={DetallesSolicitud} />
+          <Stack.Screen name="DetallesEspacios" component={DetallesEspacios} />
           <Stack.Screen name="Tickets" component={TicketsTecnico} />
           <Stack.Screen name="DetallesTicket" component={DetallesTicket} />
           <Stack.Screen name="EspaciosTecnico" component={EspaciosTecnico} />

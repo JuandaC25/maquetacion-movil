@@ -8,10 +8,11 @@ import {
   FlatList,
   ActivityIndicator,
   Modal,
+  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
-import { authService } from '../../../services/Api';
+import { authService, solicitudesService } from '../../../services/Api';
 
 interface Solicitud {
   id_soli: number;
@@ -20,6 +21,9 @@ interface Solicitud {
   nom_espa?: string | null;
   nom_usu: string;
   fecha_ini: string;
+  fecha_fn?: string;
+  est_soli?: string;
+  nom_estado?: string;
   id_espa?: number | null;
   id_elem?: string | null;
 }
@@ -35,6 +39,9 @@ export default function EspaciosTecnico({ navigation }: any) {
   const [mostrarCalendarioFin, setMostrarCalendarioFin] = useState(false);
   const [mesActualInicio, setMesActualInicio] = useState(new Date());
   const [mesActualFin, setMesActualFin] = useState(new Date());
+  const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
+  const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<Solicitud | null>(null);
+  const [actualizando, setActualizando] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -45,18 +52,40 @@ export default function EspaciosTecnico({ navigation }: any) {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const response = await authService.obtenerSolicitudesPendientes();
+      // Usar solicitudesService.getAll() para traer TODAS las solicitudes
+      const response = await solicitudesService.getAll();
+      console.log('RESPUESTA RAW solicitudesService.getAll():', response);
+      console.log('RESPUESTA typeof:', typeof response);
+      console.log('RESPUESTA isArray:', Array.isArray(response));
       
-      // Filtrar solo las solicitudes de Espacios (cuando id_espa NO es null)
-      const espacios = Array.isArray(response) 
-        ? response.filter((sol: any) => {
-            const esEspacio = sol.id_espa !== null && sol.id_espa !== undefined;
-            return esEspacio;
-          })
-        : [];
+      // Obtener array de solicitudes (puede venir en response.data o directamente)
+      let todasLasSolicitudes = [];
       
+      if (Array.isArray(response)) {
+        todasLasSolicitudes = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        todasLasSolicitudes = response.data;
+      } else if (response?.data) {
+        todasLasSolicitudes = Array.isArray(response.data) ? response.data : [response.data];
+      } else {
+        todasLasSolicitudes = [];
+      }
+      
+      console.log('Todas las solicitudes (antes de filtrar):', todasLasSolicitudes);
+      console.log('Total solicitudes cargadas:', todasLasSolicitudes.length);
+      
+      // Filtrar solo las solicitudes de Espacios (cuando id_espa NO es null) Y que estén Pendientes
+      const espacios = todasLasSolicitudes.filter((sol: any) => {
+        const esEspacio = sol?.id_espa !== null && sol?.id_espa !== undefined;
+        const esPendiente = sol?.est_soli === 'Pendiente' || sol?.est_soli === 1;
+        const cumple = esEspacio && esPendiente;
+        console.log(`Solicitud ${sol?.id_soli}: id_espa=${sol?.id_espa}, nom_espa=${sol?.nom_espa}, est_soli=${sol?.est_soli}, esEspacio=${esEspacio}, esPendiente=${esPendiente}, cumple=${cumple}`);
+        return cumple;
+      });
+      
+      console.log('Espacios filtrados (finales):', espacios);
+      console.log('Total espacios encontrados:', espacios.length);
       setSolicitudes(espacios);
-      console.log('Solicitudes de Espacios filtradas:', espacios);
     } catch (error) {
       console.error('Error al cargar solicitudes:', error);
       setSolicitudes([]);
@@ -136,8 +165,45 @@ export default function EspaciosTecnico({ navigation }: any) {
   };
 
   const abrirDetalle = (solicitud: Solicitud) => {
-    navigation.navigate('DetallesSolicitud', { solicitud });
+    navigation.navigate('DetallesEspacios', { solicitud });
   };
+
+  const abrirModalConfirmacion = (solicitud: Solicitud) => {
+    setSolicitudSeleccionada(solicitud);
+    setMostrarModalConfirmacion(true);
+  };
+
+  const cambiarEstadoAAprobada = async () => {
+    if (!solicitudSeleccionada) return;
+    
+    try {
+      setActualizando(true);
+      // Cambiar estado a Aprobada (estado 2)
+      const datosActualizacion = {
+        id_est_soli: 2, // Estado Aprobada
+        id_soli: solicitudSeleccionada.id_soli,
+      };
+      
+      await solicitudesService.updateEstado(solicitudSeleccionada.id_soli, datosActualizacion);
+      
+      // Actualizar la lista local
+      setSolicitudes(solicitudes.map(sol => 
+        sol.id_soli === solicitudSeleccionada.id_soli 
+          ? { ...sol, est_soli: 'Aprobada' }
+          : sol
+      ));
+      
+      setMostrarModalConfirmacion(false);
+      setSolicitudSeleccionada(null);
+      Alert.alert('Éxito', 'Solicitud de espacio aprobada correctamente');
+    } catch (error: any) {
+      console.error('Error al aprobar solicitud:', error);
+      Alert.alert('Error', 'No se pudo aprobar la solicitud');
+    } finally {
+      setActualizando(false);
+    }
+  };
+
 
   // Filtrar solicitudes
   const solicitudesFiltradas = solicitudes.filter((sol) => {
@@ -187,9 +253,9 @@ export default function EspaciosTecnico({ navigation }: any) {
             {item.nom_espa || item.nom_elem}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <View style={{ backgroundColor: '#e8f5e9', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 }}>
-              <Text style={{ fontSize: 12, color: '#3fbb34', fontWeight: '600' }}>
-                {item.nom_cat}
+            <View style={{ backgroundColor: item.est_soli === 'Pendiente' ? '#fff3cd' : '#e8f5e9', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 }}>
+              <Text style={{ fontSize: 12, color: item.est_soli === 'Pendiente' ? '#856404' : '#3fbb34', fontWeight: '600' }}>
+                {item.est_soli || item.nom_estado}
               </Text>
             </View>
           </View>
@@ -397,6 +463,48 @@ export default function EspaciosTecnico({ navigation }: any) {
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Confirmación para Aprobar */}
+      <Modal
+        visible={mostrarModalConfirmacion}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMostrarModalConfirmacion(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 20, width: '100%', maxWidth: 300 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 15, textAlign: 'center' }}>
+              Confirmar Aprobación
+            </Text>
+            
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 20, textAlign: 'center' }}>
+              ¿Deseas aprobar la solicitud de espacio "{solicitudSeleccionada?.nom_espa || solicitudSeleccionada?.nom_elem}"?
+            </Text>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderWidth: 2, borderColor: '#999', borderRadius: 6, alignItems: 'center' }}
+                onPress={() => setMostrarModalConfirmacion(false)}
+                disabled={actualizando}
+              >
+                <Text style={{ color: '#999', fontWeight: '600', fontSize: 14 }}>No</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, backgroundColor: '#3fbb34', borderRadius: 6, alignItems: 'center' }}
+                onPress={cambiarEstadoAAprobada}
+                disabled={actualizando}
+              >
+                {actualizando ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Sí, Aprobar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

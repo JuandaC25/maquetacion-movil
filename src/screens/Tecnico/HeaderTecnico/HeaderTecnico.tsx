@@ -115,16 +115,6 @@ export default function HeaderTecnico({ title, navigation }: HeaderTecnicoProps)
           style={HeaderTecnicoStyles.menuItem}
           onPress={() => {
             setMenuVisible(false);
-            navigation.navigate('PrestamosActivos');
-          }}
-        >
-          <Text style={HeaderTecnicoStyles.menuItemText}>Préstamos</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={HeaderTecnicoStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
             navigation.navigate('Historial');
           }}
         >
