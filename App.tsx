@@ -6,7 +6,6 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import LoginScreen from './src/screens/LoginScreen';
 import SolicitudesScreen from './src/screens/Instructor/Solicitudes/Solicitudes';
 import ReportesScreen from './src/screens/Instructor/Reportes/Reportes';
-import AdminDashboard from './src/screens/Administrador/AdminDashboard';
 import UsuariosAdmin from './src/screens/Administrador/UsuariosAdmin';
 import CategoriasAdmin from './src/screens/Administrador/CategoriasAdmin';
 import InventarioAdmin from './src/screens/Administrador/InventarioAdmin';
@@ -51,7 +50,6 @@ export default function App() {
           <Stack.Screen name="DetallesPrestamo" component={DetallesPrestamo} />
           <Stack.Screen name="Historial" component={HistorialTecnico} />
           <Stack.Screen name="Reportes" component={ReportesScreen} />
-          <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
           <Stack.Screen name="UsuariosAdmin" component={UsuariosAdmin} />
           <Stack.Screen name="CategoriasAdmin" component={CategoriasAdmin} />
           <Stack.Screen name="InventarioAdmin" component={InventarioAdmin} />

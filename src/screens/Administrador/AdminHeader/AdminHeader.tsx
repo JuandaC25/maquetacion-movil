@@ -230,82 +230,64 @@ export default function AdminHeader({ title, navigation }: HeaderWithDrawerProps
         />
       )}
 
-      <Animated.View 
+
+      <Animated.View
         style={[
           HeaderComponentStyles.drawer,
           {
+            backgroundColor: colors.background,
+            borderRightColor: theme === 'dark' ? colors.border : '#eee',
+            borderRightWidth: 1,
             transform: [{ translateX }],
             marginTop: headerHeight
           }
         ]}
         {...panResponder.panHandlers}
       >
-        <View style={HeaderComponentStyles.drawerHeader}>
-          <Text style={HeaderComponentStyles.drawerTitle}>Menú Administrador</Text>
+        <View style={[
+          HeaderComponentStyles.drawerHeader,
+          { backgroundColor: theme === 'dark' ? colors.cardBackground : '#3fbb34', borderBottomColor: theme === 'dark' ? colors.border : '#3fbb34', borderBottomWidth: 1 }
+        ]}>
+          <Text style={[HeaderComponentStyles.drawerTitle, { color: '#fff' }]}>Menú Administrador</Text>
         </View>
 
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('UsuariosAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Usuarios</Text>
-        </TouchableOpacity>
+        {[
+          { label: 'Usuarios', route: 'UsuariosAdmin' },
+          { label: 'Categorías', route: 'CategoriasAdmin' },
+          { label: 'Inventario', route: 'InventarioAdmin' },
+          { label: 'Solicitudes Elementos', route: 'SolicitudesElementoAdmin' },
+          { label: 'Solicitudes Espacios', route: 'SolicitudesEspacioAdmin' },
+          { label: 'Reportes', route: 'ReportesAdmin' },
+        ].map((item, idx) => (
+          <TouchableOpacity
+            key={item.route}
+            style={[
+              HeaderComponentStyles.menuItem,
+              {
+                borderBottomColor: theme === 'dark' ? colors.border : '#eee',
+                backgroundColor: 'transparent',
+              },
+            ]}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate(item.route);
+            }}
+          >
+            <Text style={[
+              HeaderComponentStyles.menuItemText,
+              {
+                color: theme === 'dark' ? colors.textPrimary : '#333',
+                fontFamily: 'sans-serif',
+              },
+            ]}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
 
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('CategoriasAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Categorías</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('InventarioAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Inventario</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('SolicitudesElementoAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Solicitudes Elementos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('SolicitudesEspacioAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Solicitudes Espacios</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('ReportesAdmin');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Reportes</Text>
-        </TouchableOpacity>
-        
-        <View style={HeaderComponentStyles.themeToggleContainer}>
-          <Text style={HeaderComponentStyles.menuItemText}>
+        <View style={[
+          HeaderComponentStyles.themeToggleContainer,
+          { backgroundColor: theme === 'dark' ? colors.cardBackground : '#f8f8f8', borderTopColor: theme === 'dark' ? colors.border : '#eee', borderTopWidth: 1 }
+        ]}>
+          <Text style={[HeaderComponentStyles.menuItemText, { color: theme === 'dark' ? colors.textPrimary : '#333' }] }>
             {theme === 'dark' ? '🌙 Tema Oscuro' : '☀️ Tema Claro'}
           </Text>
           <Switch

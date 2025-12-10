@@ -30,8 +30,8 @@ export default function LoginScreen({ navigation }: any) {
       console.log('💾 Usuario guardado en AsyncStorage:', userData);
 
       if ((userData.email || userData.correo || username) === 'admin@tech.com') {
-        console.log('🎯 Navegando a AdminDashboard...');
-        navigation.replace('AdminDashboard');
+        console.log('🎯 Navegando a UsuariosAdmin...');
+        navigation.replace('UsuariosAdmin');
       } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
         console.log('🎯 Navegando a Solicitudes (Instructor)...');
         navigation.replace('Solicitudes');
