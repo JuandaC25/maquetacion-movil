@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { categoriasService, subcategoriasService } from '../../services/Api';
@@ -18,6 +20,7 @@ type Subcategoria = {
 
 const CategoriasAdmin = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +131,8 @@ const CategoriasAdmin = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <Text style={[styles.title, { color: colors.primary }]}>{activeTab === 'categorias' ? 'Categorías' : 'Subcategorías'}</Text>
+      <AdminHeader title={activeTab === 'categorias' ? 'Categorías' : 'Subcategorías'} navigation={navigation} />
+      <View style={{ height: 12 }} />
       {/* Tabs para cambiar entre categorías y subcategorías */}
       <View style={styles.tabsRow}>
         <TouchableOpacity
