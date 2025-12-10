@@ -4,6 +4,7 @@ export const SolicitudesStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000ff',
+    paddingHorizontal: 10, // Añadido para margen lateral adaptable
   },
   
   // Tabs Menu
@@ -93,7 +94,9 @@ export const SolicitudesStyles = StyleSheet.create({
   portatilContainer: {
     marginTop: 15,
     marginRight: 1,
-    width: 330,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
     height: 128,
     backgroundColor: '#000',
     borderRadius: 16,
@@ -116,7 +119,9 @@ export const SolicitudesStyles = StyleSheet.create({
   escritorioContainer: {
     marginTop: 20,
     marginRight: 1,
-    width: 330,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
     height: 128,
     backgroundColor: '#000',
     borderRadius: 16,
@@ -138,7 +143,9 @@ export const SolicitudesStyles = StyleSheet.create({
   audioVideoContainer: {
     marginTop: 20,
     marginRight: 1,
-    width: 330,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
     height: 128,
     backgroundColor: '#000',
     borderRadius: 16,
@@ -161,7 +168,9 @@ export const SolicitudesStyles = StyleSheet.create({
   elementosContainer: {
     marginTop: 20,
     marginRight: 1,
-    width: 330,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
     height: 128,
     backgroundColor: '#000',
     borderRadius: 16,

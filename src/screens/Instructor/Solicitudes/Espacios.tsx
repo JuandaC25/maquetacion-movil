@@ -42,8 +42,6 @@ export default function EspaciosContent({ navigation }: any) {
     hora_ini: '',
     fecha_fn: '',
     hora_fn: '',
-    ambient: '',
-    num_ficha: '',
   });
   // DatePicker states
   const [showDatePicker, setShowDatePicker] = useState<{ field: 'fecha_ini' | 'fecha_fn' | 'hora_ini' | 'hora_fn' | null, visible: boolean, mode?: 'date' | 'time' }>({ field: null, visible: false });
@@ -80,8 +78,6 @@ export default function EspaciosContent({ navigation }: any) {
       hora_ini: '',
       fecha_fn: '',
       hora_fn: '',
-      ambient: '',
-      num_ficha: '',
     });
   };
 
@@ -402,30 +398,7 @@ export default function EspaciosContent({ navigation }: any) {
         onClose={() => setShowDatePicker({ field: null, visible: false })}
       />
 
-              {/* Ambiente */}
-              <View style={EspaciosStyles.formGroup}>
-                <Text style={EspaciosStyles.formLabel}>Ambiente</Text>
-                <TextInput
-                  style={EspaciosStyles.input}
-                  placeholder="Ej: Ambiente301"
-                  placeholderTextColor="#666"
-                  value={form.ambient}
-                  onChangeText={(text) => setForm({...form, ambient: text})}
-                />
-              </View>
 
-              {/* Número de Ficha */}
-              <View style={EspaciosStyles.formGroup}>
-                <Text style={EspaciosStyles.formLabel}>Número de ficha</Text>
-                <TextInput
-                  style={EspaciosStyles.input}
-                  placeholder="Ej: 2560014"
-                  placeholderTextColor="#666"
-                  value={form.num_ficha}
-                  onChangeText={(text) => setForm({...form, num_ficha: text})}
-                  keyboardType="numeric"
-                />
-              </View>
 
               <TouchableOpacity 
                 style={EspaciosStyles.submitButton}
