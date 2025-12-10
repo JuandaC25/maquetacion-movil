@@ -576,7 +576,7 @@ const SolicitudesElementoAdmin = () => {
                     est_soli: estadoMap[editEstado],
                     cantidad: editCantidad,
                   });
-                  alert('Respuesta backend: ' + JSON.stringify(resp?.data || resp));
+                  alert('Respuesta backend: ' + JSON.stringify(resp));
                   setEditModalVisible(false);
                   fetchSolicitudes(setSolicitudes, setLoading);
                 } catch (e) {
