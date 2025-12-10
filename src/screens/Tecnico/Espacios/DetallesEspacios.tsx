@@ -8,6 +8,7 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+import { useTheme } from '../../../context/ThemeContext';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { SolicitudesTecnicoStyles } from '../../../styles/Tecnico/Solicitudes/SolicitudesTecnico';
 import { solicitudesService } from '../../../services/Api';
@@ -19,6 +20,7 @@ interface DetallesEspaciosProps {
 
 export default function DetallesEspacios({ route, navigation }: DetallesEspaciosProps) {
   const { solicitud } = route.params;
+  const { colors, theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [estadoActual, setEstadoActual] = useState(solicitud.est_soli);
   const [modalVisible, setModalVisible] = useState(false);
@@ -93,10 +95,10 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
   };
 
   return (
-    <View style={SolicitudesTecnicoStyles.container}>
+    <View style={[SolicitudesTecnicoStyles.container, { backgroundColor: colors.background }]}>
       <HeaderTecnico title="Detalles de Espacio" navigation={navigation} />
       
-      <ScrollView style={SolicitudesTecnicoStyles.contentContainer}>
+      <ScrollView style={[SolicitudesTecnicoStyles.contentContainer, { backgroundColor: colors.background }]}>
         <View style={SolicitudesTecnicoStyles.filterContainer}>
           {/* Botón para volver */}
           <TouchableOpacity
@@ -104,16 +106,18 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
               alignSelf: 'flex-end', 
               marginBottom: 15, 
               padding: 5,
-              backgroundColor: '#e0e0e0',
+              backgroundColor: colors.cardBackground,
               borderRadius: 50,
               width: 30,
               height: 30,
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: colors.border
             }}
             onPress={() => navigation.goBack()}
           >
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#666' }}>✕</Text>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.textPrimary }}>✕</Text>
           </TouchableOpacity>
           <View style={SolicitudesTecnicoStyles.tarjeta}>
             <Text style={SolicitudesTecnicoStyles.cardModelo}>
@@ -211,11 +215,11 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
             onRequestClose={() => setModalVisible(false)}
           >
             <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' }}>
-              <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 20, width: '85%' }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' }}>
+              <View style={{ backgroundColor: colors.cardBackground, borderRadius: 10, padding: 20, width: '85%' }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center', color: colors.textPrimary }}>
                   {modalAction === 'rechazar' ? '¿Rechazar solicitud?' : '¿Aprobar solicitud?'}
                 </Text>
-                <Text style={{ fontSize: 14, color: '#666', marginBottom: 20, textAlign: 'center' }}>
+                <Text style={{ fontSize: 14, color: colors.textTertiary, marginBottom: 20, textAlign: 'center' }}>
                   {modalAction === 'rechazar' 
                     ? 'Una vez rechazada, se notificará al usuario' 
                     : 'La solicitud de espacio será aprobada'}
@@ -239,13 +243,13 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
                     style={{ 
                       flex: 1, 
                       padding: 12, 
-                      backgroundColor: '#fff',
+                      backgroundColor: colors.inputBackground,
                       borderWidth: 2,
                       borderColor: '#3fbb34',
                       borderRadius: 5, 
                       alignItems: 'center' 
                     }}
-                    onPress={confirmarAccion}
+                    onPress={cambiarEstado}
                   >
                     <Text style={{ color: '#3fbb34', fontWeight: 'bold' }}>Sí</Text>
                   </TouchableOpacity>

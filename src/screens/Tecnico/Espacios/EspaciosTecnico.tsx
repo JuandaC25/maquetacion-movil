@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { authService, solicitudesService } from '../../../services/Api';
+import { useTheme } from '../../../context/ThemeContext' ;
 
 interface Solicitud {
   id_soli: number;
@@ -29,6 +30,7 @@ interface Solicitud {
 }
 
 export default function EspaciosTecnico({ navigation }: any) {
+  const { colors, theme } = useTheme();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [busquedaNombre, setBusquedaNombre] = useState('');
   const [fechaInicio, setFechaInicio] = useState('');
@@ -136,7 +138,7 @@ export default function EspaciosTecnico({ navigation }: any) {
       <View style={{ padding: 15 }}>
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
           {dias_semana.map(d => (
-            <Text key={d} style={{ flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#333', fontSize: 12 }}>
+            <Text key={d} style={{ flex: 1, textAlign: 'center', fontWeight: 'bold', color: colors.textPrimary, fontSize: 12 }}>
               {d}
             </Text>
           ))}
@@ -149,14 +151,14 @@ export default function EspaciosTecnico({ navigation }: any) {
                 width: '14.28%',
                 padding: 10,
                 alignItems: 'center',
-                backgroundColor: dia ? '#f0f0f0' : 'transparent',
+                backgroundColor: dia ? colors.inputBackground : 'transparent',
                 borderRadius: 4,
                 marginBottom: 5,
               }}
               disabled={!dia}
               onPress={() => dia && (esInicio ? seleccionarFechaInicio(dia) : seleccionarFechaFin(dia))}
             >
-              {dia && <Text style={{ fontWeight: '500', color: '#333', fontSize: 12 }}>{dia}</Text>}
+              {dia && <Text style={{ fontWeight: '500', color: colors.textPrimary, fontSize: 12 }}>{dia}</Text>}
             </TouchableOpacity>
           ))}
         </View>
@@ -231,11 +233,11 @@ export default function EspaciosTecnico({ navigation }: any) {
   };
 
   const renderSolicitud = ({ item }: { item: Solicitud }) => (
-    <View style={{ padding: 10, backgroundColor: '#fff', marginBottom: 8 }}>
+    <View style={{ padding: 10, backgroundColor: colors.background, marginBottom: 8 }}>
       <TouchableOpacity 
         style={{
           padding: 15,
-          backgroundColor: '#f9f9f9',
+          backgroundColor: colors.cardBackground,
           borderRadius: 8,
           borderLeftWidth: 4,
           borderLeftColor: '#3fbb34',
@@ -249,7 +251,7 @@ export default function EspaciosTecnico({ navigation }: any) {
         activeOpacity={0.7}
       >
         <View style={{ marginBottom: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 6 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 }}>
             {item.nom_espa || item.nom_elem}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -261,12 +263,12 @@ export default function EspaciosTecnico({ navigation }: any) {
           </View>
         </View>
 
-        <Text style={{ fontSize: 13, color: '#666', marginBottom: 6 }}>
+        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
           <Text style={{ fontWeight: '600' }}>Usuario: </Text>
           {item.nom_usu}
         </Text>
         
-        <Text style={{ fontSize: 13, color: '#999' }}>
+        <Text style={{ fontSize: 13, color: colors.textTertiary }}>
           <Text style={{ fontWeight: '600' }}>Fecha: </Text>
           {new Date(item.fecha_ini).toLocaleDateString()}
         </Text>
@@ -276,28 +278,28 @@ export default function EspaciosTecnico({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <HeaderTecnico title="Espacios" navigation={navigation} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#3fbb34" />
-          <Text style={{ color: '#999', marginTop: 10, fontSize: 14 }}>Cargando solicitudes...</Text>
+          <Text style={{ color: colors.textTertiary, marginTop: 10, fontSize: 14 }}>Cargando solicitudes...</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <HeaderTecnico title="Solicitudes de Espacios" navigation={navigation} />
       
       <ScrollView style={{ flex: 1 }}>
         {/* Filtros Compactos */}
-        <View style={{ backgroundColor: '#fff', padding: 12, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+        <View style={{ backgroundColor: colors.cardBackground, padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           <View style={{ marginBottom: 12 }}>
             <TextInput
-              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: '#f9f9f9' }}
+              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: colors.inputBackground, color: colors.textPrimary }}
               placeholder="🔍 Buscar por nombre"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={busquedaNombre}
               onChangeText={setBusquedaNombre}
             />
@@ -306,16 +308,16 @@ export default function EspaciosTecnico({ navigation }: any) {
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <TouchableOpacity 
-                style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: '#f9f9f9', justifyContent: 'center' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: colors.inputBackground, justifyContent: 'center' }}
                 onPress={() => setMostrarCalendarioInicio(true)}
               >
-                <Text style={{ fontSize: 12, color: fechaInicio ? '#333' : '#999' }}>
+                <Text style={{ fontSize: 12, color: fechaInicio ? colors.textPrimary : colors.textTertiary }}>
                   📅 {fechaInicio || 'Desde'}
                 </Text>
               </TouchableOpacity>
               {fechaInicio && (
                 <TouchableOpacity 
-                  style={{ padding: 6, backgroundColor: '#f0f0f0', borderRadius: 4 }}
+                  style={{ padding: 6, backgroundColor: colors.inputBackground, borderRadius: 4 }}
                   onPress={() => setFechaInicio('')}
                 >
                   <Text style={{ fontSize: 14, color: '#999' }}>✕</Text>
@@ -324,16 +326,16 @@ export default function EspaciosTecnico({ navigation }: any) {
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <TouchableOpacity 
-                style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: '#f9f9f9', justifyContent: 'center' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: colors.inputBackground, justifyContent: 'center' }}
                 onPress={() => setMostrarCalendarioFin(true)}
               >
-                <Text style={{ fontSize: 12, color: fechaFin ? '#333' : '#999' }}>
+                <Text style={{ fontSize: 12, color: fechaFin ? colors.textPrimary : colors.textTertiary }}>
                   📅 {fechaFin || 'Hasta'}
                 </Text>
               </TouchableOpacity>
               {fechaFin && (
                 <TouchableOpacity 
-                  style={{ padding: 6, backgroundColor: '#f0f0f0', borderRadius: 4 }}
+                  style={{ padding: 6, backgroundColor: colors.inputBackground, borderRadius: 4 }}
                   onPress={() => setFechaFin('')}
                 >
                   <Text style={{ fontSize: 14, color: '#999' }}>✕</Text>
@@ -350,17 +352,17 @@ export default function EspaciosTecnico({ navigation }: any) {
             renderItem={renderSolicitud}
             keyExtractor={(item) => item.id_soli.toString()}
             scrollEnabled={false}
-            style={{ backgroundColor: '#f5f5f5', padding: 10 }}
+            style={{ backgroundColor: colors.background, padding: 10 }}
           />
         ) : (
           <View style={{ padding: 20, alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
-            <Text style={{ color: '#999', fontSize: 14 }}>No hay solicitudes de espacios disponibles</Text>
+            <Text style={{ color: colors.textTertiary, fontSize: 14 }}>No hay solicitudes de espacios disponibles</Text>
           </View>
         )}
 
         {/* Paginación Minimalista */}
         {totalPaginas > 1 && (
-          <View style={{ paddingVertical: 15, paddingHorizontal: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0' }}>
+          <View style={{ paddingVertical: 15, paddingHorizontal: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, backgroundColor: colors.cardBackground, borderTopWidth: 1, borderTopColor: colors.border }}>
             <TouchableOpacity
               style={{ paddingHorizontal: 10, paddingVertical: 6 }}
               onPress={() => irPagina(paginaActual - 1)}
@@ -378,13 +380,13 @@ export default function EspaciosTecnico({ navigation }: any) {
                   borderRadius: 4,
                   backgroundColor: paginaActual === i + 1 ? '#3fbb34' : 'transparent',
                   borderWidth: paginaActual === i + 1 ? 0 : 1,
-                  borderColor: '#ddd',
+                  borderColor: colors.border,
                 }}
                 onPress={() => irPagina(i + 1)}
               >
                 <Text
                   style={{
-                    color: paginaActual === i + 1 ? '#fff' : '#333',
+                    color: paginaActual === i + 1 ? '#fff' : colors.textPrimary,
                     fontSize: 12,
                     fontWeight: '500',
                   }}
@@ -413,12 +415,12 @@ export default function EspaciosTecnico({ navigation }: any) {
         onRequestClose={() => setMostrarCalendarioInicio(false)}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 15, borderTopRightRadius: 15, padding: 15 }}>
+          <View style={{ backgroundColor: colors.cardBackground, borderTopLeftRadius: 15, borderTopRightRadius: 15, padding: 15 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
               <TouchableOpacity onPress={() => setMesActualInicio(new Date(mesActualInicio.getFullYear(), mesActualInicio.getMonth() - 1))}>
                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#3fbb34' }}>◄</Text>
               </TouchableOpacity>
-              <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#333' }}>
+              <Text style={{ fontSize: 14, fontWeight: 'bold', color: colors.textPrimary }}>
                 {mesActualInicio.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
               </Text>
               <TouchableOpacity onPress={() => setMesActualInicio(new Date(mesActualInicio.getFullYear(), mesActualInicio.getMonth() + 1))}>
@@ -444,12 +446,12 @@ export default function EspaciosTecnico({ navigation }: any) {
         onRequestClose={() => setMostrarCalendarioFin(false)}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 15, borderTopRightRadius: 15, padding: 15 }}>
+          <View style={{ backgroundColor: colors.cardBackground, borderTopLeftRadius: 15, borderTopRightRadius: 15, padding: 15 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
               <TouchableOpacity onPress={() => setMesActualFin(new Date(mesActualFin.getFullYear(), mesActualFin.getMonth() - 1))}>
                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#3fbb34' }}>◄</Text>
               </TouchableOpacity>
-              <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#333' }}>
+              <Text style={{ fontSize: 14, fontWeight: 'bold', color: colors.textPrimary }}>
                 {mesActualFin.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
               </Text>
               <TouchableOpacity onPress={() => setMesActualFin(new Date(mesActualFin.getFullYear(), mesActualFin.getMonth() + 1))}>

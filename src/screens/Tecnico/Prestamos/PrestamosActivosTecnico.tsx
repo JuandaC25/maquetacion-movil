@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { SolicitudesTecnicoStyles } from '../../../styles/Tecnico/Solicitudes/SolicitudesTecnico';
 import { authService } from '../../../services/Api';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface Prestamo {
   id_prest: number;
@@ -38,6 +39,7 @@ interface Subcategoria {
 }
 
 export default function PrestamosActivosTecnico({ navigation }: any) {
+  const { colors, theme } = useTheme();
   const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
@@ -216,23 +218,23 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color="#3fbb34" />
-        <Text style={{ marginTop: 10, color: '#666', fontSize: 14 }}>Cargando préstamos...</Text>
+        <Text style={{ marginTop: 10, color: colors.textSecondary, fontSize: 14 }}>Cargando préstamos...</Text>
       </View>
     );
   }
 
   return (
-    <View style={SolicitudesTecnicoStyles.container}>
+    <View style={[SolicitudesTecnicoStyles.container, { backgroundColor: colors.background }]}>
       <HeaderTecnico title="Préstamos Activos" navigation={navigation} />
 
-      <ScrollView style={SolicitudesTecnicoStyles.contentContainer}>
+      <ScrollView style={[SolicitudesTecnicoStyles.contentContainer, { backgroundColor: colors.background }]}>
         {/* Filtros Compactos */}
-        <View style={{ backgroundColor: '#fff', padding: 12, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+        <View style={{ backgroundColor: colors.cardBackground, padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           {/* Categoría y Subcategoría */}
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-            <View style={{ flex: 1, borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: '#f9f9f9', paddingLeft: 10 }}>
+            <View style={{ flex: 1, borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: colors.inputBackground, paddingLeft: 10 }}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: '#3fbb34', marginTop: 3 }}>Categoría</Text>
               <Picker
                 selectedValue={categoriaFiltro}
@@ -250,7 +252,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
               </Picker>
             </View>
 
-            <View style={{ flex: 1, borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: '#f9f9f9', paddingLeft: 10 }}>
+            <View style={{ flex: 1, borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: colors.inputBackground, paddingLeft: 10 }}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: '#3fbb34', marginTop: 3 }}>Subcategoría</Text>
               <Picker
                 selectedValue={subcategoriaFiltro}
@@ -272,9 +274,9 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
           {/* Búsqueda por marca */}
           <View style={{ marginBottom: 12 }}>
             <TextInput
-              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: '#f9f9f9' }}
+              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: colors.inputBackground, color: colors.textPrimary }}
               placeholder="🔍 Buscar por Marca"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={busquedaMarca}
               onChangeText={(text) => {
                 setBusquedaMarca(text);
@@ -287,16 +289,16 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <TouchableOpacity 
-                style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: '#f9f9f9', justifyContent: 'center' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: colors.inputBackground, justifyContent: 'center' }}
                 onPress={() => setMostrarCalendarioInicio(true)}
               >
-                <Text style={{ fontSize: 12, color: fechaInicio ? '#333' : '#999' }}>
+                <Text style={{ fontSize: 12, color: fechaInicio ? colors.textPrimary : colors.textTertiary }}>
                   📅 {fechaInicio || 'Desde'}
                 </Text>
               </TouchableOpacity>
               {fechaInicio && (
                 <TouchableOpacity 
-                  style={{ padding: 6, backgroundColor: '#f0f0f0', borderRadius: 4 }}
+                  style={{ padding: 6, backgroundColor: colors.inputBackground, borderRadius: 4 }}
                   onPress={() => {
                     setFechaInicio('');
                     setPaginaActual(1);
@@ -309,16 +311,16 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
 
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <TouchableOpacity 
-                style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: '#f9f9f9', justifyContent: 'center' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 10, backgroundColor: colors.inputBackground, justifyContent: 'center' }}
                 onPress={() => setMostrarCalendarioFin(true)}
               >
-                <Text style={{ fontSize: 12, color: fechaFin ? '#333' : '#999' }}>
+                <Text style={{ fontSize: 12, color: fechaFin ? colors.textPrimary : colors.textTertiary }}>
                   📅 {fechaFin || 'Hasta'}
                 </Text>
               </TouchableOpacity>
               {fechaFin && (
                 <TouchableOpacity 
-                  style={{ padding: 6, backgroundColor: '#f0f0f0', borderRadius: 4 }}
+                  style={{ padding: 6, backgroundColor: colors.inputBackground, borderRadius: 4 }}
                   onPress={() => {
                     setFechaFin('');
                     setPaginaActual(1);
@@ -339,12 +341,12 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
           onRequestClose={() => setMostrarCalendarioInicio(false)}
         >
           <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
-            <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+            <View style={{ backgroundColor: colors.cardBackground, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
               <TouchableOpacity
                 onPress={() => setMostrarCalendarioInicio(false)}
                 style={{ alignSelf: 'center', marginTop: 10, paddingHorizontal: 10, paddingVertical: 5 }}
               >
-                <Text style={{ fontSize: 20, color: '#666' }}>✕</Text>
+                <Text style={{ fontSize: 20, color: colors.textTertiary }}>✕</Text>
               </TouchableOpacity>
               {renderCalendario(generarDiasDelMes(mesActualInicio), true)}
             </View>
@@ -359,12 +361,12 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
           onRequestClose={() => setMostrarCalendarioFin(false)}
         >
           <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
-            <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+            <View style={{ backgroundColor: colors.cardBackground, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
               <TouchableOpacity
                 onPress={() => setMostrarCalendarioFin(false)}
                 style={{ alignSelf: 'center', marginTop: 10, paddingHorizontal: 10, paddingVertical: 5 }}
               >
-                <Text style={{ fontSize: 20, color: '#666' }}>✕</Text>
+                <Text style={{ fontSize: 20, color: colors.textTertiary }}>✕</Text>
               </TouchableOpacity>
               {renderCalendario(generarDiasDelMes(mesActualFin), false)}
             </View>
@@ -374,7 +376,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
         {/* Lista de Préstamos */}
         {prestamosFiltrados.length === 0 ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ fontSize: 16, color: '#999', textAlign: 'center', marginHorizontal: 20 }}>
+            <Text style={{ fontSize: 16, color: colors.textTertiary, textAlign: 'center', marginHorizontal: 20 }}>
               {prestamos.length === 0 ? 'No hay préstamos activos' : 'No hay resultados con los filtros seleccionados'}
             </Text>
           </View>
@@ -420,7 +422,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                 paddingHorizontal: 16, 
                 paddingVertical: 16, 
                 marginTop: 12,
-                backgroundColor: '#fff',
+                backgroundColor: colors.cardBackground,
                 borderRadius: 8,
               }}>
                 {/* Indicador de página */}
@@ -430,7 +432,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                 }}>
                   <Text style={{ 
                     fontSize: 14, 
-                    color: '#666', 
+                    color: colors.textPrimary, 
                     fontWeight: '600',
                     marginBottom: 4
                   }}>
@@ -438,7 +440,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                   </Text>
                   <Text style={{ 
                     fontSize: 12, 
-                    color: '#999',
+                    color: colors.textTertiary,
                   }}>
                     Mostrando {prestamosPagina.length} de {prestamosFiltrados.length} préstamos
                   </Text>
@@ -456,7 +458,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                     style={{
                       paddingHorizontal: 16,
                       paddingVertical: 10,
-                      backgroundColor: paginaActual === 1 ? '#f0f0f0' : '#3fbb34',
+                      backgroundColor: paginaActual === 1 ? colors.inputBackground : '#3fbb34',
                       borderRadius: 6,
                       alignItems: 'center',
                       minWidth: 50,
@@ -465,7 +467,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                   >
                     <Text style={{ 
                       fontSize: 16, 
-                      color: paginaActual === 1 ? '#ccc' : '#fff', 
+                      color: paginaActual === 1 ? colors.textTertiary : '#fff', 
                       fontWeight: '700' 
                     }}>
                       ← Anterior
@@ -476,7 +478,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                   <View style={{
                     flex: 1,
                     height: 6,
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: colors.border,
                     borderRadius: 3,
                     justifyContent: 'center',
                     marginHorizontal: 10,
@@ -495,7 +497,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                     style={{
                       paddingHorizontal: 16,
                       paddingVertical: 10,
-                      backgroundColor: paginaActual === totalPaginas ? '#f0f0f0' : '#3fbb34',
+                      backgroundColor: paginaActual === totalPaginas ? colors.inputBackground : '#3fbb34',
                       borderRadius: 6,
                       alignItems: 'center',
                       minWidth: 50,
@@ -504,7 +506,7 @@ export default function PrestamosActivosTecnico({ navigation }: any) {
                   >
                     <Text style={{ 
                       fontSize: 16, 
-                      color: paginaActual === totalPaginas ? '#ccc' : '#fff', 
+                      color: paginaActual === totalPaginas ? colors.textTertiary : '#fff', 
                       fontWeight: '700' 
                     }}>
                       Siguiente →
