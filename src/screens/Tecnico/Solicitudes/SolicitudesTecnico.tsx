@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { authService } from '../../../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface Solicitud {
   id_soli: number;
@@ -52,6 +53,7 @@ interface ElementoSeleccionado {
 }
 
 export default function SolicitudesTecnico({ navigation }: any) {
+  const { colors, theme } = useTheme();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
@@ -233,11 +235,11 @@ export default function SolicitudesTecnico({ navigation }: any) {
   };
 
   const renderSolicitud = ({ item }: { item: Solicitud }) => (
-    <View style={{ padding: 10, backgroundColor: '#fff', marginBottom: 8 }}>
+    <View style={{ padding: 10, backgroundColor: colors.background, marginBottom: 8 }}>
       <TouchableOpacity 
         style={{
           padding: 15,
-          backgroundColor: '#f9f9f9',
+          backgroundColor: colors.cardBackground,
           borderRadius: 8,
           borderLeftWidth: 4,
           borderLeftColor: '#3fbb34',
@@ -251,11 +253,11 @@ export default function SolicitudesTecnico({ navigation }: any) {
         activeOpacity={0.7}
       >
         <View style={{ marginBottom: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 6 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 }}>
             {item.nom_elem}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <View style={{ backgroundColor: '#e8f5e9', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 }}>
+            <View style={{ backgroundColor: colors.inputBackground, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 }}>
               <Text style={{ fontSize: 12, color: '#3fbb34', fontWeight: '600' }}>
                 {item.nom_cat}
               </Text>
@@ -263,12 +265,12 @@ export default function SolicitudesTecnico({ navigation }: any) {
           </View>
         </View>
 
-        <Text style={{ fontSize: 13, color: '#666', marginBottom: 6 }}>
+        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
           <Text style={{ fontWeight: '600' }}>Usuario: </Text>
           {item.nom_usu}
         </Text>
         
-        <Text style={{ fontSize: 13, color: '#999' }}>
+        <Text style={{ fontSize: 13, color: colors.textTertiary }}>
           <Text style={{ fontWeight: '600' }}>Fecha: </Text>
           {new Date(item.fecha_ini).toLocaleDateString()}
         </Text>
@@ -278,27 +280,27 @@ export default function SolicitudesTecnico({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <HeaderTecnico title="Solicitudes" navigation={navigation} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#3fbb34" />
-          <Text style={{ color: '#999', marginTop: 10, fontSize: 14 }}>Cargando solicitudes...</Text>
+          <Text style={{ color: colors.textSecondary, marginTop: 10, fontSize: 14 }}>Cargando solicitudes...</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <HeaderTecnico title="Solicitudes" navigation={navigation} />
       
       <ScrollView style={{ flex: 1 }}>
         {/* Filtros Compactos */}
-        <View style={{ backgroundColor: '#fff', padding: 12, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+        <View style={{ backgroundColor: colors.cardBackground, padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           {/* Categoría y Subcategoría lado a lado */}
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
             <View style={{ flex: 1 }}>
-              <View style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: '#f9f9f9', paddingLeft: 10 }}>
+              <View style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: colors.inputBackground, paddingLeft: 10 }}>
                 <Text style={{ fontSize: 11, fontWeight: '700', color: '#3fbb34', marginTop: 3 }}>Categoría</Text>
                 <Picker
                   selectedValue={categoriaFiltro}
@@ -317,7 +319,7 @@ export default function SolicitudesTecnico({ navigation }: any) {
             </View>
 
             <View style={{ flex: 1 }}>
-              <View style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: '#f9f9f9', paddingLeft: 10 }}>
+              <View style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, overflow: 'hidden', backgroundColor: colors.inputBackground, paddingLeft: 10 }}>
                 <Text style={{ fontSize: 11, fontWeight: '700', color: '#3fbb34', marginTop: 3 }}>Subcategoría</Text>
                 <Picker
                   selectedValue={subcategoriaFiltro}
@@ -335,9 +337,9 @@ export default function SolicitudesTecnico({ navigation }: any) {
 
           <View style={{ marginBottom: 12 }}>
             <TextInput
-              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: '#f9f9f9' }}
+              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: colors.inputBackground, color: colors.textPrimary }}
               placeholder="🔍 Buscar por Marca"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={busquedaMarca}
               onChangeText={setBusquedaMarca}
             />

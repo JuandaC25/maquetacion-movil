@@ -13,6 +13,7 @@ import {
 import * as XLSX from 'xlsx';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { authService, ticketsService, solicitudesService } from '../../../services/Api';
+import { useTheme } from '../../../context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
 
 interface Solicitud {
@@ -65,6 +66,7 @@ interface Ticket {
 
 
 const HistorialTecnico = ({ navigation }: any) => {
+  const { colors, theme } = useTheme();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
   const [espacios, setEspacios] = useState<Solicitud[]>([]);
@@ -77,9 +79,7 @@ const HistorialTecnico = ({ navigation }: any) => {
   const [categorias, setCategorias] = useState<string[]>([]);
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const [paginaActual, setPaginaActual] = useState(1);
   const [tab, setTab] = useState<'tickets' | 'prestamos' | 'espacios'>('tickets');
-  const itemsPorPagina = 5;
 
   // Estilos separados por tab
   const estilosCard = {
@@ -87,7 +87,7 @@ const HistorialTecnico = ({ navigation }: any) => {
       container: {
         borderLeftWidth: 4,
         borderLeftColor: '#3fbb34',
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         marginHorizontal: 12,
         marginVertical: 8,
         paddingHorizontal: 12,
@@ -98,15 +98,15 @@ const HistorialTecnico = ({ navigation }: any) => {
         shadowRadius: 3,
         elevation: 2,
       },
-      titulo: { fontSize: 14, fontWeight: '700' as const, color: '#333', flex: 1 },
-      subtitulo: { fontSize: 11, color: '#999', marginBottom: 2 },
-      contenido: { fontSize: 12, fontWeight: '500' as const, color: '#333' },
+      titulo: { fontSize: 14, fontWeight: '700' as const, color: colors.textPrimary, flex: 1 },
+      subtitulo: { fontSize: 11, color: colors.textTertiary, marginBottom: 2 },
+      contenido: { fontSize: 12, fontWeight: '500' as const, color: colors.textPrimary },
     },
     prestamos: {
       container: {
         borderLeftWidth: 4,
         borderLeftColor: '#ff9800',
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         marginHorizontal: 12,
         marginVertical: 8,
         paddingHorizontal: 12,
@@ -117,15 +117,15 @@ const HistorialTecnico = ({ navigation }: any) => {
         shadowRadius: 3,
         elevation: 2,
       },
-      titulo: { fontSize: 14, fontWeight: '700' as const, color: '#333', flex: 1 },
-      subtitulo: { fontSize: 11, color: '#999', marginBottom: 2 },
-      contenido: { fontSize: 12, fontWeight: '500' as const, color: '#333' },
+      titulo: { fontSize: 14, fontWeight: '700' as const, color: colors.textPrimary, flex: 1 },
+      subtitulo: { fontSize: 11, color: colors.textTertiary, marginBottom: 2 },
+      contenido: { fontSize: 12, fontWeight: '500' as const, color: colors.textPrimary },
     },
     espacios: {
       container: {
         borderLeftWidth: 4,
         borderLeftColor: '#2196F3',
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         marginHorizontal: 12,
         marginVertical: 8,
         paddingHorizontal: 12,
@@ -136,9 +136,9 @@ const HistorialTecnico = ({ navigation }: any) => {
         shadowRadius: 3,
         elevation: 2,
       },
-      titulo: { fontSize: 14, fontWeight: '700' as const, color: '#333', flex: 1 },
-      subtitulo: { fontSize: 11, color: '#999', marginBottom: 2 },
-      contenido: { fontSize: 12, fontWeight: '500' as const, color: '#333' },
+      titulo: { fontSize: 14, fontWeight: '700' as const, color: colors.textPrimary, flex: 1 },
+      subtitulo: { fontSize: 11, color: colors.textTertiary, marginBottom: 2 },
+      contenido: { fontSize: 12, fontWeight: '500' as const, color: colors.textPrimary },
     },
   };
 
@@ -257,7 +257,6 @@ const HistorialTecnico = ({ navigation }: any) => {
       });
       
       setCategorias(Array.from(todasLasCategorias).sort());
-      setPaginaActual(1);
     } catch (error: any) {
       console.error('Error cargando datos:', error);
       Alert.alert('Error', 'No se pudo cargar el historial');
@@ -311,25 +310,10 @@ const HistorialTecnico = ({ navigation }: any) => {
     return cumpleBusqueda && cumpleCategoria && cumpleSubcategoria && cumpleFechas;
   });
 
-  const totalPaginas = Math.max(1, Math.ceil(datosFiltrados.length / itemsPorPagina));
-  const datosPagina = datosFiltrados.slice(
-    (paginaActual - 1) * itemsPorPagina,
-    paginaActual * itemsPorPagina
-  );
-
   const limpiarFiltros = () => {
-    setBusqueda('');
-    setPaginaActual(1);
-  };
-
-  const irADetalle = (item: any) => {
-    if (tab === 'tickets') {
-      navigation.navigate('DetallesTicket', { ticket: item });
-    } else if (tab === 'prestamos') {
-      navigation.navigate('DetallesPrestamo', { prestamo: item });
-    } else {
-      navigation.navigate('DetallesSolicitud', { solicitud: item });
-    }
+      setBusqueda('');
+    };  const irADetalle = (item: any) => {
+    navigation.navigate('DetallesHistorial', { item, tipo: tab });
   };
 
   const exportarACSV = async () => {
@@ -440,24 +424,23 @@ const HistorialTecnico = ({ navigation }: any) => {
 
   if (cargando) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color="#3fbb34" />
-        <Text style={{ marginTop: 10, color: '#666', fontSize: 14 }}>Cargando historial...</Text>
+        <Text style={{ marginTop: 10, color: colors.textSecondary, fontSize: 14 }}>Cargando historial...</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header Principal */}
       <HeaderTecnico title="Historial" navigation={navigation} />
 
       {/* Tabs */}
-      <View style={{ flexDirection: 'row', backgroundColor: '#f5f5f5', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+      <View style={{ flexDirection: 'row', backgroundColor: colors.cardBackground, borderBottomWidth: 1, borderBottomColor: colors.border }}>
         <TouchableOpacity
           onPress={() => {
             setTab('tickets');
-            setPaginaActual(1);
           }}
           style={{
             flex: 1,
@@ -471,7 +454,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             style={{
               fontSize: 13,
               fontWeight: tab === 'tickets' ? '700' : '500',
-              color: tab === 'tickets' ? '#3fbb34' : '#999',
+              color: tab === 'tickets' ? '#3fbb34' : colors.textTertiary,
             }}
           >
             🎫 Tickets
@@ -480,7 +463,6 @@ const HistorialTecnico = ({ navigation }: any) => {
         <TouchableOpacity
           onPress={() => {
             setTab('prestamos');
-            setPaginaActual(1);
           }}
           style={{
             flex: 1,
@@ -494,7 +476,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             style={{
               fontSize: 13,
               fontWeight: tab === 'prestamos' ? '700' : '500',
-              color: tab === 'prestamos' ? '#3fbb34' : '#999',
+              color: tab === 'prestamos' ? '#3fbb34' : colors.textTertiary,
             }}
           >
             📦 Préstamos
@@ -503,7 +485,6 @@ const HistorialTecnico = ({ navigation }: any) => {
         <TouchableOpacity
           onPress={() => {
             setTab('espacios');
-            setPaginaActual(1);
           }}
           style={{
             flex: 1,
@@ -517,7 +498,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             style={{
               fontSize: 13,
               fontWeight: tab === 'espacios' ? '700' : '500',
-              color: tab === 'espacios' ? '#3fbb34' : '#999',
+              color: tab === 'espacios' ? '#3fbb34' : colors.textTertiary,
             }}
           >
             🏢 Espacios
@@ -529,11 +510,11 @@ const HistorialTecnico = ({ navigation }: any) => {
       <TouchableOpacity
         onPress={() => setMostrarFiltros(!mostrarFiltros)}
         style={{
-          backgroundColor: '#f0f0f0',
+          backgroundColor: colors.inputBackground,
           paddingVertical: 10,
           paddingHorizontal: 16,
           borderBottomWidth: 1,
-          borderBottomColor: '#e0e0e0',
+          borderBottomColor: colors.border,
         }}
       >
         <Text style={{ color: '#3fbb34', fontWeight: '600', fontSize: 14 }}>
@@ -543,7 +524,7 @@ const HistorialTecnico = ({ navigation }: any) => {
 
       {/* Panel de Filtros Compacto */}
       {mostrarFiltros && (
-        <ScrollView style={{ backgroundColor: '#fafafa', paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+        <ScrollView style={{ backgroundColor: colors.inputBackground, paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           {/* Búsqueda por Nombre */}
           <View style={{ marginBottom: 10 }}>
             <Text style={{ fontSize: 11, fontWeight: '600', color: '#666', marginBottom: 4 }}>
@@ -554,7 +535,6 @@ const HistorialTecnico = ({ navigation }: any) => {
               value={busqueda}
               onChangeText={(text) => {
                 setBusqueda(text);
-                setPaginaActual(1);
               }}
               style={{
                 borderWidth: 1,
@@ -582,7 +562,6 @@ const HistorialTecnico = ({ navigation }: any) => {
                 onPress={() => {
                   setCategoria('');
                   setSubcategoria('');
-                  setPaginaActual(1);
                 }}
                 style={{
                   paddingHorizontal: 10,
@@ -596,7 +575,7 @@ const HistorialTecnico = ({ navigation }: any) => {
                   style={{
                     fontSize: 11,
                     fontWeight: '600',
-                    color: categoria === '' ? '#fff' : '#666',
+                    color: categoria === '' ? '#fff' : colors.textPrimary,
                   }}
                 >
                   Todas
@@ -608,13 +587,12 @@ const HistorialTecnico = ({ navigation }: any) => {
                   onPress={() => {
                     setCategoria(cat);
                     setSubcategoria('');
-                    setPaginaActual(1);
                   }}
                   style={{
                     paddingHorizontal: 10,
                     paddingVertical: 4,
                     borderRadius: 16,
-                    backgroundColor: categoria === cat ? '#3fbb34' : '#e0e0e0',
+                    backgroundColor: categoria === cat ? '#3fbb34' : colors.border,
                     marginRight: 6,
                   }}
                 >
@@ -622,7 +600,7 @@ const HistorialTecnico = ({ navigation }: any) => {
                     style={{
                       fontSize: 11,
                       fontWeight: '600',
-                      color: categoria === cat ? '#fff' : '#666',
+                      color: categoria === cat ? '#fff' : colors.textPrimary,
                     }}
                   >
                     {cat}
@@ -634,7 +612,7 @@ const HistorialTecnico = ({ navigation }: any) => {
 
           {/* Filtro por Subcategoría */}
           <View style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 11, fontWeight: '600', color: '#666', marginBottom: 4 }}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textTertiary, marginBottom: 4 }}>
               📂 Subcategoría
             </Text>
             <ScrollView
@@ -645,7 +623,6 @@ const HistorialTecnico = ({ navigation }: any) => {
               <TouchableOpacity
                 onPress={() => {
                   setSubcategoria('');
-                  setPaginaActual(1);
                 }}
                 style={{
                   paddingHorizontal: 10,
@@ -677,7 +654,6 @@ const HistorialTecnico = ({ navigation }: any) => {
                   key={subcat}
                   onPress={() => {
                     setSubcategoria(subcat);
-                    setPaginaActual(1);
                   }}
                   style={{
                     paddingHorizontal: 10,
@@ -712,7 +688,6 @@ const HistorialTecnico = ({ navigation }: any) => {
                 value={fechaInicio}
                 onChangeText={(text) => {
                   setFechaInicio(text);
-                  setPaginaActual(1);
                 }}
                 style={{
                   borderWidth: 1,
@@ -735,7 +710,6 @@ const HistorialTecnico = ({ navigation }: any) => {
                 value={fechaFin}
                 onChangeText={(text) => {
                   setFechaFin(text);
-                  setPaginaActual(1);
                 }}
                 style={{
                   borderWidth: 1,
@@ -759,7 +733,6 @@ const HistorialTecnico = ({ navigation }: any) => {
                 setFechaFin('');
                 setCategoria('');
                 setSubcategoria('');
-                setPaginaActual(1);
               }}
               style={{
                 paddingVertical: 6,
@@ -788,7 +761,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             </View>
           ) : (
             <FlatList
-              data={datosPagina}
+              data={datosFiltrados}
               keyExtractor={(item: any) => `tickets-${item.id_soli}`}
               renderItem={({ item }: any) => (
                 <TouchableOpacity
@@ -856,7 +829,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             </View>
           ) : (
             <FlatList
-              data={datosPagina}
+              data={datosFiltrados}
               keyExtractor={(item: any) => `prestamos-${item.id_prest}`}
               renderItem={({ item }: any) => (
                 <TouchableOpacity
@@ -931,7 +904,7 @@ const HistorialTecnico = ({ navigation }: any) => {
             </View>
           ) : (
             <FlatList
-              data={datosPagina}
+              data={datosFiltrados}
               keyExtractor={(item: any) => `espacios-${item.id_soli}`}
               renderItem={({ item }: any) => (
                 <TouchableOpacity
@@ -988,41 +961,6 @@ const HistorialTecnico = ({ navigation }: any) => {
         </>
       )}
 
-      {/* Paginación */}
-      {datosFiltrados.length > 0 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            borderTopWidth: 1,
-            borderTopColor: '#e0e0e0',
-            backgroundColor: '#fafafa',
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => setPaginaActual(Math.max(1, paginaActual - 1))}
-            disabled={paginaActual === 1}
-            style={{ opacity: paginaActual === 1 ? 0.5 : 1 }}
-          >
-            <Text style={{ fontSize: 24, color: '#3fbb34', fontWeight: '700' }}>◄</Text>
-          </TouchableOpacity>
-
-          <Text style={{ fontSize: 13, color: '#666', fontWeight: '600' }}>
-            Página {paginaActual} de {totalPaginas}
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
-            disabled={paginaActual === totalPaginas}
-            style={{ opacity: paginaActual === totalPaginas ? 0.5 : 1 }}
-          >
-            <Text style={{ fontSize: 24, color: '#3fbb34', fontWeight: '700' }}>►</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       {/* Botón Exportar */}
       <TouchableOpacity
