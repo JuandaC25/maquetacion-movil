@@ -163,7 +163,9 @@ const InventarioAdmin = () => {
                 <Text style={[styles.inventoryCategoria, { color: colors.textSecondary }]}>{item.categoria ? `Categoría: ${item.categoria}` : 'Categoría: (sin dato)'}</Text>
                 <Text style={[styles.inventorySerie, { color: colors.textPrimary }]}>{item.serie ? `Serie: ${item.serie}` : 'Serie: (sin dato)'}</Text>
                 <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.marca ? `Marca: ${item.marca}` : 'Marca: (sin dato)'}</Text>
-                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.estado !== undefined ? `Estado: ${item.estado}` : 'Estado: (sin dato)'}</Text>
+                <Text style={[styles.inventoryMarca, { color: colors.success }]}>
+                  Estado: {item.estado === 1 || item.estado === '1' ? 'Activo' : item.estado === 0 || item.estado === '0' ? 'Inactivo' : '(sin dato)'}
+                </Text>
                 <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.observaciones ? `Observaciones: ${item.observaciones}` : 'Observaciones: (sin dato)'}</Text>
                 <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.componentes ? `Componentes: ${item.componentes}` : 'Componentes: (sin dato)'}</Text>
               </View>

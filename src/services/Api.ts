@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
 // Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-const LOCAL_IP = '192.168.1.90'; // IP actualizada según el usuario
+const LOCAL_IP = '192.168.20.60'; // IP actualizada según el usuario
 const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
@@ -47,10 +47,13 @@ const withAuth = async (config: any = {}) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('❌ Error en la petición:', error.response?.data);
-    console.log('❌ Status:', error.response?.status);
-    console.log('❌ URL:', error.config?.url);
-    
+    if (error.message === 'Network Error') {
+      console.log('❌ Network Error: No se pudo conectar al backend. Verifica la IP, el puerto y la conexión de red.');
+    } else {
+      console.log('❌ Error en la petición:', error.response?.data);
+      console.log('❌ Status:', error.response?.status);
+      console.log('❌ URL:', error.config?.url);
+    }
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');

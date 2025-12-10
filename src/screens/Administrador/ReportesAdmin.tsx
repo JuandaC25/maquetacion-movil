@@ -207,6 +207,10 @@ const ReportesAdmin: FC = () => {
                   <Text style={{ fontSize: 16, color: colors.textPrimary }}>{estadoInfo(modalTicket?.estado ?? modalTicket?.id_est_tick).label}</Text>
                 </View>
               </View>
+              <View style={styles.modalRowFull}>
+                <Text style={[styles.modalLabelFull, { color: colors.title }]}>Observaciones:</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.observaciones ?? modalTicket?.observacion ?? '-'}</Text>
+              </View>
             </View>
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalTicket(null)}>
