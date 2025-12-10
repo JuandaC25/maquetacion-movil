@@ -16,8 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-// Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-const LOCAL_IP = '192.168.1.90'; // IP actualizada según el usuario
+const LOCAL_IP = '192.168.1.6'; // 👈 CAMBIA ESTO A TU IP
 const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
@@ -128,6 +127,17 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener préstamos activos:', error);
+      return [];
+    }
+  },
+
+  obtenerPrestamosFinalizados: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/prestamos/finalizados', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener préstamos finalizados:', error);
       return [];
     }
   },
