@@ -8,6 +8,7 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
+import { useTheme } from '../../../context/ThemeContext';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { SolicitudesTecnicoStyles } from '../../../styles/Tecnico/Solicitudes/SolicitudesTecnico';
 import { prestamosService } from '../../../services/Api';
@@ -24,6 +25,7 @@ interface Prestamo {
 
 const DetallesPrestamo = ({ route, navigation }: any) => {
   const { prestamo } = route.params;
+  const { colors, theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [accionActual, setAccionActual] = useState('');
   const [actualizando, setActualizando] = useState(false);
@@ -83,10 +85,10 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
   const textoModal = getTextoModal();
 
   return (
-    <View style={SolicitudesTecnicoStyles.container}>
+    <View style={[SolicitudesTecnicoStyles.container, { backgroundColor: colors.background }]}>
       <HeaderTecnico title="Detalles de Préstamo" navigation={navigation} />
       
-      <ScrollView style={SolicitudesTecnicoStyles.contentContainer}>
+      <ScrollView style={[SolicitudesTecnicoStyles.contentContainer, { backgroundColor: colors.background }]}>
         <View style={SolicitudesTecnicoStyles.filterContainer}>
           {/* Botón para volver */}
           <TouchableOpacity
@@ -94,16 +96,18 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
               alignSelf: 'flex-end', 
               marginBottom: 15, 
               padding: 5,
-              backgroundColor: '#e0e0e0',
+              backgroundColor: colors.cardBackground,
               borderRadius: 50,
               width: 30,
               height: 30,
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: colors.border
             }}
             onPress={() => navigation.goBack()}
           >
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#666' }}>✕</Text>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.textPrimary }}>✕</Text>
           </TouchableOpacity>
 
           {/* Tarjeta de Detalles */}
@@ -192,10 +196,10 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
           <View
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: colors.cardBackground,
               borderRadius: 16,
               paddingHorizontal: 24,
-              paddingVertical: 28,
+              paddingVertical: 30,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
@@ -210,7 +214,7 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
                 width: 60, 
                 height: 60, 
                 borderRadius: 30, 
-                backgroundColor: '#FFF8DC', 
+                backgroundColor: colors.inputBackground, 
                 justifyContent: 'center', 
                 alignItems: 'center' 
               }}>
@@ -219,12 +223,12 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
             </View>
 
             {/* Título */}
-            <Text style={{ fontSize: 20, fontWeight: '800', color: '#333', marginBottom: 8, textAlign: 'center' }}>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginBottom: 8, textAlign: 'center' }}>
               {textoModal.titulo}
             </Text>
 
             {/* Mensaje */}
-            <Text style={{ fontSize: 14, color: '#666', marginBottom: 24, textAlign: 'center', lineHeight: 20 }}>
+            <Text style={{ fontSize: 14, color: colors.textTertiary, marginBottom: 24, textAlign: 'center', lineHeight: 20 }}>
               {textoModal.mensaje}
             </Text>
 
@@ -253,7 +257,7 @@ const DetallesPrestamo = ({ route, navigation }: any) => {
                 onPress={() => setModalVisible(false)}
                 disabled={actualizando}
                 style={{
-                  backgroundColor: '#fff',
+                  backgroundColor: colors.inputBackground,
                   paddingVertical: 12,
                   borderRadius: 5,
                   alignItems: 'center',

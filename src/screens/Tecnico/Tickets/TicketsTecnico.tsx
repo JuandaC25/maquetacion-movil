@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ticketsService, authService } from '../../../services/Api';
+import { useTheme } from '../../../context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../../Tecnico/HeaderTecnico/HeaderTecnico';
 
@@ -49,6 +50,7 @@ interface Subcategoria {
 }
 
 const TicketsTecnico = ({ navigation }: any) => {
+  const { colors, theme } = useTheme();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [cargando, setCargando] = useState(true);
   const [categoriaFiltro, setCategoriaFiltro] = useState('');
@@ -172,34 +174,34 @@ const TicketsTecnico = ({ navigation }: any) => {
 
   if (cargando) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color="#3fbb34" />
-        <Text style={{ marginTop: 10, color: '#666', fontSize: 14 }}>Cargando tickets...</Text>
+        <Text style={{ marginTop: 10, color: colors.textSecondary, fontSize: 14 }}>Cargando tickets...</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <HeaderTecnico title="Tickets Técnico" navigation={navigation} />
 
       {/* Filtros Siempre Visibles */}
-      <View style={{ backgroundColor: '#fff', padding: 12, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+      <View style={{ backgroundColor: colors.cardBackground, padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
         {/* Categoría - Dropdown con indicador visual llamativo */}
         <View style={{ marginBottom: 12 }}>
           <View style={{ 
             borderWidth: 3, 
-            borderColor: categoriaFiltro ? '#3fbb34' : '#ddd', 
+            borderColor: categoriaFiltro ? '#3fbb34' : colors.border, 
             borderRadius: 8, 
             overflow: 'hidden', 
-            backgroundColor: categoriaFiltro ? '#e8f5e9' : '#f9f9f9',
+            backgroundColor: categoriaFiltro ? '#e8f5e9' : colors.inputBackground,
             shadowColor: categoriaFiltro ? '#3fbb34' : 'transparent',
             shadowOpacity: 0.3,
             shadowRadius: 4,
             elevation: categoriaFiltro ? 3 : 0,
           }}>
             <View style={{ paddingLeft: 10, paddingTop: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 10 }}>
-              <Text style={{ fontSize: 12, fontWeight: '800', color: categoriaFiltro ? '#2e7d32' : '#999' }}>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: categoriaFiltro ? '#2e7d32' : colors.textTertiary }}>
                 Categoría {categoriaFiltro && '✓ SELECCIONADO'}
               </Text>
               {categoriaFiltro && (
@@ -234,17 +236,17 @@ const TicketsTecnico = ({ navigation }: any) => {
         <View style={{ marginBottom: 12 }}>
           <View style={{ 
             borderWidth: 3, 
-            borderColor: subcategoriaFiltro ? '#3fbb34' : '#ddd', 
+            borderColor: subcategoriaFiltro ? '#3fbb34' : colors.border, 
             borderRadius: 8, 
             overflow: 'hidden', 
-            backgroundColor: subcategoriaFiltro ? '#e8f5e9' : '#f9f9f9',
+            backgroundColor: subcategoriaFiltro ? '#e8f5e9' : colors.inputBackground,
             shadowColor: subcategoriaFiltro ? '#3fbb34' : 'transparent',
             shadowOpacity: 0.3,
             shadowRadius: 4,
             elevation: subcategoriaFiltro ? 3 : 0,
           }}>
             <View style={{ paddingLeft: 10, paddingTop: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 10 }}>
-              <Text style={{ fontSize: 12, fontWeight: '800', color: subcategoriaFiltro ? '#2e7d32' : '#999' }}>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: subcategoriaFiltro ? '#2e7d32' : colors.textTertiary }}>
                 Subcategoría {subcategoriaFiltro && '✓ SELECCIONADO'}
               </Text>
               {subcategoriaFiltro && (
@@ -278,9 +280,9 @@ const TicketsTecnico = ({ navigation }: any) => {
         {/* Búsqueda por Problema */}
         <View style={{ marginBottom: 12 }}>
           <TextInput
-            style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: '#f9f9f9' }}
+            style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: colors.inputBackground, color: colors.textPrimary }}
             placeholder="🔍 Buscar por Problema"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={busquedaProblema}
             onChangeText={(text) => {
               setBusquedaProblema(text);
@@ -314,15 +316,15 @@ const TicketsTecnico = ({ navigation }: any) => {
           <ActivityIndicator size="large" color="#3fbb34" />
         </View>
       ) : ticketsFiltrados.length === 0 ? (
-        <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+        <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ fontSize: 16, color: '#999', textAlign: 'center', marginHorizontal: 20 }}>
+            <Text style={{ fontSize: 16, color: colors.textTertiary, textAlign: 'center', marginHorizontal: 20 }}>
               {tickets.length === 0 ? 'No hay tickets' : 'No hay resultados con los filtros seleccionados'}
             </Text>
           </View>
         </ScrollView>
       ) : (
-        <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+        <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
           <FlatList
             data={ticketsPagina}
             keyExtractor={(item, index) => ((item.id_tickets || item.id_ticket || index) as any).toString()}
@@ -333,7 +335,7 @@ const TicketsTecnico = ({ navigation }: any) => {
                   marginHorizontal: 12,
                   marginVertical: 8,
                   borderRadius: 12,
-                  backgroundColor: '#fff',
+                  backgroundColor: colors.cardBackground,
                   shadowColor: '#000',
                   shadowOpacity: 0.12,
                   shadowRadius: 8,
@@ -379,29 +381,29 @@ const TicketsTecnico = ({ navigation }: any) => {
                 <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
                   {/* Problema - más prominente */}
                   <View style={{ marginBottom: 12 }}>
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: '#888', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textTertiary, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                       ⚠️ Problema
                     </Text>
-                    <Text style={{ fontSize: 15, fontWeight: '700', color: '#1a1a1a', lineHeight: 22 }} numberOfLines={2}>
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 22 }} numberOfLines={2}>
                       {item.nom_problm || item.nom_problema || 'Sin descripción'}
                     </Text>
                   </View>
 
                   {/* Grid de 2 columnas - Categoría y Elemento */}
                   <View style={{ flexDirection: 'row', marginBottom: 12, gap: 8 }}>
-                    <View style={{ flex: 1, backgroundColor: '#f8f8f8', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#3fbb34' }}>
-                      <Text style={{ fontSize: 10, color: '#888', fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
+                    <View style={{ flex: 1, backgroundColor: colors.inputBackground, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#3fbb34' }}>
+                      <Text style={{ fontSize: 10, color: colors.textTertiary, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
                         🏷️ Categoría
                       </Text>
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: '#333' }} numberOfLines={1}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }} numberOfLines={1}>
                         {item.nom_cat || categorias.find((c: any) => c.id === item.id_cat)?.nom_cat || 'N/A'}
                       </Text>
                     </View>
-                    <View style={{ flex: 1, backgroundColor: '#f8f8f8', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#3fbb34' }}>
-                      <Text style={{ fontSize: 10, color: '#888', fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
+                    <View style={{ flex: 1, backgroundColor: colors.inputBackground, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#3fbb34' }}>
+                      <Text style={{ fontSize: 10, color: colors.textTertiary, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
                         ⚙️ Equipo
                       </Text>
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: '#333' }} numberOfLines={1}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }} numberOfLines={1}>
                         {item.nom_elem || 'N/A'}
                       </Text>
                     </View>
@@ -410,18 +412,18 @@ const TicketsTecnico = ({ navigation }: any) => {
                   {/* Grid de 2 columnas - Usuario y Fecha */}
                   <View style={{ flexDirection: 'row', marginBottom: 0, gap: 8 }}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 10, color: '#888', fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
+                      <Text style={{ fontSize: 10, color: colors.textTertiary, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
                         👤 Reportado por
                       </Text>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: '#333' }}>
+                      <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>
                         {item.nom_usu || 'Desconocido'}
                       </Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 10, color: '#888', fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
+                      <Text style={{ fontSize: 10, color: colors.textTertiary, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase' }}>
                         📅 Fecha
                       </Text>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: '#333' }}>
+                      <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>
                         {item.fecha_in ? new Date(item.fecha_in).toLocaleDateString('es-ES', { month: 'short', day: '2-digit' }) : 'N/A'}
                       </Text>
                     </View>
@@ -429,7 +431,7 @@ const TicketsTecnico = ({ navigation }: any) => {
                 </View>
 
                 {/* Footer - Indicador de interacción */}
-                <View style={{ backgroundColor: '#fafafa', paddingVertical: 10, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#e0e0e0' }}>
+                <View style={{ backgroundColor: colors.inputBackground, paddingVertical: 10, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border }}>
                   <Text style={{ fontSize: 12, color: '#3fbb34', fontWeight: '600' }}>
                     Ubicación: {item.ambient || 'No especificada'}
                   </Text>
@@ -451,8 +453,8 @@ const TicketsTecnico = ({ navigation }: any) => {
                 paddingHorizontal: 16,
                 paddingVertical: 12,
                 borderTopWidth: 1,
-                borderTopColor: '#e0e0e0',
-                backgroundColor: '#fafafa',
+                borderTopColor: colors.border,
+                backgroundColor: colors.inputBackground,
               }}
             >
               <TouchableOpacity
@@ -463,7 +465,7 @@ const TicketsTecnico = ({ navigation }: any) => {
                 <Text style={{ fontSize: 24, color: '#3fbb34', fontWeight: '700' }}>◄</Text>
               </TouchableOpacity>
 
-              <Text style={{ fontSize: 13, color: '#666', fontWeight: '600' }}>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, fontWeight: '600' }}>
                 Página {paginaActual} de {totalPaginas}
               </Text>
 
