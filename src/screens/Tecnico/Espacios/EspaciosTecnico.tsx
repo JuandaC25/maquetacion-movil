@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { authService, solicitudesService } from '../../../services/Api';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext' ;
 
 interface Solicitud {
   id_soli: number;
