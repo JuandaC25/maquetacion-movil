@@ -1,6 +1,8 @@
 import { useTheme } from '../../context/ThemeContext';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView, Image, Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import ReservaEspacioCard, { ReservaEspacio } from './ReservaEspacioCard';
 import DatePickerModal from '../../components/DatePickerModal';
 import { espaciosService, solicitudesService, authService } from '../../services/Api';
@@ -8,6 +10,7 @@ import { espaciosService, solicitudesService, authService } from '../../services
 const SolicitudesEspacioAdmin = () => {
   const { colors, theme } = useTheme();
   const isDark = theme === 'dark';
+  const navigation = useNavigation<any>();
   type Espacio = {
     id: number;
     nom_espa: string;
@@ -239,6 +242,7 @@ const SolicitudesEspacioAdmin = () => {
 
   return (
     <>
+      <AdminHeader title="Solicitudes y Espacios" navigation={navigation} />
       <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={[styles.header, { color: colors.title }]}>Espacios Disponibles</Text>
         {loading ? (

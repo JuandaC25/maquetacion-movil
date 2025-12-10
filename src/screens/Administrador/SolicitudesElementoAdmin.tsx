@@ -1,5 +1,7 @@
 import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DatePickerModal from '../../components/DatePickerModal';
@@ -78,6 +80,7 @@ const ESTADO_IDS: Record<string, number> = {
 
 const SolicitudesElementoAdmin = () => {
   const { colors, theme } = useTheme();
+  const navigation = useNavigation<any>();
   const isDark = theme === 'dark';
   // Estados para mostrar los modales de selección
   const [showCategoriaModal, setShowCategoriaModal] = useState(false);
@@ -169,10 +172,7 @@ const SolicitudesElementoAdmin = () => {
   });
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      {/* Header alineado a la izquierda, sin botón verde */}
-      <View style={{marginBottom: 10, paddingHorizontal: 16, paddingTop: 4}}>
-        <Text style={[styles.title, { color: colors.title, textAlign: 'left', fontSize: 22 }]}>Solicitudes de Elementos (Admin)</Text>
-      </View>
+      <AdminHeader title="Solicitudes de Elementos" navigation={navigation} />
       <View style={styles.solicitudesListWrap}>
         {loading ? (
           <ActivityIndicator size="large" color="#28a745" style={{ marginTop: 40 }} />
@@ -576,7 +576,7 @@ const SolicitudesElementoAdmin = () => {
                     est_soli: estadoMap[editEstado],
                     cantidad: editCantidad,
                   });
-                  alert('Respuesta backend: ' + JSON.stringify(resp?.data || resp));
+                  alert('Respuesta backend: ' + JSON.stringify(resp));
                   setEditModalVisible(false);
                   fetchSolicitudes(setSolicitudes, setLoading);
                 } catch (e) {

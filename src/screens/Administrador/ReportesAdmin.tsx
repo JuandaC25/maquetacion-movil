@@ -1,9 +1,12 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { ticketsService } from '../../services/Api';
 import { trazabilidadService } from '../../services/Api';
 import { useTheme } from '../../context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const estadoInfo = (estado: number | string) => {
   switch (Number(estado)) {
@@ -18,6 +21,7 @@ const ReportesAdmin: FC = () => {
   const [tickets, setTickets] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
   const [modalTicket, setModalTicket] = React.useState<any | null>(null);
   const [modalHistorial, setModalHistorial] = React.useState<any | null>(null);
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
@@ -25,10 +29,37 @@ const ReportesAdmin: FC = () => {
   // Helper to fetch full ticket/trazabilidad details and resolve user/element names
   const openHistorialModal = async (ticket: any) => {
     try {
+      // Check if user is authenticated
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setModalHistorial({
+          id: ticket.id ?? ticket.id_tickets,
+          fecha: '-',
+          usuarioReporta: '-',
+          usuario: '-',
+          elemento: '-',
+          ticketNum: ticket.id ?? ticket.id_tickets ?? '-',
+          observacion: 'Debes iniciar sesión para ver el historial.',
+        });
+        return;
+      }
+      
       // Fetch trazabilidad history for the ticket
       const ticketId = ticket.id ?? ticket.id_tickets;
+      console.log('[TRAZABILIDAD][MÓVIL] Intentando obtener historial para ticket:', ticketId);
+      console.log('[TRAZABILIDAD][MÓVIL] Token disponible:', !!token);
+      
       const res = await trazabilidadService.getByTicketId(ticketId);
-      const history = Array.isArray(res.data) ? res.data : [];
+      console.log('[TRAZABILIDAD][MÓVIL] Respuesta completa de la API:', res);
+      console.log('[TRAZABILIDAD][MÓVIL] Data de la respuesta:', res.data);
+      // Manejar diferentes tipos de respuesta
+      let history = [];
+      if (res.data && Array.isArray(res.data)) {
+        history = res.data;
+      } else if (Array.isArray(res)) {
+        history = res;
+      }
+      console.log('[TRAZABILIDAD][MÓVIL] Historial procesado:', history);
       let latest = history.length > 0 ? [...history].sort((a, b) => {
         const fechaA = new Date(
           a.fech || a.fecha || a.fecha1 || a.fecha_ini || 0
@@ -36,17 +67,19 @@ const ReportesAdmin: FC = () => {
         const fechaB = new Date(
           b.fech || b.fecha || b.fecha1 || b.fecha_ini || 0
         );
-        return fechaB - fechaA;
+        return fechaB.getTime() - fechaA.getTime();
       })[0] : null;
       if (latest) {
+        console.log('[TRAZABILIDAD] Objeto latest antes de setModalHistorial:', latest);
         setModalHistorial({
-          id: latest.id_trsa ?? latest.id ?? latest.id_interno ?? latest.id_ticket ?? latest.id_tickets ?? '-',
-          fecha: latest.fech ?? latest.fecha ?? latest.fecha1 ?? latest.fecha_ini ?? '-',
-          usuarioReporta: latest.nom_us_reporta ?? latest.reporta ?? latest.reportado_por ?? latest.usuario_reporta ?? '-',
-          usuario: latest.nom_us ?? latest.nom_usu ?? latest.usuario ?? latest.nombre_usuario ?? latest.tecnico ?? '-',
-          elemento: latest.nom_elemento ?? latest.nom_elem ?? latest.elemento ?? latest.nombre ?? latest.nombreElemento ?? latest.nombre_elemento ?? latest.nombre_elem ?? '-',
+          id: latest.id_trsa ?? latest.id ?? '-',
+          fecha: latest.fech ?? latest.fecha ?? '-',
+          usuarioReporta: latest.nom_us_reporta ?? '-',
+          usuario: latest.nom_us ?? '-',
+          elemento: latest.nom_elemen ?? latest.nom_elem ?? '-',
           ticketNum: latest.id_ticet ?? latest.id_ticket ?? latest.id_tickets ?? ticketId ?? '-',
           observacion: latest.obser ?? latest.obse ?? latest.descripcion ?? latest.respuesta ?? 'Sin respuesta registrada',
+          problema: latest.nom_problm ?? '-', // Agregar campo de problema
           ...latest
         });
       } else {
@@ -60,7 +93,21 @@ const ReportesAdmin: FC = () => {
           observacion: 'Sin respuesta registrada',
         });
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('[TRAZABILIDAD][MÓVIL] Error al obtener historial:', err);
+      
+      // Handle specific error cases
+      let errorMessage = 'Error al cargar historial';
+      if (err.response) {
+        if (err.response.status === 403) {
+          errorMessage = 'No tienes permisos para ver el historial. Inicia sesión nuevamente.';
+        } else if (err.response.status === 401) {
+          errorMessage = 'Sesión expirada. Inicia sesión nuevamente.';
+        } else if (err.response.status === 404) {
+          errorMessage = 'No se encontró historial para este ticket.';
+        }
+      }
+      
       setModalHistorial({
         id: ticket.id ?? ticket.id_tickets,
         fecha: '-',
@@ -68,11 +115,15 @@ const ReportesAdmin: FC = () => {
         usuario: '-',
         elemento: '-',
         ticketNum: ticket.id ?? ticket.id_tickets ?? '-',
-        observacion: '-',
+        observacion: errorMessage,
       });
     }
   };
 
+
+  React.useEffect(() => {
+    console.log('[MODAL] modalHistorial:', modalHistorial);
+  }, [modalHistorial]);
 
   React.useEffect(() => {
     const fetchTickets = async () => {
@@ -92,7 +143,8 @@ const ReportesAdmin: FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <Text style={[styles.header, { color: colors.title }]}>TICKETS</Text>
+      <AdminHeader title="Reportes" navigation={navigation} />
+      <View style={{ height: 12 }} />
       {loading ? (
         <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
       ) : (
@@ -159,6 +211,10 @@ const ReportesAdmin: FC = () => {
                   <Text style={{ fontSize: 16, color: colors.textPrimary }}>{estadoInfo(modalTicket?.estado ?? modalTicket?.id_est_tick).label}</Text>
                 </View>
               </View>
+              <View style={styles.modalRowFull}>
+                <Text style={[styles.modalLabelFull, { color: colors.title }]}>Observaciones:</Text>
+                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.observaciones ?? modalTicket?.observacion ?? '-'}</Text>
+              </View>
             </View>
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalTicket(null)}>
@@ -181,27 +237,31 @@ const ReportesAdmin: FC = () => {
               <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10, color: colors.title }]}>Trazabilidad — Entrada #{modalHistorial?.id ?? '-'}</Text>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Fecha</Text>
-                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.fecha ?? '-'}</Text>
+                <Text style={{ color: colors.textPrimary, fontSize: 16 }}>{modalHistorial?.fecha ?? '-'}</Text>
               </View>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Reportado por / Respondido por</Text>
                 <View style={{ flexDirection: 'row', gap: 20 }}>
-                  <Text style={{ color: colors.textPrimary }}><Text style={{ fontWeight: 'bold' }}>Reportó:</Text> {modalHistorial?.usuarioReporta ?? '-'}</Text>
-                  <Text style={{ color: colors.textPrimary, marginLeft: 20, borderLeftWidth: 1, borderLeftColor: '#ddd', paddingLeft: 20 }}><Text style={{ fontWeight: 'bold' }}>Respondió (Técnico):</Text> {modalHistorial?.usuario ?? '-'}</Text>
+                  <Text style={{ color: colors.textPrimary, fontSize: 14 }}><Text style={{ fontWeight: 'bold' }}>Reportó:</Text> {modalHistorial?.usuarioReporta ?? '-'}</Text>
+                  <Text style={{ color: colors.textPrimary, fontSize: 14, marginLeft: 20, borderLeftWidth: 1, borderLeftColor: '#ddd', paddingLeft: 20 }}><Text style={{ fontWeight: 'bold' }}>Respondió (Técnico):</Text> {modalHistorial?.usuario ?? '-'}</Text>
                 </View>
               </View>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Elemento</Text>
-                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.elemento ?? '-'}</Text>
+                <Text style={{ color: colors.textPrimary, fontSize: 16 }}>{modalHistorial?.elemento ?? '-'}</Text>
+              </View>
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Problema</Text>
+                <Text style={{ color: colors.textPrimary, fontSize: 16 }}>{modalHistorial?.problema ?? '-'}</Text>
               </View>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>ID interno</Text>
-                <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.id ?? '-'}</Text>
+                <Text style={{ color: colors.textPrimary, fontSize: 16 }}>{modalHistorial?.id ?? '-'}</Text>
               </View>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Respuesta del Técnico</Text>
                 <View style={{ backgroundColor: '#f1f8f4', borderRadius: 8, padding: 8, minHeight: 32, marginBottom: 10 }}>
-                  <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalHistorial?.observacion ?? 'Sin respuesta registrada'}</Text>
+                  <Text style={{ color: '#333', fontSize: 14 }}>{modalHistorial?.observacion ?? 'Sin respuesta registrada'}</Text>
                 </View>
               </View>
             </View>
