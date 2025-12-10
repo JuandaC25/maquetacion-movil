@@ -321,7 +321,7 @@ const SolicitudesEspacioAdmin = () => {
                       }
                       return s;
                     }));
-                    const resp = await solicitudesService.update(solicitudId, { est_soli: nuevoEstado });
+                    const resp = await solicitudesService.update(solicitudId, { id_est_soli: nuevoEstado });
                     console.log('RESPUESTA update solicitud:', resp?.data);
                     let msg = '';
                     if (nuevoEstado === 2) msg = '¡Solicitud aprobada correctamente!';

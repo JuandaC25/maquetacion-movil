@@ -573,8 +573,8 @@ const SolicitudesElementoAdmin = () => {
                     'Finalizado': 5
                   };
                   const resp = await solicitudesService.update(selectedSolicitud.id, {
-                    est_soli: estadoMap[editEstado],
-                    cantidad: editCantidad,
+                    id_est_soli: estadoMap[editEstado],
+                    cantid: editCantidad,
                   });
                   alert('Respuesta backend: ' + JSON.stringify(resp));
                   setEditModalVisible(false);

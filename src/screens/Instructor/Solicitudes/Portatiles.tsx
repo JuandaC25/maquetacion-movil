@@ -96,8 +96,15 @@ export default function Portatiles({ navigation }: any) {
         setIsLoading(true);
         const response = await elementosService.getAll();
         const data = response.data || [];
-        const subCatgFiltroNombre = categoriaFiltro === 'computo' ? 'portatil' : 'portatil de edición';
-        const filtrados = data.filter((item: any) => item.sub_catg && item.sub_catg.toLowerCase().includes(subCatgFiltroNombre));
+        const filtrados = data.filter((item: any) => {
+          if (!item.sub_catg) return false;
+          const subcat = item.sub_catg.trim().toLowerCase();
+          if (categoriaFiltro === 'computo') {
+            return subcat === 'portatil';
+          } else {
+            return subcat === 'portatil de edición';
+          }
+        });
         const activos = filtrados.filter((item: any) => item.est === 1);
         setEquiposDisponibles(activos.length);
         setPortatilesActivos(activos);

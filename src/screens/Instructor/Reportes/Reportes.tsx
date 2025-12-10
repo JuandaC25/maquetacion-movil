@@ -16,6 +16,7 @@ import { ReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Rep
 import HeaderWithDrawer from '../Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import { problemasService } from '../../../services/Api';
 
 interface Problema {
   id: number;
@@ -53,36 +54,9 @@ export default function ReportesScreen({ navigation }: any) {
   const cargarProblemas = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      const token = await AsyncStorage.getItem('token'); 
-      console.log('Token obtenido:', token ? 'Sí hay token' : 'No hay token');
-      console.log('Token value:', token);
-      
-      const authHeader = token 
-        ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
-        : '';
-      
-      console.log('Authorization header:', authHeader.substring(0, 30) + '...');
-      
-      const response = await fetch('http://192.168.1.90:8081/api/problemas/descripcion', {
-        method: 'GET',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Status response problemas:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Error ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Problemas recibidos:', data);
+      const response = await problemasService.getDescripciones();
+      const data = response.data;
       setProblemas(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Error en cargarProblemas:', err);

@@ -1,3 +1,4 @@
+// ==================== PROBLEMAS SERVICE ====================
 export const trazabilidadService = {
   getByTicketId: async (ticketId: number | string) => {
     const authConfig = await withAuth();
