@@ -290,7 +290,7 @@ export default function SolicitudesTecnico({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      <HeaderTecnico title="Solicitudes de Equipos" navigation={navigation} />
+      <HeaderTecnico title="Solicitudes" navigation={navigation} />
       
       <ScrollView style={{ flex: 1 }}>
         {/* Filtros Compactos */}
