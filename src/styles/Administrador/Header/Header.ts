@@ -2,22 +2,27 @@ import { StyleSheet } from 'react-native';
 
 export const HeaderComponentStyles = StyleSheet.create({
   header: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: '#2f9b2e',
     paddingHorizontal: 20,
+    paddingTop: 14,
     flexDirection: 'row-reverse',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.18,
     shadowRadius: 4,
-    height: 60,
+    height: 72,
   },
   headerTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginTop: 5,
+    fontSize: 22,
+    fontWeight: '700',
+    marginTop: 0,
     marginLeft: 'auto',
     marginRight: 'auto',
     color: '#fff',
+    maxWidth: '90%',
+    flexShrink: 1,
+    textAlign: 'center',
+    lineHeight: 26,
   },
   menuButton: {
     marginTop: 5,
@@ -29,7 +34,7 @@ export const HeaderComponentStyles = StyleSheet.create({
   },
   drawerOverlay: {
     position: 'absolute',
-    top: 0,
+    top: 72,
     left: 0,
     right: 0,
     bottom: 0,
@@ -95,7 +100,7 @@ export const HeaderComponentStyles = StyleSheet.create({
   gestureArea: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    top: 72,
     bottom: 0,
     width: 20,
     zIndex: 100,

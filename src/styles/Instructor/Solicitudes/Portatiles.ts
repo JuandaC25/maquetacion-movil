@@ -1,0 +1,302 @@
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#020202ff',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  counterContainer: {
+    alignSelf: 'flex-end',
+    marginTop: -10,
+    marginBottom: 10,
+    backgroundColor: '#e8f5e9',
+    paddingVertical: 4,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#4caf50',
+  },
+  counterText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#388e3c',
+    letterSpacing: 0.5,
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  // Estilos del Modal (copiados de EquipoMesa.ts)
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: width - 100, // Deja 20px de margen a cada lado
+    maxWidth: width,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 8,
+  },
+  modalText: {
+    marginBottom: 8,
+  },
+  cardHeader: {
+    marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: '#4caf50',
+    paddingBottom: 15,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#4caf50',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  descripcionContainer: {
+    marginBottom: 20,
+  },
+  descripcionTextContainer: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4caf50',
+    marginBottom: 12,
+  },
+  descripcionText: {
+    fontSize: 15,
+    color: '#555',
+    lineHeight: 24,
+    textAlign: 'justify',
+  },
+  especificacionesContainer: {
+    marginBottom: 20,
+    padding: 0,
+  },
+  listaContainer: {
+    gap: 12,
+  },
+  listaItem: {
+    fontSize: 15,
+    color: '#555',
+    lineHeight: 22,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  noDataText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    padding: 20,
+  },
+  carouselContainer: {
+    marginBottom: 20,
+  },
+  carouselContent: {
+    paddingHorizontal: 20,
+  },
+  carouselItem: {
+    width: width - 80,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginRight: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  carouselImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  elementoInfo: {
+    gap: 8,
+  },
+  elementoNombre: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  elementoDetalle: {
+    fontSize: 14,
+    color: '#666',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: '#4caf50',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  filterContainer: {
+    marginBottom: 15,
+  },
+  filterLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  filterButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#e0e0e0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  filterButtonActive: {
+    backgroundColor: '#4caf50',
+    borderColor: '#4caf50',
+  },
+  filterButtonText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  filterButtonTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  searchContainer: {
+    marginBottom: 20,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  selectionContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+ 
+  selectedText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
+  selectedDetail: {
+    fontSize: 14,
+    color: '#666',
+  },
+  noSelectionText: {
+    fontSize: 14,
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  datesContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  dateButton: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  submitButton: {
+    backgroundColor: '#4caf50',
+    borderRadius: 10,
+    padding: 18,
+    alignItems: 'center',
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});

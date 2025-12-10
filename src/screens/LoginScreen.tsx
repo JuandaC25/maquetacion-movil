@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/Api';
 import { LoginStyles } from '../styles/LoginStyles';
@@ -15,34 +15,57 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(true);
     try {
       console.log('🔐 Iniciando login...');
-      const response = await authService.login(username, password);
-      console.log('✅ Login exitoso, token recibido');
-      
+      console.log('Login payload:', { username, password });
+      const response = await authService.login(username.trim(), password);
+      console.log('✅ Login exitoso, token recibido:', response);
+
       console.log('📡 Obteniendo datos del usuario...');
       const userData = await authService.getMe();
       console.log('✅ Datos del usuario:', userData);
-      const userRoles = userData?.roles || [];
+      const userRoles = userData?.roles || userData?.role || [];
       console.log('👤 Roles:', userRoles);
-      
-      if (userRoles.includes('INSTRUCTOR')) {
-        console.log('🎯 Navegando a Solicitudes...');
+
+      // Guardar el usuario en AsyncStorage para futuras pantallas
+      await AsyncStorage.setItem('usuario', JSON.stringify(userData));
+      console.log('💾 Usuario guardado en AsyncStorage:', userData);
+
+      if ((userData.email || userData.correo || username) === 'admin@tech.com') {
+        console.log('🎯 Navegando a UsuariosAdmin...');
+        navigation.replace('UsuariosAdmin');
+      } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
+        console.log('🎯 Navegando a Solicitudes (Instructor)...');
         navigation.replace('Solicitudes');
+      } else if (Array.isArray(userRoles) && userRoles.includes('TECNICO')) {
+        console.log('🎯 Navegando a SolicitudesTecnico...');
+        navigation.replace('SolicitudesTecnico');
       } else {
         Alert.alert(
           'Login exitoso',
-          `Bienvenido ${userData.nombre || username}\nRoles: ${userRoles.join(', ')}`
+          `Bienvenido ${userData.nombre || userData.nom_usu || username}\nRoles: ${userRoles.join(', ')}`
         );
       }
     } catch (err: any) {
-      console.error('❌ Error en login:', err);
-      setError(err.message || 'Error al iniciar sesión');
+      console.error('❌ Error en login:', err, err?.response?.data);
+      if (err?.response?.status === 403 || err?.response?.status === 401) {
+        setError('Credenciales incorrectas o permisos insuficientes. Verifica tu usuario y contraseña.');
+      } else if (err?.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err?.message) {
+        setError(err.message);
+      } else {
+        setError('Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={LoginStyles.container}>
+    <ImageBackground
+      source={require('../../assets/login-bg.png')}
+      style={LoginStyles.container}
+      resizeMode="cover"
+    >
       <View style={LoginStyles.formBox}>
         <Text style={LoginStyles.title}>Iniciar sesión</Text>
 
@@ -83,6 +106,6 @@ export default function LoginScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 }

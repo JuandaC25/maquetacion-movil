@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   Image,
   Alert as RNAlert,
-  StyleSheet
+  StyleSheet,
+  SafeAreaView,
+  StatusBar
 } from 'react-native';
 import { ReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Reportes';
 import HeaderWithDrawer from '../Header/Header';
@@ -63,7 +65,7 @@ export default function ReportesScreen({ navigation }: any) {
       
       console.log('Authorization header:', authHeader.substring(0, 30) + '...');
       
-      const response = await fetch('http://192.168.0.7:8081/api/problemas/descripcion', {
+      const response = await fetch('http://192.168.1.90:8081/api/problemas/descripcion', {
         method: 'GET',
         headers: {
           'Authorization': authHeader,
@@ -251,7 +253,7 @@ export default function ReportesScreen({ navigation }: any) {
   };
 
   return (
-    <View style={ReportesStyles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#000', paddingTop: StatusBar.currentHeight || 24 }}>
       <HeaderWithDrawer title="Reportes" navigation={navigation} />
 
       <ScrollView style={ReportesStyles.formContainer}>
@@ -410,6 +412,6 @@ export default function ReportesScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

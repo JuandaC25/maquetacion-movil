@@ -1,8 +1,8 @@
 import Svg, { Path } from 'react-native-svg';
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions, PanResponder, Switch, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, PanResponder, Switch, TextInput, Alert, Platform, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { HeaderComponentStyles } from '../../../styles/Instructor/Header/Header';
+import { HeaderComponentStyles } from '../../../styles/Administrador/Header/Header';
 import { useTheme } from '../../../context/ThemeContext';
 import { usuariosService } from '../../../services/Api';
 
@@ -13,54 +13,84 @@ interface HeaderWithDrawerProps {
   navigation: any;
 }
 
-export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawerProps) {
-        // Guardar cambios de edición de perfil
-        const handleSaveEdit = async () => {
-          try {
-            // Validación básica
-            if (!formData.nom_us || !formData.ape_us || !formData.corre) {
-              Alert.alert('Error', 'Todos los campos son obligatorios.');
-              return;
+export default function AdminHeader({ title, navigation }: HeaderWithDrawerProps) {
+  const statusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 18) : 24;
+  const baseHeaderInner = 72;
+  const headerPaddingTop = statusBarHeight;
+  const headerHeight = headerPaddingTop + baseHeaderInner;
+  const handleSaveEdit = async () => {
+    try {
+      if (!formData.nom_us || !formData.ape_us || !formData.corre) {
+        Alert.alert('Error', 'Todos los campos son obligatorios.');
+        return;
+      }
+      let updatePayload: any = {
+        nom_us: formData.nom_us,
+        ape_us: formData.ape_us,
+        corre: formData.corre,
+      };
+      if (formData.currentPassword || formData.password || formData.confirmPassword) {
+        updatePayload.currentPassword = formData.currentPassword;
+        updatePayload.password = formData.password;
+      }
+      try {
+        const res = await usuariosService.updateProfile(updatePayload);
+        const updatedUser = res.data;
+        await AsyncStorage.setItem('usuario', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setShowEditModal(false);
+        AsyncStorage.clear();
+        Alert.alert('Información actualizada', 'Debes iniciar sesión nuevamente.', [
+          {
+            text: 'Aceptar',
+            onPress: () => {
+              navigation.navigate('Login');
             }
-            // Construir el payload según UsuariosUpdateDto
-            let updatePayload: any = {
-              nom_us: formData.nom_us,
-              ape_us: formData.ape_us,
-              corre: formData.corre,
-            };
-            // Lógica de cambio de contraseña
-            if (formData.currentPassword || formData.password || formData.confirmPassword) {
-              updatePayload.currentPassword = formData.currentPassword;
-              updatePayload.password = formData.password;
-            }
-            // Usar endpoint /perfil/me para actualizar el propio perfil
-            try {
-              const res = await usuariosService.updateProfile(updatePayload);
-              const updatedUser = res.data;
-              await AsyncStorage.setItem('usuario', JSON.stringify(updatedUser));
-              setUser(updatedUser);
-              // Cerrar sesión y navegar al login tras guardar cambios
-              setShowEditModal(false);
-              AsyncStorage.clear();
-              Alert.alert('Información actualizada', 'Debes iniciar sesión nuevamente.', [
-                {
-                  text: 'Aceptar',
-                  onPress: () => {
-                    navigation.navigate('Login');
-                  }
-                }
-              ]);
-            } catch (err) {
-              Alert.alert('Error', 'No se pudo actualizar en el servidor.');
-            }
-          } catch (err) {
-            Alert.alert('Error', 'No se pudo guardar la información.');
           }
-        };
-    // Estado y datos de usuario para perfil y edición
-    const [showProfile, setShowProfile] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [formData, setFormData] = useState({
+        ]);
+      } catch (err) {
+        Alert.alert('Error', 'No se pudo actualizar en el servidor.');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo guardar la información.');
+    }
+  };
+
+  const [showProfile, setShowProfile] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formData, setFormData] = useState({
+    nom_us: '',
+    ape_us: '',
+    corre: '',
+    currentPassword: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('usuario').then(u => {
+      if (u) setUser(JSON.parse(u));
+    });
+  }, []);
+
+  const handleShowProfile = () => setShowProfile(true);
+  const handleCloseProfile = () => setShowProfile(false);
+  const handleShowEditModal = () => {
+    setShowProfile(false);
+    setFormData({
+      nom_us: user?.nombre || user?.name || '',
+      ape_us: user?.apellido || '',
+      corre: user?.email || user?.correo || '',
+      currentPassword: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setShowEditModal(true);
+  };
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setFormData({
       nom_us: '',
       ape_us: '',
       corre: '',
@@ -68,47 +98,16 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
       password: '',
       confirmPassword: ''
     });
-    const [user, setUser] = useState<any>(null);
+  };
+  const handleInputChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  const handleLogout = () => {
+    AsyncStorage.clear();
+    Alert.alert('Sesión cerrada', 'Has cerrado sesión correctamente.');
+    navigation.navigate('Login');
+  };
 
-    useEffect(() => {
-      AsyncStorage.getItem('usuario').then(u => {
-        if (u) setUser(JSON.parse(u));
-      });
-    }, []);
-
-    const handleShowProfile = () => setShowProfile(true);
-    const handleCloseProfile = () => setShowProfile(false);
-    const handleShowEditModal = () => {
-      setShowProfile(false);
-      setFormData({
-        nom_us: user?.nombre || user?.name || '',
-        ape_us: user?.apellido || '',
-        corre: user?.email || user?.correo || '',
-        currentPassword: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setShowEditModal(true);
-    };
-    const handleCloseEditModal = () => {
-      setShowEditModal(false);
-      setFormData({
-        nom_us: '',
-        ape_us: '',
-        corre: '',
-        currentPassword: '',
-        password: '',
-        confirmPassword: ''
-      });
-    };
-    const handleInputChange = (name: string, value: string) => {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    };
-    const handleLogout = () => {
-      AsyncStorage.clear();
-      Alert.alert('Sesión cerrada', 'Has cerrado sesión correctamente.');
-      navigation.navigate('Login');
-    };
   const [menuVisible, setMenuVisible] = useState(false);
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const { theme, toggleTheme, colors } = useTheme();
@@ -146,8 +145,7 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
 
   return (
     <>
-      <View style={[HeaderComponentStyles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
-        {/* Menú a la izquierda */}
+      <View style={[HeaderComponentStyles.header, { paddingTop: headerPaddingTop, height: headerHeight, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
         <TouchableOpacity 
           style={HeaderComponentStyles.menuButton}
           onPress={() => setMenuVisible(true)}
@@ -155,7 +153,7 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
           <Text style={HeaderComponentStyles.menuIcon}>☰</Text>
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={HeaderComponentStyles.headerTitle}>{title}</Text>
+          <Text style={HeaderComponentStyles.headerTitle} numberOfLines={2} ellipsizeMode="tail">{title}</Text>
         </View>
         <TouchableOpacity onPress={handleShowProfile} style={{ marginLeft: 18, backgroundColor: '#4caf50', borderRadius: 20, padding: 2 }}>
           <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
@@ -165,6 +163,7 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
           </View>
         </TouchableOpacity>
       </View>
+
       {showProfile && (
         <View style={{ position: 'absolute', top: 110, right: 18, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.0)' }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: 250, elevation: 20, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8 }}>
@@ -192,7 +191,6 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
         </View>
       )}
 
-      {/* Modal de edición de perfil, encima de todo */}
       {showEditModal && (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.25)', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '85%', elevation: 20 }}>
@@ -224,63 +222,72 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
         </View>
       )}
 
-      {/* Overlay del drawer */}
       {menuVisible && (
         <TouchableOpacity 
-          style={HeaderComponentStyles.drawerOverlay}
+          style={[HeaderComponentStyles.drawerOverlay, { top: headerHeight }]}
           activeOpacity={1}
           onPress={() => setMenuVisible(false)}
         />
       )}
 
-      {/* Drawer lateral izquierdo */}
-      <Animated.View 
+
+      <Animated.View
         style={[
           HeaderComponentStyles.drawer,
           {
+            backgroundColor: colors.background,
+            borderRightColor: theme === 'dark' ? colors.border : '#eee',
+            borderRightWidth: 1,
             transform: [{ translateX }],
-            marginTop: 45 // Ajuste aún más fino para la posición del menú respecto al header
+            marginTop: headerHeight
           }
         ]}
         {...panResponder.panHandlers}
       >
-        <View style={HeaderComponentStyles.drawerHeader}>
-          <Text style={HeaderComponentStyles.drawerTitle}>Menú</Text>
+        <View style={[
+          HeaderComponentStyles.drawerHeader,
+          { backgroundColor: theme === 'dark' ? colors.cardBackground : '#3fbb34', borderBottomColor: theme === 'dark' ? colors.border : '#3fbb34', borderBottomWidth: 1 }
+        ]}>
+          <Text style={[HeaderComponentStyles.drawerTitle, { color: '#fff' }]}>Menú Administrador</Text>
         </View>
-        
-        <TouchableOpacity 
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('Solicitudes');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Solicitudes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('Reportes');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Reporte de equipos</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={HeaderComponentStyles.menuItem}
-          onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('HistorialPrueba');
-          }}
-        >
-          <Text style={HeaderComponentStyles.menuItemText}>Historial</Text>
-        </TouchableOpacity>
-        
-        {/* Toggle de Tema */}
-        <View style={HeaderComponentStyles.themeToggleContainer}>
-          <Text style={HeaderComponentStyles.menuItemText}>
+
+        {[
+          { label: 'Usuarios', route: 'UsuariosAdmin' },
+          { label: 'Categorías', route: 'CategoriasAdmin' },
+          { label: 'Inventario', route: 'InventarioAdmin' },
+          { label: 'Solicitudes Elementos', route: 'SolicitudesElementoAdmin' },
+          { label: 'Solicitudes Espacios', route: 'SolicitudesEspacioAdmin' },
+          { label: 'Reportes', route: 'ReportesAdmin' },
+        ].map((item, idx) => (
+          <TouchableOpacity
+            key={item.route}
+            style={[
+              HeaderComponentStyles.menuItem,
+              {
+                borderBottomColor: theme === 'dark' ? colors.border : '#eee',
+                backgroundColor: 'transparent',
+              },
+            ]}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate(item.route);
+            }}
+          >
+            <Text style={[
+              HeaderComponentStyles.menuItemText,
+              {
+                color: theme === 'dark' ? colors.textPrimary : '#333',
+                fontFamily: 'sans-serif',
+              },
+            ]}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <View style={[
+          HeaderComponentStyles.themeToggleContainer,
+          { backgroundColor: theme === 'dark' ? colors.cardBackground : '#f8f8f8', borderTopColor: theme === 'dark' ? colors.border : '#eee', borderTopWidth: 1 }
+        ]}>
+          <Text style={[HeaderComponentStyles.menuItemText, { color: theme === 'dark' ? colors.textPrimary : '#333' }] }>
             {theme === 'dark' ? '🌙 Tema Oscuro' : '☀️ Tema Claro'}
           </Text>
           <Switch
@@ -293,9 +300,8 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
         </View>
       </Animated.View>
 
-      {/* Área de gestos para abrir el drawer */}
       <View 
-        style={HeaderComponentStyles.gestureArea}
+        style={[HeaderComponentStyles.gestureArea, { top: headerHeight }]}
         {...panResponder.panHandlers}
       />
     </>

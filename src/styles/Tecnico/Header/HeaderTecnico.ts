@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const HeaderComponentStyles = StyleSheet.create({
+export const HeaderTecnicoStyles = StyleSheet.create({
   header: {
     backgroundColor: '#3fbb34',
     paddingHorizontal: 20,

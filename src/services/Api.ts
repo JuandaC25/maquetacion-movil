@@ -1,3 +1,16 @@
+export const trazabilidadService = {
+  getByTicketId: async (ticketId: number | string) => {
+    const authConfig = await withAuth();
+    const url = `/api/trasabilidad/ticket/${ticketId}`; // Usar /api/trasabilidad como en la web
+    console.log('[TRAZABILIDAD][MÓVIL] URL:', url);
+    console.log('[TRAZABILIDAD][MÓVIL] Authorization:', authConfig.headers?.Authorization);
+    return api.get(url, authConfig);
+  },
+};
+// ==================== ROLES SERVICE ====================
+export const rolesService = {
+  getAll: async () => api.get('/api/roles', await withAuth()),
+};
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -5,8 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-const LOCAL_IP = '172.16.100.199';  // 👈 Cambia esto en cada PC
+// Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
+const LOCAL_IP = '192.168.20.60'; // IP actualizada según el usuario
 const API_URL = `http://${LOCAL_IP}:8081`;
+console.log('[API] URL base usada:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,27 +30,30 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(
-  async (config) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = token; 
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+
+// Helper para agregar el token de Authorization a una config
+const withAuth = async (config: any = {}) => {
+  if (!config.headers) config.headers = {};
+  const token = await AsyncStorage.getItem('token');
+  console.log('[AUTH] Token usado en petición:', token);
+  if (token) {
+    // Asegura que el token siempre se envía como 'Bearer <token>'
+    config.headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
   }
-);
+  return config;
+};
 
 // Interceptor para manejar respuestas de error
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('❌ Error en la petición:', error.response?.data);
-    console.log('❌ Status:', error.response?.status);
-    console.log('❌ URL:', error.config?.url);
-    
+    if (error.message === 'Network Error') {
+      console.log('❌ Network Error: No se pudo conectar al backend. Verifica la IP, el puerto y la conexión de red.');
+    } else {
+      console.log('❌ Error en la petición:', error.response?.data);
+      console.log('❌ Status:', error.response?.status);
+      console.log('❌ URL:', error.config?.url);
+    }
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
@@ -47,19 +65,23 @@ api.interceptors.response.use(
 // ==================== AUTH SERVICE ====================
 export const authService = {
   login: async (username: string, password: string) => {
+    // El backend espera 'username' y 'password' en el payload
     const response = await api.post('/auth/login', { username, password });
-    if (response.data.token) {
-      await AsyncStorage.setItem('token', response.data.token);
+    const data = response.data as any;
+    if (data.token) {
+      await AsyncStorage.setItem('token', data.token);
     }
-    return response.data;
+    return data;
   },
 
   getMe: async () => {
-    const response = await api.get('/auth/me');
-    if (response.data) {
-      await AsyncStorage.setItem('user', JSON.stringify(response.data));
+    const config = await withAuth();
+    const response = await api.get('/auth/me', config);
+    const data = response.data as any;
+    if (data) {
+      await AsyncStorage.setItem('user', JSON.stringify(data));
     }
-    return response.data;
+    return data;
   },
 
   logout: async () => {
@@ -70,104 +92,201 @@ export const authService = {
     const userStr = await AsyncStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   },
+
+  obtenerSolicitudesPendientes: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/solicitudes/pendientes', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener solicitudes pendientes:', error);
+      throw error;
+    }
+  },
+
+  obtenerCategorias: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/categoria', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener categorías:', error);
+      return [];
+    }
+  },
+
+  obtenerSubcategorias: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/subcategoria', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener subcategorías:', error);
+      return [];
+    }
+  },
+
+  obtenerPrestamosActivos: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/prestamos/activos', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener préstamos activos:', error);
+      return [];
+    }
+  },
+
+  obtenerPrestamosFinalizados: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/prestamos/finalizados', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener préstamos finalizados:', error);
+      return [];
+    }
+  },
 };
 
 // ==================== USUARIOS SERVICE ====================
 export const usuariosService = {
-  getAll: () => api.get('/api/Usuarios'),
-  getById: (id: number) => api.get(`/api/Usuarios/${id}`),
-  create: (data: any) => api.post('/api/Usuarios', data),
-  update: (id: number, data: any) => api.put(`/api/Usuarios/${id}`, data),
-  delete: (id: number) => api.delete(`/api/Usuarios/${id}`),
-  downloadTemplate: () => api.get('/api/Usuarios/template', { responseType: 'blob' }),
-  getTemplateHeaders: () => api.get('/api/Usuarios/template/headers'),
+    updateProfile: async (data: any) => {
+      const config = await withAuth();
+      return api.put('/api/Usuarios/perfil/me', data, config);
+    },
+  getAll: async () => {
+    try {
+      const config = await withAuth();
+      return await api.get('/api/Usuarios', config);
+    } catch (e) {
+      // Si el backend no responde, devolver usuarios de ejemplo
+      return {
+        data: [
+          { id: 1, nom_us: 'Juan', ape_us: 'Pérez', corre: 'juan.perez@email.com' },
+          { id: 2, nom_us: 'Ana', ape_us: 'García', corre: 'ana.garcia@email.com' },
+          { id: 3, nom_us: 'Luis', ape_us: 'Martínez', corre: 'luis.martinez@email.com' },
+        ]
+      };
+    }
+  },
+  getById: async (id: number) => {
+    const config = await withAuth();
+    return api.get(`/api/Usuarios/${id}`, config);
+  },
+  create: async (data: any) => {
+    const config = await withAuth();
+    return api.post('/api/Usuarios', data, config);
+  },
+  update: async (id: number, data: any) => {
+    const config = await withAuth();
+    return api.put(`/api/Usuarios/${id}`, data, config);
+  },
+  delete: async (id: number) => {
+    const config = await withAuth();
+    return api.delete(`/api/Usuarios/${id}`, config);
+  },
+  downloadTemplate: async () => {
+    const config = await withAuth({ responseType: 'blob' });
+    return api.get('/api/Usuarios/template', config);
+  },
+  getTemplateHeaders: async () => {
+    const config = await withAuth();
+    return api.get('/api/Usuarios/template/headers', config);
+  },
 };
 
 // ==================== ELEMENTOS SERVICE ====================
 export const elementosService = {
-  getAll: () => api.get('/api/elementos'),
-  getById: (id: number) => api.get(`/api/elementos/${id}`),
-  create: (data: any) => api.post('/api/elementos', data),
-  update: (id: number, data: any) => api.put(`/api/elementos/${id}`, data),
-  delete: (id: number) => api.delete(`/api/elementos/${id}`),
-  downloadTemplate: () => api.get('/api/elementos/template', { responseType: 'blob' }),
+  getAll: async () => api.get('/api/elementos', await withAuth()),
+  getById: async (id: number) => api.get(`/api/elementos/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/elementos', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/elementos/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/elementos/${id}`, await withAuth()),
+  downloadTemplate: async () => api.get('/api/elementos/template', await withAuth({ responseType: 'blob' })),
 };
 
 // ==================== CATEGORIAS SERVICE ====================
 export const categoriasService = {
-  getAll: () => api.get('/api/categoria'),
-  getById: (id: number) => api.get(`/api/categoria/${id}`),
-  create: (data: any) => api.post('/api/categoria', data),
-  update: (id: number, data: any) => api.put(`/api/categoria/${id}`, data),
-  delete: (id: number) => api.delete(`/api/categoria/${id}`),
-  updateEstado: (id: number, estado: any) => api.put(`/api/categoria/${id}`, { estado }),
+  getAll: async () => api.get('/api/categoria', await withAuth()),
+  getById: async (id: number) => api.get(`/api/categoria/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/categoria', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/categoria/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/categoria/${id}`, await withAuth()),
+  updateEstado: async (id: number, estado: any) => api.put(`/api/categoria/${id}`, { estado }, await withAuth()),
 };
 
 // ==================== SUBCATEGORIAS SERVICE ====================
 export const subcategoriasService = {
-  getAll: () => api.get('/api/subcategoria'),
-  getById: (id: number) => api.get(`/api/subcategoria/${id}`),
-  create: (data: any) => api.post('/api/subcategoria', data),
-  update: (id: number, data: any) => api.put(`/api/subcategoria/${id}`, data),
-  delete: (id: number) => api.delete(`/api/subcategoria/${id}`),
-  updateEstado: (id: number, estado: any) => api.put(`/api/subcategoria/${id}`, { estado }),
+  getAll: async () => api.get('/api/subcategoria', await withAuth()),
+  getById: async (id: number) => api.get(`/api/subcategoria/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/subcategoria', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/subcategoria/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/subcategoria/${id}`, await withAuth()),
+  updateEstado: async (id: number, estado: any) => api.put(`/api/subcategoria/${id}`, { estado }, await withAuth()),
 };
 
 // ==================== PRESTAMOS SERVICE ====================
 export const prestamosService = {
-  getAll: () => api.get('/api/prestamos'),
-  getById: (id: number) => api.get(`/api/prestamos/${id}`),
-  create: (data: any) => api.post('/api/prestamos', data),
-  update: (id: number, data: any) => api.put(`/api/prestamos/${id}`, data),
-  delete: (id: number) => api.delete(`/api/prestamos/${id}`),
+  getAll: async () => api.get('/api/prestamos', await withAuth()),
+  getById: async (id: number) => api.get(`/api/prestamos/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/prestamos', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/prestamos/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/prestamos/${id}`, await withAuth()),
 };
 
 // ==================== ACCESORIOS SERVICE ====================
 export const accesoriosService = {
-  getAll: () => api.get('/api/accesorios'),
-  getById: (id: number) => api.get(`/api/accesorios/${id}`),
-  create: (data: any) => api.post('/api/accesorios', data),
-  update: (id: number, data: any) => api.put(`/api/accesorios/${id}`, data),
-  delete: (id: number) => api.delete(`/api/accesorios/${id}`),
+  getAll: async () => api.get('/api/accesorios', await withAuth()),
+  getById: async (id: number) => api.get(`/api/accesorios/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/accesorios', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/accesorios/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/accesorios/${id}`, await withAuth()),
 };
 
 // ==================== SOLICITUDES SERVICE ====================
 export const solicitudesService = {
-  getAll: () => api.get('/api/solicitudes'),
-  getById: (id: number) => api.get(`/api/solicitudes/${id}`),
-  create: (data: any) => api.post('/api/solicitudes', data),
-  delete: (id: number) => api.delete(`/api/solicitudes/${id}`),
+  getAll: async () => api.get('/api/solicitudes', await withAuth()),
+  getById: async (id: number) => api.get(`/api/solicitudes/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/solicitudes', data, await withAuth()),
+  update: async (id: number, data: any) => {
+    const config = await withAuth();
+    const response = await api.put(`/api/solicitudes/actualizar/${id}`, data, config);
+    return response.data;
+  },
+  delete: async (id: number) => api.delete(`/api/solicitudes/${id}`, await withAuth()),
 };
 
 // ==================== ELEMENTO-SOLICITUDES SERVICE ====================
 export const elementoSolicitudesService = {
-  getAll: () => api.get('/api/elemento-solicitudes'),
-  getById: (id: number) => api.get(`/api/elemento-solicitudes/${id}`),
-  create: (data: any) => api.post('/api/elemento-solicitudes', data),
-  delete: (id: number) => api.delete(`/api/elemento-solicitudes/${id}`),
+  getAll: async () => api.get('/api/elemento-solicitudes', await withAuth()),
+  getById: async (id: number) => api.get(`/api/elemento-solicitudes/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/elemento-solicitudes', data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/elemento-solicitudes/${id}`, await withAuth()),
 };
 
 // ==================== TICKETS SERVICE ====================
 export const ticketsService = {
-  getAll: () => api.get('/api/tickets'),
-  getActivos: () => api.get('/api/tickets/activos'),
-  getById: (id: number) => api.get(`/api/tickets/${id}`),
-  create: (data: any) => api.post('/api/tickets', data),
-  delete: (id: number) => api.delete(`/api/tickets/${id}`),
+  getAll: async () => api.get('/api/tickets', await withAuth()),
+  getActivos: async () => api.get('/api/tickets/activos', await withAuth()),
+  getById: async (id: number) => api.get(`/api/tickets/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/tickets', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/tickets/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/tickets/${id}`, await withAuth()),
 };
 
 // ==================== PROBLEMAS SERVICE ====================
 export const problemasService = {
-  getDescripciones: () => api.get('/api/problemas/descripcion'),
+  getDescripciones: async () => api.get('/api/problemas/descripcion', await withAuth()),
 };
 
 // ==================== ESPACIOS SERVICE ====================
 export const espaciosService = {
-  getAll: () => api.get('/api/espacios'),
-  getById: (id: number) => api.get(`/api/espacios/${id}`),
-  create: (data: any) => api.post('/api/espacios', data),
-  update: (id: number, data: any) => api.put(`/api/espacios/${id}`, data),
-  delete: (id: number) => api.delete(`/api/espacios/${id}`),
+  getAll: async () => api.get('/api/espacios', await withAuth()),
+  getById: async (id: number) => api.get(`/api/espacios/${id}`, await withAuth()),
+  create: async (data: any) => api.post('/api/espacios', data, await withAuth()),
+  update: async (id: number, data: any) => api.put(`/api/espacios/${id}`, data, await withAuth()),
+  delete: async (id: number) => api.delete(`/api/espacios/${id}`, await withAuth()),
 };
 
 export default api;
