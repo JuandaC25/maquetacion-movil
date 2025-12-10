@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -27,6 +28,7 @@ const PORTATILES_IMAGES = [
 ];
 
 export default function Portatiles({ navigation }: any) {
+    // Estados principales
     const [modalVisible, setModalVisible] = useState(false);
     const [form, setForm] = useState({
       fecha_ini: '',
@@ -46,6 +48,8 @@ export default function Portatiles({ navigation }: any) {
     const [portatilInfo, setPortatilInfo] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Helpers reutilizados
     const getCurrentDate = () => {
       const d = new Date();
       const year = d.getFullYear();
@@ -85,6 +89,8 @@ export default function Portatiles({ navigation }: any) {
       }
       setShowTimePicker(null);
     };
+
+    // Cargar portátiles activos y subcategoría
     const loadElementos = async () => {
       try {
         setIsLoading(true);
@@ -120,6 +126,7 @@ export default function Portatiles({ navigation }: any) {
     useEffect(() => {
       loadElementos();
     }, [categoriaFiltro]);
+    // Envío de solicitud
     const handleSubmitSolicitud = async () => {
       if (equiposDisponibles === 0) {
         Alert.alert('Error', 'No hay portátiles disponibles para solicitar.');
@@ -133,13 +140,16 @@ export default function Portatiles({ navigation }: any) {
         Alert.alert('Error', 'Por favor, completa todos los campos.');
         return;
       }
+
       const inicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
-      const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
-      if (fin <= inicio) {
-        Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
-        return;
-      }
+          const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+          if (fin <= inicio) {
+            Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
+            return;
+          }
+
       try {
+        // Tomamos el primer portátil activo para obtener el id_subcategoria
         const primerEquipo = portatilesActivos[0];
         const idSubcategoria = primerEquipo?.id_subcat || primerEquipo?.id_subcategoria;
         const idsElem = portatilesActivos.slice(0, form.cantidad).map(eq => eq.id);
@@ -152,8 +162,8 @@ export default function Portatiles({ navigation }: any) {
           ids_elem: idsElem,
           id_categoria: categoriaFiltro === 'computo' ? 1 : 2,
           id_subcategoria: Number(idSubcategoria),
-          id_usu: 1,
-          id_estado_soli: 1,
+          id_usu: 1, // Ajusta según tu lógica de usuario
+          id_estado_soli: 1, // Ajusta según tu backend
         };
         console.log('Solicitudes DTO:', dto);
         console.log('IDs enviados en ids_elem:', idsElem);
@@ -179,6 +189,7 @@ export default function Portatiles({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <HeaderWithDrawer navigation={navigation} title="Portátiles" />
       <ScrollView style={styles.content}>
+        {/* Toggle de categorías */}
         <View style={styles.filterContainer}>
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
             <TouchableOpacity
@@ -218,18 +229,23 @@ export default function Portatiles({ navigation }: any) {
 
         {portatilInfo ? (
           <View style={styles.card}>
+            {/* Header */}
             <View style={styles.cardHeader}>
               <Text style={styles.title}>🖥️ {portatilInfo.nombre}</Text>
               <Text style={styles.subtitle}>
                 Visualiza aquí los detalles generales de los portátiles disponibles
               </Text>
             </View>
+
+            {/* Badge de disponibles igual que Elementos */}
             <View style={styles.counterContainer}>
               <Text style={styles.counterText}>
                 <Text style={{fontWeight: 'bold', color: '#4caf50', fontSize: 14}}>● </Text>
                 {equiposDisponibles} disponibles
               </Text>
             </View>
+
+            {/* Carrusel de imágenes */}
             <View style={styles.carouselContainer}>
               <Image
                 source={PORTATILES_IMAGES[currentImageIndex]}
@@ -237,6 +253,8 @@ export default function Portatiles({ navigation }: any) {
                 resizeMode="contain"
               />
             </View>
+
+            {/* Descripción */}
             <View style={styles.descripcionContainer}>
               <Text style={styles.sectionTitle}>📋 Descripción general</Text>
               <View style={styles.descripcionTextContainer}>
@@ -245,6 +263,8 @@ export default function Portatiles({ navigation }: any) {
                 </Text>
               </View>
             </View>
+
+            {/* Especificaciones */}
             <View style={styles.especificacionesContainer}>
               <Text style={styles.sectionTitle}>  Componentes principales</Text>
               <View style={styles.listaContainer}>
@@ -256,6 +276,8 @@ export default function Portatiles({ navigation }: any) {
                 ))}
               </View>
             </View>
+
+            {/* Botón de solicitud */}
             <TouchableOpacity 
               style={[styles.submitButton, equiposDisponibles === 0 && styles.submitButtonDisabled]}
               disabled={equiposDisponibles === 0}
@@ -275,6 +297,8 @@ export default function Portatiles({ navigation }: any) {
             >
               <Text style={styles.submitButtonText}>Realizar solicitud</Text>
             </TouchableOpacity>
+
+            {/* ---- MODAL DE SOLICITUD ---- */}
             <Modal
               visible={modalVisible}
               animationType="slide"
@@ -285,16 +309,20 @@ export default function Portatiles({ navigation }: any) {
                 <ScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
                   <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Solicitud de Portátil</Text>
+                    {/* Fecha Inicio */}
                     <Text style={styles.modalText}>Fecha inicio</Text>
                     <TextInput style={styles.modalInput} value={form.fecha_ini} editable={false} />
+                    {/* Hora Inicio */}
                     <Text style={styles.modalText}>Hora inicio</Text>
                     <TouchableOpacity onPress={() => { setShowTimePicker('hora_ini'); setPickerTime(new Date()); }}>
                       <View pointerEvents="none">
                         <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" value={formatTo12Hour(form.hora_ini)} editable={false} />
                       </View>
                     </TouchableOpacity>
+                    {/* Fecha Fin */}
                     <Text style={styles.modalText}>Fecha fin</Text>
                     <TextInput style={styles.modalInput} value={form.fecha_fn} editable={false} />
+                    {/* Hora Fin */}
                     <Text style={styles.modalText}>Hora fin</Text>
                     <TouchableOpacity onPress={() => { setShowTimePicker('hora_fn'); setPickerTime(new Date()); }}>
                       <View pointerEvents="none">

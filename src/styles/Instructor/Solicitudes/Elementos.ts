@@ -3,6 +3,15 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+    pickerContainer: {
+      borderWidth: 2,
+      borderColor: '#4caf50',
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      marginBottom: 10,
+      backgroundColor: '#fff',
+    },
   container: {
     flex: 1,
     backgroundColor: '#000000ff',
@@ -141,9 +150,9 @@ export const styles = StyleSheet.create({
   pickerInput: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 7,
+    borderRadius: 7, // más delgado
     marginBottom: 10,
-    paddingVertical: 6,
+    paddingVertical: 1, // menos alto
     paddingHorizontal: 10,
     width: '100%',
     minWidth: '100%',
