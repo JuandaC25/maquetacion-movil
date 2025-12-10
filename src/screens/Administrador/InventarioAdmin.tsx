@@ -1,5 +1,7 @@
 import { useTheme } from '../../context/ThemeContext';
 import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { elementosService } from '../../services/Api';
@@ -21,6 +23,7 @@ type Elemento = {
 
 const InventarioAdmin = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
   const [elementos, setElementos] = useState<Elemento[]>([]);
   const [loading, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -130,7 +133,8 @@ const InventarioAdmin = () => {
           <Text style={{color: colors.textPrimary, textAlign: 'center'}}>{message}</Text>
         </View>
       )}
-      <Text style={styles.title}>Inventario</Text>
+      <AdminHeader title="Inventario" navigation={navigation} />
+      <View style={{ height: 12 }} />
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={20} color={colors.primary} style={{ marginRight: 8 }} />
         <TextInput

@@ -1,6 +1,8 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { ticketsService } from '../../services/Api';
 import { trazabilidadService } from '../../services/Api';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,6 +21,7 @@ const ReportesAdmin: FC = () => {
   const [tickets, setTickets] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
   const [modalTicket, setModalTicket] = React.useState<any | null>(null);
   const [modalHistorial, setModalHistorial] = React.useState<any | null>(null);
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
@@ -140,7 +143,8 @@ const ReportesAdmin: FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <Text style={[styles.header, { color: colors.title }]}>TICKETS</Text>
+      <AdminHeader title="Reportes" navigation={navigation} />
+      <View style={{ height: 12 }} />
       {loading ? (
         <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
       ) : (

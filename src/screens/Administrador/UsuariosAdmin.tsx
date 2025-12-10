@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import AdminHeader from './AdminHeader/AdminHeader';
 import { useTheme } from '../../context/ThemeContext';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView } from 'react-native';
 // Estados posibles (puedes ajustar los valores según tu backend)
@@ -28,6 +30,7 @@ type Usuario = {
 
 const UsuariosAdmin = () => {
   const { colors, theme } = useTheme();
+  const navigation = useNavigation<any>();
   const isDark = theme === 'dark';
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +125,8 @@ const UsuariosAdmin = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <Text style={[styles.title, { color: colors.primary }]}>Gestionar Usuarios</Text>
+      <AdminHeader title="Gestionar Usuarios" navigation={navigation} />
+      <View style={{ height: 12 }} />
       <View style={[styles.searchContainer, { backgroundColor: colors.cardBackground, shadowColor: colors.shadow }]}> 
         <FontAwesome5 name="search" size={18} color={colors.primary} style={{ marginRight: 8 }} />
         <TextInput
