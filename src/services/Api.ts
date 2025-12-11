@@ -1,17 +1,3 @@
-// ==================== PROBLEMAS SERVICE ====================
-export const trazabilidadService = {
-  getByTicketId: async (ticketId: number | string) => {
-    const authConfig = await withAuth();
-    const url = `/api/trasabilidad/ticket/${ticketId}`; // Usar /api/trasabilidad como en la web
-    console.log('[TRAZABILIDAD][MÓVIL] URL:', url);
-    console.log('[TRAZABILIDAD][MÓVIL] Authorization:', authConfig.headers?.Authorization);
-    return api.get(url, authConfig);
-  },
-};
-// ==================== ROLES SERVICE ====================
-export const rolesService = {
-  getAll: async () => api.get('/api/roles', await withAuth()),
-};
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -20,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
 // Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
-const LOCAL_IP = '192.168.20.60'; // IP actualizada según el usuario
+const LOCAL_IP = '192.168.1.6'; // IP actualizada según el usuario
 const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
@@ -148,6 +134,17 @@ export const authService = {
       return [];
     }
   },
+
+  obtenerElementos: async () => {
+    try {
+      const config = await withAuth();
+      const response = await api.get('/api/elementos', config);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener elementos:', error);
+      return [];
+    }
+  },
 };
 
 // ==================== USUARIOS SERVICE ====================
@@ -255,6 +252,12 @@ export const solicitudesService = {
     const response = await api.put(`/api/solicitudes/actualizar/${id}`, data, config);
     return response.data;
   },
+  updateEstado: async (id: number, data: any) => {
+    // ✅ Usar el endpoint correcto para cambios de estado
+    const config = await withAuth();
+    const response = await api.put(`/api/solicitudes/${id}`, data, config);
+    return response.data;
+  },
   delete: async (id: number) => api.delete(`/api/solicitudes/${id}`, await withAuth()),
 };
 
@@ -288,6 +291,22 @@ export const espaciosService = {
   create: async (data: any) => api.post('/api/espacios', data, await withAuth()),
   update: async (id: number, data: any) => api.put(`/api/espacios/${id}`, data, await withAuth()),
   delete: async (id: number) => api.delete(`/api/espacios/${id}`, await withAuth()),
+};
+
+// ==================== TRAZABILIDAD SERVICE ====================
+export const trazabilidadService = {
+  getByTicketId: async (ticketId: number | string) => {
+    const authConfig = await withAuth();
+    const url = `/api/trasabilidad/ticket/${ticketId}`; // Usar /api/trasabilidad como en la web
+    console.log('[TRAZABILIDAD][MÓVIL] URL:', url);
+    console.log('[TRAZABILIDAD][MÓVIL] Authorization:', authConfig.headers?.Authorization);
+    return api.get(url, authConfig);
+  },
+};
+
+// ==================== ROLES SERVICE ====================
+export const rolesService = {
+  getAll: async () => api.get('/api/roles', await withAuth()),
 };
 
 export default api;

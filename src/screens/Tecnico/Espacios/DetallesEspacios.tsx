@@ -29,8 +29,10 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
   const obtenerIdEstado = (estado: string): number => {
     const estados: { [key: string]: number } = {
       'Pendiente': 1,
-      'Aprobada': 2,
-      'Rechazada': 3,
+      'Aprobado': 2,
+      'Rechazado': 3,
+      'Cancelado': 4,
+      'Finalizado': 5,
     };
     return estados[estado] || 1;
   };
@@ -49,14 +51,14 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
         id_est_soli: nuevoIdEstado,
       };
       
-      const respuesta = await solicitudesService.update(solicitud.id_soli, datosActualizacion);
+      const respuesta = await solicitudesService.updateEstado(solicitud.id_soli, datosActualizacion);
       console.log('✅ Respuesta del servidor:', respuesta);
       
       setEstadoActual(nuevoEstado);
       setModalVisible(false);
       setModalAction(null);
       
-      const mensaje = nuevoEstado === 'Aprobada' 
+      const mensaje = nuevoEstado === 'Aprobado' 
         ? 'Solicitud de espacio aprobada correctamente' 
         : 'Solicitud de espacio rechazada correctamente';
       Alert.alert('Éxito', mensaje);
@@ -88,9 +90,9 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
 
   const confirmarAccion = () => {
     if (modalAction === 'rechazar') {
-      cambiarEstado('Rechazada');
+      cambiarEstado('Rechazado');
     } else if (modalAction === 'aprobar') {
-      cambiarEstado('Aprobada');
+      cambiarEstado('Aprobado');
     }
   };
 
@@ -249,7 +251,7 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
                       borderRadius: 5, 
                       alignItems: 'center' 
                     }}
-                    onPress={cambiarEstado}
+                    onPress={() => confirmarAccion()}
                   >
                     <Text style={{ color: '#3fbb34', fontWeight: 'bold' }}>Sí</Text>
                   </TouchableOpacity>
