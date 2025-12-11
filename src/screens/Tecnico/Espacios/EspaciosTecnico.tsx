@@ -180,18 +180,23 @@ export default function EspaciosTecnico({ navigation }: any) {
     
     try {
       setActualizando(true);
-      // Cambiar estado a Aprobada (estado 2)
+      // Cambiar estado a Aprobado (estado 2)
       const datosActualizacion = {
-        id_est_soli: 2, // Estado Aprobada
-        id_soli: solicitudSeleccionada.id_soli,
+        id_est_soli: 2, // Estado Aprobado
       };
       
-      await solicitudesService.updateEstado(solicitudSeleccionada.id_soli, datosActualizacion);
+      console.log('🔹 ID Solicitud:', solicitudSeleccionada.id_soli);
+      console.log('🔹 Estado actual:', solicitudSeleccionada.est_soli);
+      console.log('🔹 Datos a enviar:', JSON.stringify(datosActualizacion));
+      
+      const respuesta = await solicitudesService.updateEstado(solicitudSeleccionada.id_soli, datosActualizacion);
+      console.log('🔹 Respuesta del servidor:', respuesta);
+      console.log('🔹 Estado en respuesta:', respuesta.data?.est_soli);
       
       // Actualizar la lista local
       setSolicitudes(solicitudes.map(sol => 
         sol.id_soli === solicitudSeleccionada.id_soli 
-          ? { ...sol, est_soli: 'Aprobada' }
+          ? { ...sol, est_soli: respuesta.data?.est_soli || 'Aprobado' }
           : sol
       ));
       
@@ -199,7 +204,8 @@ export default function EspaciosTecnico({ navigation }: any) {
       setSolicitudSeleccionada(null);
       Alert.alert('Éxito', 'Solicitud de espacio aprobada correctamente');
     } catch (error: any) {
-      console.error('Error al aprobar solicitud:', error);
+      console.error('❌ Error al aprobar solicitud:', error);
+      console.error('❌ Detalles:', error.response?.data);
       Alert.alert('Error', 'No se pudo aprobar la solicitud');
     } finally {
       setActualizando(false);
@@ -497,7 +503,7 @@ export default function EspaciosTecnico({ navigation }: any) {
               
               <TouchableOpacity 
                 style={{ flex: 1, paddingVertical: 12, backgroundColor: '#3fbb34', borderRadius: 6, alignItems: 'center' }}
-                onPress={cambiarEstadoAAprobada}
+                onPress={() => cambiarEstadoAAprobada()}
                 disabled={actualizando}
               >
                 {actualizando ? (

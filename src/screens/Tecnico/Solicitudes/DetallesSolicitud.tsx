@@ -41,8 +41,6 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
   const [estadoActual, setEstadoActual] = useState(solicitud.est_soli);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAction, setModalAction] = useState<string | null>(null);
-  const [isAprobarPressed, setIsAprobarPressed] = useState(false);
-  const [isRechazarPressed, setIsRechazarPressed] = useState(false);
   const [mostrarModalAsignar, setMostrarModalAsignar] = useState(false);
   const [elementos, setElementos] = useState<Elemento[]>([]);
   const [elementosSeleccionados, setElementosSeleccionados] = useState<ElementoSeleccionado[]>([]);
@@ -51,8 +49,10 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
   const obtenerIdEstado = (estado: string): number => {
     const estados: { [key: string]: number } = {
       'Pendiente': 1,
-      'Aprobada': 2,
-      'Rechazada': 3,
+      'Aprobado': 2,
+      'Rechazado': 3,
+      'Cancelado': 4,
+      'Finalizado': 5,
     };
     return estados[estado] || 1;
   };
@@ -71,14 +71,14 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
         id_est_soli: nuevoIdEstado,
       };
       
-      const respuesta = await solicitudesService.update(solicitud.id_soli, datosActualizacion);
+      const respuesta = await solicitudesService.updateEstado(solicitud.id_soli, datosActualizacion);
       console.log('✅ Respuesta del servidor:', respuesta);
       
       setEstadoActual(nuevoEstado);
       setModalVisible(false);
       setModalAction(null);
       
-      const mensaje = nuevoEstado === 'Aprobada' 
+      const mensaje = nuevoEstado === 'Aprobado' 
         ? 'Solicitud aprobada correctamente' 
         : 'Solicitud rechazada correctamente';
       Alert.alert('Éxito', mensaje);
@@ -96,8 +96,17 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
     }
   };
 
-  // Función independiente para Aprobar (abre directamente el modal de equipos)
+  // Función independiente para Aprobar (abre modal de equipos solo si hay elementos)
   const abrirModalAprobar = () => {
+    // ✅ Si no tiene elementos o cantidad es null, es solicitud de espacio - aprobar directamente
+    if (!solicitud.nom_elem || !solicitud.cantid) {
+      console.log('📋 Solicitud de espacio detectada - aprobando directamente sin asignar elementos');
+      cambiarEstado('Aprobado');
+      return;
+    }
+    
+    // ✅ Si tiene elementos, mostrar modal para asignar
+    console.log('📦 Solicitud de equipos detectada - abriendo modal de asignación');
     cargarElementos();
     setMostrarModalAsignar(true);
   };
@@ -110,7 +119,7 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
 
   const confirmarAccion = () => {
     if (modalAction === 'rechazar') {
-      cambiarEstado('Rechazada');
+      cambiarEstado('Rechazado');
     }
   };
 
@@ -199,6 +208,11 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
   const enviarAsignacion = async () => {
     const cantidadTotal = elementosSeleccionados.reduce((sum, e) => sum + e.cantidad, 0);
     
+    if (cantidadTotal === 0) {
+      Alert.alert('Error', 'Debes seleccionar al menos un elemento');
+      return;
+    }
+
     if (cantidadTotal > solicitud.cantid) {
       Alert.alert(
         'Cantidad excedida',
@@ -207,17 +221,13 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
       return;
     }
 
-    if (cantidadTotal === 0) {
-      Alert.alert('Error', 'Debes seleccionar al menos un elemento');
-      return;
-    }
-
     setEnviando(true);
     try {
-      const usuarioJSON = await AsyncStorage.getItem('usuario');
-      const usuario = usuarioJSON ? JSON.parse(usuarioJSON) : {};
-      const id_tecnico = usuario.id || 0;
-      const nombre_tecnico = usuario.nombre || usuario.nom_usu || 'Técnico';
+      // Obtener usuario del AsyncStorage
+      const userJSON = await AsyncStorage.getItem('user');
+      const user = userJSON ? JSON.parse(userJSON) : {};
+      const id_tecnico = user.id || 0;
+      const nombre_tecnico = user.nombre || 'Técnico';
 
       const idsElem: number[] = [];
       elementosSeleccionados.forEach((item) => {
@@ -225,16 +235,6 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
           idsElem.push(item.id_elemen);
         }
       });
-
-      const payload = {
-        id_soli: solicitud.id_soli,
-        id_est_soli: 2,
-        ids_elem: idsElem,
-        id_tecnico,
-        nombre_tecnico,
-      };
-
-      console.log('📤 Enviando asignación:', payload);
 
       const token = await AsyncStorage.getItem('token');
       const headers: any = {
@@ -245,24 +245,40 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
         headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       }
 
-      const response = await fetch(`http://192.168.1.6:8080/api/solicitudes/${solicitud.id_soli}`, {
+      // Preparar payload con los nuevos elementos
+      const payload = {
+        id_est_soli: 2, // Aprobado
+        id_tecnico,
+        nombre_tecnico,
+        ids_elem: idsElem,
+      };
+
+      console.log('📤 Enviando asignación con actualización:', payload);
+
+      // PUT directo - que el backend maneje la limpieza de elementos antiguos
+      const response = await fetch(`http://192.168.1.6:8081/api/solicitudes/${solicitud.id_soli}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Error al actualizar solicitud');
+      const responseData = await response.json();
+      console.log('📥 Respuesta del servidor:', responseData, 'Status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${responseData?.mensaje || responseData?.detalle || 'Error al actualizar solicitud'}`);
+      }
 
       Alert.alert('Éxito', 'Solicitud aprobada y elementos asignados');
       setMostrarModalAsignar(false);
       setElementosSeleccionados([]);
-      setEstadoActual('Aprobada');
+      setEstadoActual('Aprobado');
       setTimeout(() => {
         navigation.goBack();
       }, 1000);
-    } catch (error) {
-      console.error('Error al enviar asignación:', error);
-      Alert.alert('Error', 'No se pudo asignar los elementos');
+    } catch (error: any) {
+      console.error('❌ Error al enviar asignación:', error.message || error);
+      Alert.alert('Error', error.message || 'No se pudo asignar los elementos');
     } finally {
       setEnviando(false);
     }
@@ -436,7 +452,7 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
                       borderRadius: 5, 
                       alignItems: 'center' 
                     }}
-                    onPress={confirmarAccion}
+                    onPress={() => confirmarAccion()}
                   >
                     <Text style={{ color: '#3fbb34', fontWeight: 'bold' }}>Sí</Text>
                   </TouchableOpacity>
@@ -626,11 +642,11 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
                 style={{
                   flex: 1,
                   paddingVertical: 12,
-                  backgroundColor: (elementosSeleccionados.length > 0 && elementosSeleccionados.reduce((sum, e) => sum + e.cantidad, 0) === solicitud.cantid) ? '#3fbb34' : '#ccc',
+                  backgroundColor: (elementosSeleccionados.length > 0 && elementosSeleccionados.reduce((sum, e) => sum + e.cantidad, 0) > 0) ? '#3fbb34' : '#ccc',
                   borderRadius: 8,
                   alignItems: 'center',
                 }}
-                disabled={(elementosSeleccionados.reduce((sum, e) => sum + e.cantidad, 0) !== solicitud.cantid) || enviando}
+                disabled={(elementosSeleccionados.reduce((sum, e) => sum + e.cantidad, 0) === 0) || enviando}
               >
                 <Text style={{ fontWeight: '600', color: '#fff', fontSize: 14 }}>
                   {enviando ? 'Asignando...' : 'Confirmar Asignación'}
