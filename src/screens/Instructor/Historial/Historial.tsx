@@ -216,9 +216,10 @@ export default function HistorialPedidosMovil({ navigation }: any) {
                     return String(sol.id_usu) === String(usuario.id); 
                 })
                 : [];
+            // Cancelar automáticamente solicitudes vencidas
+            await cancelarSolicitudesVencidas(solicitudesDelUsuario);
             
             console.log("✅ [SOLI] Solicitudes filtradas para este usuario:", solicitudesDelUsuario.length);
-            
             setSolicitudes(solicitudesDelUsuario);
             setError(null);
         } catch (err: any) {
