@@ -123,6 +123,33 @@ const SolicitudesEspacioAdmin = () => {
 
   const reservarEspacio = async () => {
     if (!espacioSeleccionado || !usuario?.id) return;
+    
+    // Validar formato de fecha de inicio
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_ini)) {
+      setError('❌ Error en fecha de inicio: El formato debe ser 2025-12-11 14:30. Formato actual: ' + (reservaForm.fecha_ini || 'vacío'));
+      return;
+    }
+    
+    // Validar formato de fecha de fin
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_fn)) {
+      setError('❌ Error en fecha de fin: El formato debe ser 2025-12-11 16:00. Formato actual: ' + (reservaForm.fecha_fn || 'vacío'));
+      return;
+    }
+    
+    // Validar que las fechas no sean iguales
+    if (reservaForm.fecha_ini === reservaForm.fecha_fn) {
+      setError('❌ Error: La fecha y hora de inicio y fin no pueden ser exactamente iguales. \n\nFecha inicio: ' + reservaForm.fecha_ini + '\nFecha fin: ' + reservaForm.fecha_fn);
+      return;
+    }
+    
+    // Validar que la fecha de fin sea posterior a la fecha de inicio
+    const fechaIniDate = new Date(reservaForm.fecha_ini.replace(' ', 'T'));
+    const fechaFinDate = new Date(reservaForm.fecha_fn.replace(' ', 'T'));
+    if (fechaFinDate <= fechaIniDate) {
+      setError('❌ Error: La fecha de fin debe ser posterior a la fecha de inicio.\n\nFecha inicio: ' + reservaForm.fecha_ini + '\nFecha fin: ' + reservaForm.fecha_fn);
+      return;
+    }
+    
     setSaving(true);
     try {
       await solicitudesService.create({
@@ -412,9 +439,9 @@ const SolicitudesEspacioAdmin = () => {
                   <Text style={styles.botonTexto}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.boton, (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_fn)) ? { backgroundColor: '#bbb' } : null]}
+                  style={[styles.boton, saving ? { backgroundColor: '#bbb' } : null]}
                   onPress={reservarEspacio}
-                  disabled={saving || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}$/.test(reservaForm.fecha_fn)}
+                  disabled={saving}
                 >
                   <Text style={styles.botonTexto}>{saving ? 'Reservando...' : 'Confirmar'}</Text>
                 </TouchableOpacity>

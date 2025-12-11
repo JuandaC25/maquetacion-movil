@@ -14,7 +14,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { elementosService } from '../../../services/Api';
+import { elementosService, solicitudesService, subcategoriasService, authService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
 import { styles } from '../../../styles/Instructor/Solicitudes/AudioVideo';
 
@@ -29,34 +29,34 @@ const AUDIO_VIDEO_IMAGES = [
 ];
 
 export default function Audio_video({ navigation }: any) {
-      // Estado para subcategoría seleccionada
       const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<number | null>(null);
     // Listado de subcategorías filtradas para Multimedia
     const [subcategorias, setSubcategorias] = useState<any[]>([]);
 
     useEffect(() => {
-      // Importo el servicio aquí para evitar error de import duplicada
-      const { subcategoriasService } = require('../../../services/Api');
       const cargarSubcategorias = async () => {
         try {
           const resp = await subcategoriasService.getAll();
           const data = resp.data || [];
-          // Filtrar subcategorías para Multimedia y excluir por nombre
           const nombresExcluir = [
             'Equipo de mesa',
             'Equipo de edición',
             'Portatil',
             'Portatil de edición'
           ];
+          // Igual que en Elementos, pero solo multimedia
           const filtradas = data.filter((subcat: any) => {
             const categoriaPadre = (subcat.nom_cat || '').toLowerCase().trim();
             return (
               !nombresExcluir.includes(subcat.nom_subcateg) &&
               categoriaPadre === 'multimedia'
             );
-          });
+          }).map((subcat: any) => ({
+            id: subcat.id_subcategoria ?? subcat.id,
+            nom_subcateg: subcat.nom_subcateg
+          }));
           setSubcategorias(filtradas);
-          if (filtradas.length > 0) setSubcategoriaSeleccionada(filtradas[0].id_subcategoria);
+          if (filtradas.length > 0) setSubcategoriaSeleccionada(filtradas[0].id);
         } catch (err) {
           console.error('Error cargando subcategorías:', err);
           setSubcategorias([]);
@@ -67,7 +67,6 @@ export default function Audio_video({ navigation }: any) {
   const [equiposDisponibles, setEquiposDisponibles] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  // Modal y formulario
   const [modalVisible, setModalVisible] = useState(false);
   const [form, setForm] = useState({
     fecha_ini: '',
@@ -80,9 +79,6 @@ export default function Audio_video({ navigation }: any) {
   });
   const [showTimePicker, setShowTimePicker] = useState<string | null>(null);
   const [pickerTime, setPickerTime] = useState<Date>(new Date());
-  // Eliminado: subcategorias y subcategoriaSeleccionada (solo se listan todas las subcategorías)
-
-  // Helpers reutilizados
   const getCurrentDate = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -124,12 +120,17 @@ export default function Audio_video({ navigation }: any) {
   };
 
   // Mock de subcategorías para Multimedia
-  // Eliminado: useEffect de mock de subcategorías
 
   // Envío de solicitud
   const handleSubmitSolicitud = async () => {
-    // Aquí deberías obtener el usuario y roles si lo necesitas
-    // Para ejemplo, solo validamos campos
+    // Obtener usuario autenticado
+    console.log('DEBUG subcategoriaSeleccionada:', subcategoriaSeleccionada);
+    console.log('DEBUG subcategorias:', subcategorias);
+    const usuario = await authService.getCurrentUser();
+    if (!usuario) {
+      Alert.alert('Error', 'Debes iniciar sesión para enviar solicitudes.');
+      return;
+    }
     if (equiposDisponibles === 0) {
       Alert.alert('Error', 'No hay elementos disponibles para solicitar.');
       return;
@@ -138,20 +139,25 @@ export default function Audio_video({ navigation }: any) {
       Alert.alert('Error', 'Solo puedes solicitar entre 1 y 3 elementos.');
       return;
     }
+
     if (!form.fecha_ini || !form.hora_ini || !form.fecha_fn || !form.hora_fn || !form.ambient || !form.num_ficha) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
 
+    if (!subcategoriaSeleccionada || isNaN(Number(subcategoriaSeleccionada))) {
+      Alert.alert('Error', 'Debes seleccionar una subcategoría válida.');
+      return;
+    }
+
     const inicio = new Date(`${form.fecha_ini}T${form.hora_ini}:00`);
-        const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
-        if (fin <= inicio) {
-          Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
-          return;
-        }
+    const fin = new Date(`${form.fecha_fn}T${form.hora_fn}:00`);
+    if (fin <= inicio) {
+      Alert.alert('Hora incorrecta', 'Seleccione una hora de fin posterior a la hora de inicio.');
+      return;
+    }
 
     try {
-      // Aquí deberías obtener los IDs de los elementos activos, para ejemplo se envía un array vacío
       const idsElem: number[] = [];
       const dto = {
         fecha_ini: `${form.fecha_ini}T${form.hora_ini}:00`,
@@ -160,13 +166,13 @@ export default function Audio_video({ navigation }: any) {
         num_fich: Number(form.num_ficha),
         cantid: Number(form.cantidad),
         ids_elem: idsElem,
-        id_categoria: 2, // Multimedia (ID ejemplo)
+        id_categoria: 2,
         id_subcategoria: subcategoriaSeleccionada,
-        id_usu: 1, // ID de usuario ejemplo
+        id_usu: usuario.id || 1,
         id_estado_soli: 1,
       };
       console.log('Solicitudes DTO AudioVideo:', dto);
-      // Aquí deberías llamar a tu servicio de solicitudes
+      await solicitudesService.create(dto);
       Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente ✅');
       setModalVisible(false);
       setForm({ 
@@ -350,13 +356,14 @@ export default function Audio_video({ navigation }: any) {
                     <Picker
                       selectedValue={subcategoriaSeleccionada}
                       onValueChange={(itemValue) => setSubcategoriaSeleccionada(itemValue)}
+                      style={{ color: '#000000ff', fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius: 5 }}
                     >
                       <Picker.Item label="Seleccione..." value={null} />
                       {subcategorias.map(subcat => (
                         <Picker.Item
-                          key={subcat.id_subcategoria}
-                          label={String(subcat.nom_subcateg || subcat.nom_subcategoria || subcat.nombre || 'Sin nombre')}
-                          value={subcat.id_subcategoria}
+                          key={subcat.id}
+                          label={subcat.nom_subcateg}
+                          value={subcat.id}
                         />
                       ))}
                     </Picker>

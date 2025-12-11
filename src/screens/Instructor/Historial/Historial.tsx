@@ -173,6 +173,23 @@ export default function HistorialPedidosMovil({ navigation }: any) {
         }
     };
 
+    const cancelarSolicitudesVencidas = async (solicitudes: Solicitud[]) => {
+        const now = new Date();
+        for (const sol of solicitudes) {
+            if (sol.est_soli?.toLowerCase().includes('pendiente') && sol.fecha_fn) {
+                const fechaFin = new Date(sol.fecha_fn);
+                if (fechaFin <= now) {
+                    try {
+                        await solicitudesService.update(sol.id_soli, { id_est_soli: 4 });
+                        sol.est_soli = 'Cancelado';
+                    } catch (err) {
+                        console.error('Error cancelando solicitud vencida:', err);
+                    }
+                }
+            }
+        }
+    };
+
     const cargarSolicitudes = async () => {
         try {
             setIsLoading(true);
@@ -199,9 +216,10 @@ export default function HistorialPedidosMovil({ navigation }: any) {
                     return String(sol.id_usu) === String(usuario.id); 
                 })
                 : [];
+            // Cancelar automáticamente solicitudes vencidas
+            await cancelarSolicitudesVencidas(solicitudesDelUsuario);
             
             console.log("✅ [SOLI] Solicitudes filtradas para este usuario:", solicitudesDelUsuario.length);
-            
             setSolicitudes(solicitudesDelUsuario);
             setError(null);
         } catch (err: any) {
@@ -262,6 +280,23 @@ export default function HistorialPedidosMovil({ navigation }: any) {
             cargarTickets();
         }
     }, [activeTab]);
+
+    // Actualizar subcategoriaOptions cada vez que cambien las solicitudes o subcategorias
+    useEffect(() => {
+        if (activeTab !== 'solicitudes') return;
+        const subcatIdsSet = new Set<string>();
+        solicitudes.forEach(sol => {
+            const subcatId = sol.id_subcategoria ?? sol.id_subcatego ?? sol.id_subcate ?? sol.id_subcat ?? sol.id_subcateg;
+            if (subcatId !== null && subcatId !== undefined) {
+                subcatIdsSet.add(String(subcatId));
+            }
+        });
+        const filteredOptions = Array.from(subcatIdsSet).map(id => ({
+            id,
+            nombre: subcategorias[id] || 'N/A'
+        }));
+        setSubcategoriaOptions(filteredOptions);
+    }, [solicitudes, subcategorias, activeTab]);
     
     const filteredSolicitudes = useMemo(() => {
         if (activeTab !== 'solicitudes') {
