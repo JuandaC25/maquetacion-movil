@@ -173,6 +173,23 @@ export default function HistorialPedidosMovil({ navigation }: any) {
         }
     };
 
+    const cancelarSolicitudesVencidas = async (solicitudes: Solicitud[]) => {
+        const now = new Date();
+        for (const sol of solicitudes) {
+            if (sol.est_soli?.toLowerCase().includes('pendiente') && sol.fecha_fn) {
+                const fechaFin = new Date(sol.fecha_fn);
+                if (fechaFin <= now) {
+                    try {
+                        await solicitudesService.update(sol.id_soli, { id_est_soli: 4 });
+                        sol.est_soli = 'Cancelado';
+                    } catch (err) {
+                        console.error('Error cancelando solicitud vencida:', err);
+                    }
+                }
+            }
+        }
+    };
+
     const cargarSolicitudes = async () => {
         try {
             setIsLoading(true);
@@ -199,9 +216,8 @@ export default function HistorialPedidosMovil({ navigation }: any) {
                     return String(sol.id_usu) === String(usuario.id); 
                 })
                 : [];
-            
-            console.log("✅ [SOLI] Solicitudes filtradas para este usuario:", solicitudesDelUsuario.length);
-            
+            // Cancelar automáticamente solicitudes vencidas
+            await cancelarSolicitudesVencidas(solicitudesDelUsuario);
             setSolicitudes(solicitudesDelUsuario);
             setError(null);
         } catch (err: any) {
