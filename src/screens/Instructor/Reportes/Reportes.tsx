@@ -16,7 +16,7 @@ import { ReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Rep
 import HeaderWithDrawer from '../Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import { problemasService } from '../../../services/Api';
+import { problemasService, API_URL } from '../../../services/Api';
 
 interface Problema {
   id: number;
@@ -143,7 +143,7 @@ export default function ReportesScreen({ navigation }: any) {
           ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
           : '';
         
-        const uploadResponse = await fetch('http://192.168.0.7:8081/api/tickets/upload-images', {
+        const uploadResponse = await fetch(`${API_URL}/api/tickets/upload-images`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -170,7 +170,7 @@ export default function ReportesScreen({ navigation }: any) {
 
       await Promise.all(
         formData.problemasSeleccionados.map(async idProblema => {
-          const response = await fetch('http://192.168.0.7:8081/api/tickets', {
+          const response = await fetch(`${API_URL}/api/tickets`, {
             method: 'POST',
             headers: {
               'Authorization': authHeader,

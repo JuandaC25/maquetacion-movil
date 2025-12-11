@@ -5,13 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Abre PowerShell y ejecuta: ipconfig
 // 2. Busca "Dirección IPv4" de tu conexión WiFi/Ethernet
 // 3. Reemplaza la IP aquí abajo
-// Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi
+// Cambia esta IP si tu PC tiene otra dirección IPv4 en la red WiFi // IP actualizada según el usuario
 
-const LOCAL_IP = '192.168.1.90'; // IP actualizada según el usuario
+const LOCAL_IP = '172.16.110.173'; // IP actualizada según el usuario
 
-const LOCAL_IP = '192.168.1.6'; // IP actualizada según el usuario
+export const API_URL = `http://${LOCAL_IP}:8081`;
+export const LOCAL_IP_ADDRESS = LOCAL_IP;
 
-const API_URL = `http://${LOCAL_IP}:8081`;
 console.log('[API] URL base usada:', API_URL);
 
 const api = axios.create({
