@@ -421,12 +421,6 @@ const SolicitudesElementoAdmin = () => {
               onChange={onPickerChange}
               onClose={() => setShowPicker({field: null, mode: 'date', visible: false})}
             />
-            {/* Validación de formato */}
-            {(!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_fin)) && (addData.fecha_ini || addData.fecha_fin) ? (
-                <Text style={{ color: isDark ? '#ff6b6b' : '#d32f2f', fontSize: 13, marginBottom: 8 }}>
-                  El formato debe ser: 2025-12-05 14:30 <Text style={{fontWeight:'bold'}}>o</Text> 2025-12-05T14:30
-              </Text>
-            ) : null}
             <TextInput
               style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
               placeholder="Cantidad"
@@ -451,6 +445,28 @@ const SolicitudesElementoAdmin = () => {
                   try {
                     if (!addData.elemento || !addData.categoria || !addData.fecha_ini || !addData.fecha_fin) {
                       alert('Por favor, completa los campos obligatorios.');
+                      return;
+                    }
+                    // Validar formato de fecha de inicio
+                    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_ini)) {
+                      alert('❌ Error en fecha de inicio:\n\nEl formato debe ser: 2025-12-11 02:18\n\nFormato actual: ' + (addData.fecha_ini || 'vacío'));
+                      return;
+                    }
+                    // Validar formato de fecha de fin
+                    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(addData.fecha_fin)) {
+                      alert('❌ Error en fecha de fin:\n\nEl formato debe ser: 2025-12-11 16:00\n\nFormato actual: ' + (addData.fecha_fin || 'vacío'));
+                      return;
+                    }
+                    // Validar que las fechas no sean iguales
+                    if (addData.fecha_ini === addData.fecha_fin) {
+                      alert('❌ Error en las fechas:\n\nLa fecha y hora de inicio y fin no pueden ser exactamente iguales.\n\nFecha inicio: ' + addData.fecha_ini + '\nFecha fin: ' + addData.fecha_fin);
+                      return;
+                    }
+                    // Validar que la fecha de fin sea posterior a la fecha de inicio
+                    const fechaIniDate = new Date(addData.fecha_ini.replace(' ', 'T'));
+                    const fechaFinDate = new Date(addData.fecha_fin.replace(' ', 'T'));
+                    if (fechaFinDate <= fechaIniDate) {
+                      alert('❌ Error en las fechas:\n\nLa fecha de fin debe ser posterior a la fecha de inicio.\n\nFecha inicio: ' + addData.fecha_ini + '\nFecha fin: ' + addData.fecha_fin);
                       return;
                     }
                     if (addData.cantidad && Number(addData.cantidad) > 2) {

@@ -1,6 +1,6 @@
 
 import React, { FC, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AdminHeader from './AdminHeader/AdminHeader';
 import { ticketsService } from '../../services/Api';
@@ -214,6 +214,67 @@ const ReportesAdmin: FC = () => {
               <View style={styles.modalRowFull}>
                 <Text style={[styles.modalLabelFull, { color: colors.title }]}>Observaciones:</Text>
                 <Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.observaciones ?? modalTicket?.observacion ?? '-'}</Text>
+              </View>
+              
+              {/* Sección de imágenes */}
+              <View style={{ marginTop: 10 }}>
+                <Text style={[styles.modalLabelFull, { color: colors.title, marginBottom: 8 }]}>Imágenes:</Text>
+                {(() => {
+                  const raw = modalTicket?.imageness ?? modalTicket?.imagenes ?? modalTicket?.imagen ?? null;
+                  if (!raw) return <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>;
+
+                  let urls: string[] = [];
+                  try {
+                    if (Array.isArray(raw)) {
+                      urls = raw;
+                    } else if (typeof raw === 'string') {
+                      const s = raw.trim();
+                      if ((s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'))) {
+                        const parsed = JSON.parse(s);
+                        if (Array.isArray(parsed)) urls = parsed;
+                        else if (typeof parsed === 'string') urls = [parsed];
+                      } else {
+                        urls = [s];
+                      }
+                    }
+                  } catch (e) {
+                    urls = typeof raw === 'string' ? [raw] : [];
+                  }
+
+                  if (!urls || urls.length === 0) return <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>;
+
+                  const normalizeUrl = (u: string) => {
+                    if (!u) return null;
+                    if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:')) return u;
+                    if (u.startsWith('/uploads/')) {
+                      return `http://192.168.20.60:8081${u}`;
+                    }
+                    return u;
+                  };
+
+                  return (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                      {urls.map((url, idx) => {
+                        const src = normalizeUrl(url);
+                        if (!src) return null;
+                        return (
+                          <View key={idx} style={{ marginRight: 12 }}>
+                            <Image
+                              source={{ uri: src }}
+                              style={{ width: 180, height: 120, borderRadius: 8, backgroundColor: '#f0f0f0' }}
+                              resizeMode="cover"
+                            />
+                            {urls.length > 1 && (
+                              <Text style={{ color: colors.textPrimary, fontSize: 12, textAlign: 'center', marginTop: 4 }}>
+                                Imagen {idx + 1}
+                              </Text>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </ScrollView>
+                  );
+                })()}
               </View>
             </View>
             <View style={styles.modalFooterFull}>
