@@ -359,12 +359,6 @@ const SolicitudesEspacioAdmin = () => {
           <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
             <Text style={[styles.modalTitle, { color: colors.title }]}>Reservar {espacioSeleccionado?.nom_espa || ''}</Text>
             <ScrollView>
-              <Text style={{ color: colors.textPrimary, marginBottom: 4, fontSize: 13 }}>
-                Formato: 2025-12-05 14:30 (año-mes-día hora:minutos)
-              </Text>
-              <Text style={{ color: colors.textPrimary, marginBottom: 4, fontSize: 13 }}>
-                Formato válido: 2025-12-05 14:30 <Text style={{ fontWeight: 'bold' }}>o</Text> 2025-12-05T14:30 (año-mes-día hora:minutos)
-              </Text>
               <TouchableOpacity onPress={() => openPicker('fecha_ini', 'date')}>
                 <TextInput
                   style={[styles.input, { color: colors.textPrimary }]}
@@ -412,26 +406,6 @@ const SolicitudesEspacioAdmin = () => {
                 value={tempDate}
                 onChange={onPickerChange}
                 onClose={() => setShowPicker({ field: null, mode: 'date', visible: false })}
-              />
-              {(!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_ini) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(reservaForm.fecha_fn)) && (reservaForm.fecha_ini || reservaForm.fecha_fn) ? (
-                <Text style={{ color: 'red', fontSize: 13, marginBottom: 8 }}>
-                  El formato debe ser: 2025-12-05 14:30 <Text style={{ fontWeight: 'bold' }}>o</Text> 2025-12-05T14:30
-                </Text>
-              ) : null}
-              <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
-                placeholder="Ambiente"
-                placeholderTextColor={isDark ? '#aaa' : '#555'}
-                value={reservaForm.ambient}
-                onChangeText={v => setReservaForm(f => ({ ...f, ambient: v }))}
-              />
-              <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
-                placeholder="Número de ficha"
-                placeholderTextColor={isDark ? '#aaa' : '#555'}
-                value={reservaForm.num_ficha}
-                onChangeText={v => setReservaForm(f => ({ ...f, num_ficha: v }))}
-                keyboardType="numeric"
               />
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                 <TouchableOpacity style={[styles.boton, { backgroundColor: '#aaa' }]} onPress={() => setShowReservaModal(false)}>
