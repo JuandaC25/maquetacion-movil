@@ -309,4 +309,4 @@ export const rolesService = {
   getAll: async () => api.get('/api/roles', await withAuth()),
 };
 
-export default api;
+export default api ;
