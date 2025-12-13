@@ -116,9 +116,6 @@ export default function EspaciosContent({ navigation }: any) {
 
     // Enviar la solicitud al backend
     try {
-      const user = await AsyncStorage.getItem('user');
-      const userData = user ? JSON.parse(user) : null;
-
       const pad = (n: number) => String(n).padStart(2, '0');
       const formatLocal = (d: Date) => {
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -127,17 +124,22 @@ export default function EspaciosContent({ navigation }: any) {
       const solicitudData = {
         fecha_ini: formatLocal(fechaInicio),
         fecha_fn: formatLocal(fechaFin),
+        ambient: '', 
+        num_fich: null, // null en lugar de 0
         estadosoli: 1,
-        id_usu: userData?.id || 1,
         id_esp: espacioSeleccionado.id,
       };
 
+      console.log('[SOLICITUD] DTO enviado:', solicitudData);
       await solicitudesService.create(solicitudData);
       Alert.alert('Éxito', 'Solicitud enviada correctamente');
       handleCloseModal();
     } catch (err: any) {
       console.error('Error al enviar solicitud:', err);
-      Alert.alert('Error', 'No se pudo enviar la solicitud');
+      console.error('Error completo:', err.response?.data);
+      // Mostrar mensaje del backend si existe
+      const mensaje = err?.response?.data?.mensaje || err?.response?.data?.error || 'No se pudo enviar la solicitud';
+      Alert.alert('Error', mensaje);
     }
   };
 
