@@ -188,13 +188,13 @@ export default function Equipo_Mesa({ navigation }: any) {
         fecha_fn: `${form.fecha_fn}T${form.hora_fn}:00`,
         ambient: form.ambient,
         num_fich: form.num_ficha,
-        ids_elem: equiposActivos.slice(0, form.cantidad).map(eq => eq.id), // array de IDs de elementos
-        id_categoria: idCategoriaNumerico, // ID numérico de la categoría
-        id_subcategoria: idSubcategoria, // ID numérico de la subcategoría
+        ids_elem: equiposActivos.slice(0, form.cantidad).map(eq => eq.id),
+        id_categoria: idCategoriaNumerico,
+        id_subcategoria: idSubcategoria,
         id_usu: ID_USUARIO,
-        id_estado_soli: ESTADO_SOLI_INICIAL, // nombre correcto según backend
+        id_estado_soli: ESTADO_SOLI_INICIAL,
+        cantid: Number(form.cantidad),
       };
-
       await solicitudesService.create(dto);
 
       Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente ✅');

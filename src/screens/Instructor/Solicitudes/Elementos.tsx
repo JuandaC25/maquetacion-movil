@@ -193,7 +193,10 @@ export default function Elementos({ navigation }: any) {
             !nombresExcluir.includes(subcat.nom_subcateg) &&
             categoriaPadre !== 'multimedia'
           );
-        });
+        }).map((subcat: any) => ({
+          id: subcat.id_subcategoria ?? subcat.id,
+          nom_subcateg: subcat.nom_subcateg
+        }));
         setSubcategorias(filtradas);
         if (filtradas.length > 0) setSubcategoriaSeleccionada(filtradas[0].id_subcategoria);
       } catch (err) {
