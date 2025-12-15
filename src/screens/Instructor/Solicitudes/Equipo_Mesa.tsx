@@ -195,9 +195,6 @@ export default function Equipo_Mesa({ navigation }: any) {
         id_estado_soli: ESTADO_SOLI_INICIAL,
         cantid: Number(form.cantidad),
       };
-      console.log('Valor de form.cantidad:', form.cantidad);
-      console.log('DTO enviado:', dto);
-
       await solicitudesService.create(dto);
 
       Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente ✅');
