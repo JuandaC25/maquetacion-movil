@@ -14,29 +14,18 @@ export default function LoginScreen({ navigation }: any) {
     setError('');
     setLoading(true);
     try {
-      console.log('🔐 Iniciando login...');
-      console.log('Login payload:', { username, password });
       const response = await authService.login(username.trim(), password);
-      console.log('✅ Login exitoso, token recibido:', response);
 
-      console.log('📡 Obteniendo datos del usuario...');
       const userData = await authService.getMe();
-      console.log('✅ Datos del usuario:', userData);
       const userRoles = userData?.roles || userData?.role || [];
-      console.log('👤 Roles:', userRoles);
 
-      // Guardar el usuario en AsyncStorage para futuras pantallas
       await AsyncStorage.setItem('usuario', JSON.stringify(userData));
-      console.log('💾 Usuario guardado en AsyncStorage:', userData);
 
       if ((userData.email || userData.correo || username) === 'admin@tech.com') {
-        console.log('🎯 Navegando a UsuariosAdmin...');
         navigation.replace('UsuariosAdmin');
       } else if (Array.isArray(userRoles) && userRoles.includes('INSTRUCTOR')) {
-        console.log('🎯 Navegando a Solicitudes (Instructor)...');
         navigation.replace('Solicitudes');
       } else if (Array.isArray(userRoles) && userRoles.includes('TECNICO')) {
-        console.log('🎯 Navegando a SolicitudesTecnico...');
         navigation.replace('SolicitudesTecnico');
       } else {
         Alert.alert(
@@ -46,7 +35,9 @@ export default function LoginScreen({ navigation }: any) {
       }
     } catch (err: any) {
       console.error('❌ Error en login:', err, err?.response?.data);
-      if (err?.response?.status === 403 || err?.response?.status === 401) {
+      if (err?.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err?.response?.status === 403 || err?.response?.status === 401) {
         setError('Credenciales incorrectas o permisos insuficientes. Verifica tu usuario y contraseña.');
       } else if (err?.response?.data?.message) {
         setError(err.response.data.message);
