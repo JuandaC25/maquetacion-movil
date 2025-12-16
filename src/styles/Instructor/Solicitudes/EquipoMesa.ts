@@ -1,12 +1,12 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
-  // --- Estilos originales del archivo ---
+export const createEquipoMesaStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000ff',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -19,28 +19,28 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#e8f5e9',
+    backgroundColor: colors.inputBackground,
     borderWidth: 1,
-    borderColor: '#4caf50',
+    borderColor: colors.primary,
   },
   toggleButtonActive: {
-    backgroundColor: '#4caf50',
-    borderColor: '#388e3c',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   toggleButtonText: {
     fontSize: 14,
-    color: '#388e3c',
+    color: colors.textSecondary,
   },
   toggleButtonTextActive: {
     color: '#fff',
     fontWeight: '600',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -49,25 +49,25 @@ export const styles = StyleSheet.create({
   cardHeader: {
     marginBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: '#4caf50',
+    borderBottomColor: colors.primary,
     paddingBottom: 15,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#4caf50',
+    color: colors.primary,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   carouselContainer: {
     marginTop: -11,
     alignItems: 'center',
     marginVertical: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 15,
   },
@@ -80,21 +80,21 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   descripcionTextContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     padding: 15,
     borderRadius: 10,
     borderLeftWidth: 4,
-    borderLeftColor: '#4caf50',
+    borderLeftColor: colors.primary,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#4caf50',
+    color: colors.primary,
     marginBottom: 12,
   },
   descripcionText: {
     fontSize: 15,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 24,
     textAlign: 'justify',
   },
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
   },
   listaItem: {
     fontSize: 15,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   counterContainer: {
@@ -119,7 +119,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#4caf50',
+    borderColor: colors.primary,
   },
   counterText: {
     fontSize: 13,
@@ -131,18 +131,18 @@ export const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   submitButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 18,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 5,
   },
   submitButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.disabled,
   },
   submitButtonText: {
     color: '#fff',
@@ -151,56 +151,55 @@ export const styles = StyleSheet.create({
   },
   noDataText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
     textAlign: 'center',
     padding: 20,
   },
-  // --- Estilos extraídos del código TSX (anteriormente localStyles) ---
-  
-  // Estilos del Toggle de Categorías
   toggleRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 10,
   },
-  // Estilos en línea específicos
   availableDot: {
     fontWeight: 'bold',
-    color: '#4caf50',
+    color: colors.primary,
     fontSize: 14,
   },
   listItemDot: {
-    color: '#4caf50',
+    color: colors.primary,
     fontSize: 22,
     fontWeight: 'bold',
   },
-  // Estilos del Modal
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlay,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.modalBackground,
     borderRadius: 16,
     padding: 20,
-    width: width - 100, // Deja 20px de margen a cada lado
+    width: width - 100,
     maxWidth: width,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: colors.textPrimary,
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
     borderRadius: 8,
     marginBottom: 10,
     padding: 8,
+    backgroundColor: colors.inputBackground,
+    color: colors.textPrimary,
   },
   modalText: {
     marginBottom: 8,
+    color: colors.textPrimary,
   },
 });

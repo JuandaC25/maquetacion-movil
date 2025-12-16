@@ -1,11 +1,12 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-export const EspaciosStyles = StyleSheet.create({
+export const createEspaciosStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000ff',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -20,12 +21,12 @@ export const EspaciosStyles = StyleSheet.create({
   loadingText: {
     marginTop: 15,
     fontSize: 16,
-    color: '#ffffff',
+    color: colors.textPrimary,
   },
   errorContainer: {
     margin: 20,
     padding: 15,
-    backgroundColor: '#ff4444',
+    backgroundColor: colors.error,
     borderRadius: 10,
   },
   errorText: {
@@ -45,17 +46,16 @@ export const EspaciosStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#888888',
+    color: colors.textTertiary,
     textAlign: 'center',
   },
-  // Card de espacio
   espacioCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     marginBottom: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   carouselContainer: {
     height: 220,
@@ -64,7 +64,7 @@ export const EspaciosStyles = StyleSheet.create({
   carouselImage: {
     width: width - 30,
     height: 220,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -76,14 +76,14 @@ export const EspaciosStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
     marginHorizontal: 4,
   },
   inactiveDotStyle: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#555555',
+    backgroundColor: colors.disabled,
     marginHorizontal: 4,
   },
   cardContent: {
@@ -92,17 +92,17 @@ export const EspaciosStyles = StyleSheet.create({
   espacioNombre: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#3fbb34',
+    color: colors.primary,
     marginBottom: 8,
   },
   espacioDescripcion: {
     fontSize: 14,
-    color: '#cccccc',
+    color: colors.textSecondary,
     lineHeight: 20,
     marginBottom: 15,
   },
   reservarButton: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -114,15 +114,14 @@ export const EspaciosStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.modalBackground,
     borderRadius: 20,
     padding: 25,
     width: width - 40,
@@ -135,12 +134,12 @@ export const EspaciosStyles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#2a2a2a',
+    borderBottomColor: colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#3fbb34',
+    color: colors.primary,
     flex: 1,
   },
   closeButton: {
@@ -148,11 +147,11 @@ export const EspaciosStyles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 24,
-    color: '#888888',
+    color: colors.textTertiary,
   },
   formLabel: {
     fontSize: 14,
-    color: '#ffffff',
+    color: colors.textPrimary,
     marginBottom: 8,
     fontWeight: '600',
   },
@@ -166,19 +165,19 @@ export const EspaciosStyles = StyleSheet.create({
     marginHorizontal: 5,
   },
   input: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: colors.inputBackground,
     borderRadius: 10,
     padding: 12,
-    color: '#ffffff',
+    color: colors.textPrimary,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#3a3a3a',
+    borderColor: colors.border,
   },
   formGroup: {
     marginBottom: 15,
   },
   submitButton: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',

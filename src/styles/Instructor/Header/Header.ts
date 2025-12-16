@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
-export const HeaderComponentStyles = StyleSheet.create({
+export const createHeaderStyles = (colors: Colors) => StyleSheet.create({
   header: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOpacity: 0.2,
     shadowRadius: 4,
     height: 60,
@@ -33,7 +34,7 @@ export const HeaderComponentStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay,
     zIndex: 999,
   },
   drawer: {
@@ -42,16 +43,16 @@ export const HeaderComponentStyles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 280,
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     zIndex: 1000,
     elevation: 16,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   drawerHeader: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
     padding: 20,
     paddingTop: 50,
   },
@@ -64,11 +65,11 @@ export const HeaderComponentStyles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
   },
   themeToggleContainer: {
     flexDirection: 'row',
@@ -77,8 +78,8 @@ export const HeaderComponentStyles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#f8f8f8',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.inputBackground,
   },
   closeButton: {
     backgroundColor: '#007bff',
@@ -99,5 +100,15 @@ export const HeaderComponentStyles = StyleSheet.create({
     bottom: 0,
     width: 20,
     zIndex: 100,
+  },
+});
+
+// Estilos estáticos que no dependen del tema
+export const staticStyles = StyleSheet.create({
+  profileIcon: {
+    marginLeft: 18,
+    backgroundColor: '#4caf50',
+    borderRadius: 20,
+    padding: 2,
   },
 });

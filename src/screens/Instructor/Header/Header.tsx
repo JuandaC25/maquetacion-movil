@@ -1,8 +1,8 @@
 import Svg, { Path } from 'react-native-svg';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, PanResponder, Switch, TextInput, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { HeaderComponentStyles } from '../../../styles/Instructor/Header/Header';
+import { createHeaderStyles, staticStyles } from '../../../styles/Instructor/Header/Header';
 import { useTheme } from '../../../context/ThemeContext';
 import { usuariosService } from '../../../services/Api';
 
@@ -112,6 +112,7 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
   const [menuVisible, setMenuVisible] = useState(false);
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const { theme, toggleTheme, colors } = useTheme();
+  const HeaderComponentStyles = useMemo(() => createHeaderStyles(colors), [colors]);
 
   useEffect(() => {
     Animated.timing(translateX, {
@@ -157,7 +158,7 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={HeaderComponentStyles.headerTitle}>{title}</Text>
         </View>
-        <TouchableOpacity onPress={handleShowProfile} style={{ marginLeft: 18, backgroundColor: '#4caf50', borderRadius: 20, padding: 2 }}>
+        <TouchableOpacity onPress={handleShowProfile} style={staticStyles.profileIcon}>
           <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
             <Svg width={28} height={28} viewBox="0 0 24 24" fill="white">
               <Path d="M12 2.5a5.5 5.5 0 0 1 3.096 10.047A9.005 9.005 0 0 1 21 20.728a.75.75 0 1 1-1.499.044a7.5 7.5 0 0 0-14.993 0a.75.75 0 0 1-1.5-.045a9.005 9.005 0 0 1 5.9-8.18A5.5 5.5 0 0 1 12 2.5ZM8 8a4 4 0 1 0 8 0a4 4 0 0 0-8 0Z" />
@@ -167,9 +168,9 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
       </View>
       {showProfile && (
         <View style={{ position: 'absolute', top: 110, right: 18, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.0)' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: 250, elevation: 20, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8 }}>
+          <View style={{ backgroundColor: colors.modalBackground, borderRadius: 16, padding: 24, width: 250, elevation: 20, shadowColor: colors.shadow, shadowOpacity: 0.15, shadowRadius: 8 }}>
             <TouchableOpacity onPress={handleCloseProfile} style={{ position: 'absolute', top: 12, right: 12 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 18 }}>✖</Text>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.textPrimary }}>✖</Text>
             </TouchableOpacity>
             <View style={{ alignItems: 'center', marginBottom: 10 }}>
               <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#4caf50', justifyContent: 'center', alignItems: 'center' }}>
@@ -178,8 +179,8 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
                 </Svg>
               </View>
             </View>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 4, textAlign: 'center' }}>¡Hola, {user?.nombre || user?.name || user?.username || 'usuario'}!</Text>
-            <Text style={{ color: '#555', marginBottom: 8, textAlign: 'center' }}>{user?.email || user?.correo || 'Sin correo'}</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 4, textAlign: 'center', color: colors.textPrimary }}>¡Hola, {user?.nombre || user?.name || user?.username || 'usuario'}!</Text>
+            <Text style={{ color: colors.textSecondary, marginBottom: 8, textAlign: 'center' }}>{user?.email || user?.correo || 'Sin correo'}</Text>
             <View style={{ marginTop: 16 }}>
               <TouchableOpacity onPress={handleShowEditModal} style={{ backgroundColor: '#4caf50', padding: 12, borderRadius: 8, marginBottom: 12 }}>
                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Editar información</Text>
@@ -194,29 +195,29 @@ export default function HeaderWithDrawer({ title, navigation }: HeaderWithDrawer
 
       {/* Modal de edición de perfil, encima de todo */}
       {showEditModal && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.25)', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '85%', elevation: 20 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9999, backgroundColor: colors.overlay, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: colors.modalBackground, borderRadius: 16, padding: 24, width: '85%', elevation: 20 }}>
             <TouchableOpacity onPress={handleCloseEditModal} style={{ position: 'absolute', top: 12, right: 12 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 18 }}>✖</Text>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.textPrimary }}>✖</Text>
             </TouchableOpacity>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10, textAlign: 'center' }}>Editar Perfil</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10, textAlign: 'center', color: colors.textPrimary }}>Editar Perfil</Text>
             <View>
-              <Text>Nombre</Text>
-              <TextInput value={formData.nom_us} onChangeText={v => handleInputChange('nom_us', v)} style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
-              <Text>Apellido</Text>
-              <TextInput value={formData.ape_us} onChangeText={v => handleInputChange('ape_us', v)} style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
-              <Text>Correo Electrónico</Text>
-              <TextInput value={formData.corre} onChangeText={v => handleInputChange('corre', v)} style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
-              <Text style={{ marginTop: 10, fontWeight: 'bold' }}>Cambio de Contraseña</Text>
-              <TextInput value={formData.currentPassword} onChangeText={v => handleInputChange('currentPassword', v)} placeholder="Contraseña actual" secureTextEntry style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
-              <TextInput value={formData.password} onChangeText={v => handleInputChange('password', v)} placeholder="Nueva contraseña" secureTextEntry style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
-              <TextInput value={formData.confirmPassword} onChangeText={v => handleInputChange('confirmPassword', v)} placeholder="Confirmar nueva contraseña" secureTextEntry style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 8, padding: 6 }} />
+              <Text style={{ color: colors.textPrimary }}>Nombre</Text>
+              <TextInput value={formData.nom_us} onChangeText={v => handleInputChange('nom_us', v)} style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
+              <Text style={{ color: colors.textPrimary }}>Apellido</Text>
+              <TextInput value={formData.ape_us} onChangeText={v => handleInputChange('ape_us', v)} style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
+              <Text style={{ color: colors.textPrimary }}>Correo Electrónico</Text>
+              <TextInput value={formData.corre} onChangeText={v => handleInputChange('corre', v)} style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
+              <Text style={{ marginTop: 10, fontWeight: 'bold', color: colors.textPrimary }}>Cambio de Contraseña</Text>
+              <TextInput value={formData.currentPassword} onChangeText={v => handleInputChange('currentPassword', v)} placeholder="Contraseña actual" placeholderTextColor={colors.textTertiary} secureTextEntry style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
+              <TextInput value={formData.password} onChangeText={v => handleInputChange('password', v)} placeholder="Nueva contraseña" placeholderTextColor={colors.textTertiary} secureTextEntry style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
+              <TextInput value={formData.confirmPassword} onChangeText={v => handleInputChange('confirmPassword', v)} placeholder="Confirmar nueva contraseña" placeholderTextColor={colors.textTertiary} secureTextEntry style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 6, marginBottom: 8, padding: 6, backgroundColor: colors.inputBackground, color: colors.textPrimary }} />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
-              <TouchableOpacity onPress={handleCloseEditModal} style={{ backgroundColor: '#ccc', paddingVertical: 8, paddingHorizontal: 18, borderRadius: 8, marginRight: 8, minWidth: 100 }}>
-                <Text style={{ textAlign: 'center' }}>Cancelar</Text>
+              <TouchableOpacity onPress={handleCloseEditModal} style={{ backgroundColor: colors.buttonCancel, paddingVertical: 8, paddingHorizontal: 18, borderRadius: 8, marginRight: 8, minWidth: 100 }}>
+                <Text style={{ textAlign: 'center', color: colors.textPrimary }}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleSaveEdit} style={{ backgroundColor: '#4caf50', paddingVertical: 8, paddingHorizontal: 18, borderRadius: 8, minWidth: 100 }}>
+              <TouchableOpacity onPress={handleSaveEdit} style={{ backgroundColor: colors.buttonPrimary, paddingVertical: 8, paddingHorizontal: 18, borderRadius: 8, minWidth: 100 }}>
                 <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>Guardar Cambios</Text>
               </TouchableOpacity>
             </View>

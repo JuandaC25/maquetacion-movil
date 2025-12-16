@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import { elementosService, solicitudesService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Modal, TextInput, Button } from 'react-native';
-import { styles } from '../../../styles/Instructor/Solicitudes/Portatiles';
+import { createPortatilesStyles } from '../../../styles/Instructor/Solicitudes/Portatiles';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,9 @@ const PORTATILES_IMAGES = [
 ];
 
 export default function Portatiles({ navigation }: any) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createPortatilesStyles(colors), [colors]);
+    
     // Estados principales
     const [modalVisible, setModalVisible] = useState(false);
     const [form, setForm] = useState({

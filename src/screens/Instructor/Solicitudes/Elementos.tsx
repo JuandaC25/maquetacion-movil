@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { elementosService, solicitudesService, subcategoriasService, authService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Instructor/Solicitudes/Elementos';
+import { createElementosStyles } from '../../../styles/Instructor/Solicitudes/Elementos';
 import { Picker } from '@react-native-picker/picker';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,9 @@ const ELEMENTOS_IMAGES = [
 ];
 
 export default function Elementos({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createElementosStyles(colors), [colors]);
+  
   const [equiposDisponibles, setEquiposDisponibles] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
