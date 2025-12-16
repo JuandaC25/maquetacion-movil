@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Modal, TextInput, Button } from 'react-native';
 import {
@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { elementosService, solicitudesService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Instructor/Solicitudes/EquipoMesa';
+import { createEquipoMesaStyles } from '../../../styles/Instructor/Solicitudes/EquipoMesa';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,9 @@ const ESCRITORIO_IMAGES = [
 ];
 
 export default function Equipo_Mesa({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createEquipoMesaStyles(colors), [colors]);
+  
   const [subcatInfo, setSubcatInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [categoriaFiltro, setCategoriaFiltro] = useState('computo');
@@ -218,7 +222,7 @@ export default function Equipo_Mesa({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderWithDrawer navigation={navigation} title="Equipos de Escritorio" />
+      <HeaderWithDrawer navigation={navigation} title="Equipos de mesa" />
       
       <ScrollView style={styles.content}>
         {/* Toggle de categorías */}

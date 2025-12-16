@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Instructor/Historial/Historial';
+import { createHistorialStyles } from '../../../styles/Instructor/Historial/Historial';
+import { useTheme } from '../../../context/ThemeContext';
 
 import { solicitudesService, ticketsService, subcategoriasService } from '../../../services/Api';
 
@@ -61,8 +62,9 @@ interface PaginationMovilProps {
     currentPage: number;
     totalPages: number;
     paginate: (pageNumber: number) => void;
+    styles: any;
 }
-const PaginationMovil = ({ currentPage, totalPages, paginate }: PaginationMovilProps) => {
+const PaginationMovil = ({ currentPage, totalPages, paginate, styles }: PaginationMovilProps) => {
     if (totalPages <= 1) return null;
     
     return (
@@ -139,6 +141,9 @@ const extractData = (response: any) => {
 //Componente Principal
 
 export default function HistorialPedidosMovil({ navigation }: any) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createHistorialStyles(colors), [colors]);
+    
     const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [subcategorias, setSubcategorias] = useState<Record<string, string>>({}); 
@@ -568,7 +573,8 @@ export default function HistorialPedidosMovil({ navigation }: any) {
                 <PaginationMovil 
                     currentPage={currentPage} 
                     totalPages={totalPages} 
-                    paginate={paginate} 
+                    paginate={paginate}
+                    styles={styles} 
                 />
             </ScrollView>
 

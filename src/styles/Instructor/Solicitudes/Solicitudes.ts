@@ -1,20 +1,20 @@
 import { StyleSheet } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
-export const SolicitudesStyles = StyleSheet.create({
+export const createSolicitudesStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000ff',
-    paddingHorizontal: 10, // Añadido para margen lateral adaptable
+    backgroundColor: colors.background,
   },
   
   // Tabs Menu
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.cardBackground,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderBottomWidth: 2,
-    borderBottomColor: '#2a2a2a',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
@@ -25,10 +25,10 @@ export const SolicitudesStyles = StyleSheet.create({
     paddingHorizontal: 10,
     marginHorizontal: 5,
     borderRadius: 10,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: colors.inputBackground,
   },
   activeTab: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
   },
   tabIcon: {
     fontSize: 20,
@@ -37,7 +37,7 @@ export const SolicitudesStyles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#888888',
+    color: colors.textTertiary,
   },
   activeTabText: {
     color: '#ffffff',
@@ -46,7 +46,8 @@ export const SolicitudesStyles = StyleSheet.create({
   // Content Layout
   content: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 15,
+    paddingTop: 10,
   },
   textContainer: {
     position: 'absolute',
@@ -59,10 +60,10 @@ export const SolicitudesStyles = StyleSheet.create({
     marginTop: 20,
     marginRight: 1,
     width: 330,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#0cfc78',
+    borderColor: colors.primaryLight,
     overflow: 'hidden',
   },
   notificationInner: {
@@ -71,12 +72,12 @@ export const SolicitudesStyles = StyleSheet.create({
     width: 150,
     top: 12,
     right: 15,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 10,
   },
   notititle: {
-    color: '#fff',
+    color: colors.textPrimary,
     paddingTop: 10,
     paddingLeft: 20,
     paddingBottom: 6,
@@ -85,7 +86,7 @@ export const SolicitudesStyles = StyleSheet.create({
   },
   notibody: {
     marginTop: 2,
-    color: '#fff',
+    color: colors.textPrimary,
     paddingLeft: 20,
     fontSize: 14,
   },
@@ -98,10 +99,10 @@ export const SolicitudesStyles = StyleSheet.create({
     maxWidth: 500,
     alignSelf: 'center',
     height: 128,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#0cfc78',
+    borderColor: colors.primaryLight,
     overflow: 'hidden',
   },
   portatilImage: {
@@ -110,7 +111,7 @@ export const SolicitudesStyles = StyleSheet.create({
     width: 150,
     top: 12,
     right: 15,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 10,
   },
@@ -123,10 +124,10 @@ export const SolicitudesStyles = StyleSheet.create({
     maxWidth: 500,
     alignSelf: 'center',
     height: 128,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#0cfc78',
+    borderColor: colors.primaryLight,
     overflow: 'hidden',
   },
   escritorioImage: {
@@ -135,7 +136,7 @@ export const SolicitudesStyles = StyleSheet.create({
     width: 240,
     top: 12,
     right: -30,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
   },
 
@@ -147,10 +148,10 @@ export const SolicitudesStyles = StyleSheet.create({
     maxWidth: 500,
     alignSelf: 'center',
     height: 128,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#0cfc78',
+    borderColor: colors.primaryLight,
     overflow: 'hidden',
   },
   audioVideoImage: {
@@ -159,7 +160,7 @@ export const SolicitudesStyles = StyleSheet.create({
     width: 120,
     top: 12,
     right: -1,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 10,
   },
@@ -172,10 +173,10 @@ export const SolicitudesStyles = StyleSheet.create({
     maxWidth: 500,
     alignSelf: 'center',
     height: 128,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#0cfc78',
+    borderColor: colors.primaryLight,
     overflow: 'hidden',
   },
   elementosImage: {
@@ -184,7 +185,7 @@ export const SolicitudesStyles = StyleSheet.create({
     width: 210,
     top: 12,
     right: -16,
-    backgroundColor: '#000',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 10,
   },

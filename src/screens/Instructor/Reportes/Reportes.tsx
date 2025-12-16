@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -12,11 +12,12 @@ import {
   SafeAreaView,
   StatusBar
 } from 'react-native';
-import { ReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Reportes';
+import { createReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Reportes';
 import HeaderWithDrawer from '../Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { problemasService, API_URL } from '../../../services/Api';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface Problema {
   id: number;
@@ -31,6 +32,9 @@ interface FormData {
 }
 
 export default function ReportesScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const ReportesStyles = useMemo(() => createReportesStyles(colors), [colors]);
+  
   const [problemas, setProblemas] = useState<Problema[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -227,7 +231,7 @@ export default function ReportesScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#000', paddingTop: StatusBar.currentHeight || 24 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, paddingTop: StatusBar.currentHeight || 24 }}>
       <HeaderWithDrawer title="Reportes" navigation={navigation} />
 
       <ScrollView style={ReportesStyles.formContainer}>
@@ -256,7 +260,7 @@ export default function ReportesScreen({ navigation }: any) {
           <TextInput
             style={ReportesStyles.input}
             placeholder="Ingrese el ID del equipo"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             keyboardType="numeric"
             value={formData.idElemento}
             onChangeText={(text) => handleInputChange('idElemento', text)}
@@ -269,7 +273,7 @@ export default function ReportesScreen({ navigation }: any) {
           <TextInput
             style={ReportesStyles.input}
             placeholder="Ej: Ambiente 301"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={formData.ambiente}
             onChangeText={(text) => handleInputChange('ambiente', text)}
           />
@@ -280,7 +284,7 @@ export default function ReportesScreen({ navigation }: any) {
           <Text style={ReportesStyles.label}>Seleccione los problemas *</Text>
           {loading ? (
             <View style={ReportesStyles.loadingContainer}>
-              <ActivityIndicator size="small" color="#3fbb34" />
+              <ActivityIndicator size="small" color={colors.primary} />
               <Text style={ReportesStyles.loadingText}>Cargando problemas...</Text>
             </View>
           ) : (
@@ -312,7 +316,7 @@ export default function ReportesScreen({ navigation }: any) {
           <TextInput
             style={[ReportesStyles.input, ReportesStyles.textarea]}
             placeholder="Detalles adicionales del problema..."
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             multiline
             numberOfLines={4}
             maxLength={255}
