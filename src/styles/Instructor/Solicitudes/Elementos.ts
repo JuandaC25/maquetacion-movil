@@ -1,31 +1,32 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createElementosStyles = (colors: Colors) => StyleSheet.create({
     pickerContainer: {
       borderWidth: 2,
-      borderColor: '#4caf50',
+      borderColor: colors.primary,
       borderRadius: 8,
       paddingHorizontal: 8,
       paddingVertical: 2,
       marginBottom: 10,
-      backgroundColor: '#fff',
+      backgroundColor: colors.inputBackground,
     },
   container: {
     flex: 1,
-    backgroundColor: '#000000ff',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
     padding: 15,
   },
   card: {
-    backgroundColor: '#ffffffff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -34,24 +35,24 @@ export const styles = StyleSheet.create({
   cardHeader: {
     marginBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: '#4caf50',
+    borderBottomColor: colors.primary,
     paddingBottom: 15,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#4caf50',
+    color: colors.primary,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   carouselContainer: {
     alignItems: 'center',
     marginVertical: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 15,
   },
@@ -64,21 +65,21 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   descripcionTextContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
     padding: 15,
     borderRadius: 10,
     borderLeftWidth: 4,
-    borderLeftColor: '#4caf50',
+    borderLeftColor: colors.primary,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#4caf50',
+    color: colors.primary,
     marginBottom: 12,
   },
   descripcionText: {
     fontSize: 15,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 24,
     textAlign: 'justify',
   },
@@ -91,15 +92,15 @@ export const styles = StyleSheet.create({
   },
   listaItem: {
     fontSize: 15,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   submitButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 18,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -114,13 +115,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlay,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.modalBackground,
     borderRadius: 16,
     padding: 20,
-    width: width - 100, // Deja 20px de margen a cada lado
+    width: width - 100,
     maxWidth: width,
     minHeight: 800,
     alignItems: 'center',
@@ -129,10 +130,11 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: colors.textPrimary,
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
     borderRadius: 7,
     marginBottom: 10,
     paddingVertical: 6,
@@ -140,22 +142,25 @@ export const styles = StyleSheet.create({
     width: '100%',
     minWidth: '100%',
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.inputBackground,
+    color: colors.textPrimary,
   },
   modalText: {
     fontSize: 16,
     marginBottom: 8,
     alignSelf: 'flex-start',
+    color: colors.textPrimary,
   },
   pickerInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 7, // más delgado
+    borderColor: colors.border,
+    borderRadius: 7,
     marginBottom: 10,
-    paddingVertical: 1, // menos alto
+    paddingVertical: 1,
     paddingHorizontal: 10,
     width: '100%',
     minWidth: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: colors.inputBackground,
+    color: colors.textPrimary,
   },
 });

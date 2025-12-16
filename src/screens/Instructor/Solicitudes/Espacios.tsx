@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -15,9 +15,10 @@ import {
   NativeSyntheticEvent
 } from 'react-native';
 import DatePickerModal from '../../../components/DatePickerModal';
-import { EspaciosStyles } from '../../../styles/Instructor/Solicitudes/Espacios';
+import { createEspaciosStyles } from '../../../styles/Instructor/Solicitudes/Espacios';
 import { espaciosService, solicitudesService } from '../../../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,9 @@ interface Espacio {
 }
 
 export default function EspaciosContent({ navigation }: any) {
+  const { colors } = useTheme();
+  const EspaciosStyles = useMemo(() => createEspaciosStyles(colors), [colors]);
+  
   const [espacios, setEspacios] = useState<Espacio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

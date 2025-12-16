@@ -1,13 +1,15 @@
 import { StyleSheet } from 'react-native';
+import { Colors } from '../../../../context/ThemeContext';
 
-export const ReportesStyles = StyleSheet.create({
+export const createReportesStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.background,
   },
   formContainer: {
     flex: 1,
     padding: 20,
+    backgroundColor: colors.background,
   },
   formGroup: {
     marginBottom: 20,
@@ -15,17 +17,17 @@ export const ReportesStyles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.inputBackground,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#fff',
+    color: colors.textPrimary,
   },
   textarea: {
     height: 100,
@@ -33,12 +35,12 @@ export const ReportesStyles = StyleSheet.create({
   },
   charCount: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textTertiary,
     marginTop: 4,
     textAlign: 'right',
   },
   alertDanger: {
-    backgroundColor: '#dc3545',
+    backgroundColor: colors.error,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
@@ -47,7 +49,7 @@ export const ReportesStyles = StyleSheet.create({
     alignItems: 'center',
   },
   alertSuccess: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.success,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
@@ -71,7 +73,7 @@ export const ReportesStyles = StyleSheet.create({
     padding: 20,
   },
   loadingText: {
-    color: '#fff',
+    color: colors.textPrimary,
     marginLeft: 10,
   },
   problemasGrid: {
@@ -81,24 +83,24 @@ export const ReportesStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.cardBackground,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: colors.border,
     marginBottom: 10,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderWidth: 2,
-    borderColor: '#3fbb34',
+    borderColor: colors.primary,
     borderRadius: 4,
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#3fbb34',
+    backgroundColor: colors.primary,
   },
   checkmark: {
     color: '#fff',
@@ -106,7 +108,7 @@ export const ReportesStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   problemaText: {
-    color: '#fff',
+    color: colors.textPrimary,
     fontSize: 14,
     flex: 1,
   },
@@ -117,13 +119,13 @@ export const ReportesStyles = StyleSheet.create({
     marginBottom: 12,
   },
   addImageButton: {
-    backgroundColor: '#6c757d',
+    backgroundColor: colors.buttonCancel,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
   },
   addImageText: {
-    color: '#fff',
+    color: colors.textPrimary,
     fontSize: 14,
   },
   imagePreviewContainer: {
@@ -140,7 +142,7 @@ export const ReportesStyles = StyleSheet.create({
     marginBottom: 8,
   },
   deleteImageButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: colors.error,
     padding: 8,
     borderRadius: 6,
     alignItems: 'center',
@@ -152,7 +154,7 @@ export const ReportesStyles = StyleSheet.create({
   },
   imageCount: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textTertiary,
   },
   buttonContainer: {
     marginBottom: 30,
@@ -166,10 +168,10 @@ export const ReportesStyles = StyleSheet.create({
     marginBottom: 12,
   },
   buttonSubmit: {
-    backgroundColor: '#dc3545',
+    backgroundColor: colors.error,
   },
   buttonSecondary: {
-    backgroundColor: '#6c757d',
+    backgroundColor: colors.buttonCancel,
   },
   buttonDisabled: {
     opacity: 0.6,

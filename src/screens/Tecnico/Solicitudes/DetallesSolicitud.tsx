@@ -12,7 +12,7 @@ import {
 import { useTheme } from '../../../context/ThemeContext';
 import HeaderTecnico from '../HeaderTecnico/HeaderTecnico';
 import { SolicitudesTecnicoStyles } from '../../../styles/Tecnico/Solicitudes/SolicitudesTecnico';
-import { solicitudesService, authService } from '../../../services/Api';
+import { solicitudesService, authService, API_URL } from '../../../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface DetallesSolicitudProps {
@@ -98,17 +98,25 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
 
   // Función independiente para Aprobar (abre modal de equipos solo si hay elementos)
   const abrirModalAprobar = () => {
-    // ✅ Si no tiene elementos o cantidad es null, es solicitud de espacio - aprobar directamente
-    if (!solicitud.nom_elem || !solicitud.cantid) {
-      console.log('📋 Solicitud de espacio detectada - aprobando directamente sin asignar elementos');
+    console.log('🔍 SOLICITUD COMPLETA:', JSON.stringify(solicitud, null, 2));
+    
+    // ✅ SIEMPRE mostrar modal de asignación para TODAS las solicitudes de equipos
+    // Solo aprobar directamente si explícitamente es de ESPACIO (tiene id_espa definido y diferente de null)
+    const esEspacio = solicitud.id_espa !== null && solicitud.id_espa !== undefined && solicitud.id_espa !== 0;
+    
+    console.log('🔍 ¿Es espacio?:', esEspacio, '(id_espa:', solicitud.id_espa, ')');
+    
+    if (esEspacio) {
+      console.log('📋 Solicitud de ESPACIO confirmada - aprobando directamente');
       cambiarEstado('Aprobado');
       return;
     }
     
-    // ✅ Si tiene elementos, mostrar modal para asignar
-    console.log('📦 Solicitud de equipos detectada - abriendo modal de asignación');
+    // ✅ Para TODO lo demás (equipos), abrir modal de asignación
+    console.log('📦 Solicitud de EQUIPOS - ABRIENDO MODAL DE ASIGNACIÓN');
     cargarElementos();
     setMostrarModalAsignar(true);
+    console.log('✅ setMostrarModalAsignar(true) ejecutado');
   };
 
   // Función independiente para Rechazar (abre modal de confirmación)
@@ -255,18 +263,37 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
 
       console.log('📤 Enviando asignación con actualización:', payload);
 
+      // Usar la URL base que se importa de Api.ts
+      const url = `${API_URL}/api/solicitudes/${solicitud.id_soli}`;
+      console.log('🌐 URL completa:', url);
+      console.log('📋 Headers:', headers);
+      
       // PUT directo - que el backend maneje la limpieza de elementos antiguos
-      const response = await fetch(`http://192.168.1.6:8081/api/solicitudes/${solicitud.id_soli}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(payload),
-      });
+      let response;
+      try {
+        response = await fetch(url, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(payload),
+        });
+      } catch (fetchError: any) {
+        console.error('❌ Error de red en fetch:', {
+          mensaje: fetchError.message,
+          tipo: fetchError.name,
+          stack: fetchError.stack?.substring(0, 200),
+        });
+        throw new Error(`Error de conexión al backend: ${fetchError.message}`);
+      }
 
-      const responseData = await response.json();
+      console.log('📥 Response recibida, status:', response.status);
+      const responseData = await response.json().catch((parseError) => {
+        console.error('❌ Error al parsear respuesta JSON:', parseError.message);
+        return null;
+      });
       console.log('📥 Respuesta del servidor:', responseData, 'Status:', response.status);
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${responseData?.mensaje || responseData?.detalle || 'Error al actualizar solicitud'}`);
+        throw new Error(`Error ${response.status}: ${responseData?.mensaje || responseData?.detalle || responseData?.error || 'Error al actualizar solicitud'}`);
       }
 
       Alert.alert('Éxito', 'Solicitud aprobada y elementos asignados');
@@ -277,7 +304,11 @@ export default function DetallesSolicitud({ route, navigation }: DetallesSolicit
         navigation.goBack();
       }, 1000);
     } catch (error: any) {
-      console.error('❌ Error al enviar asignación:', error.message || error);
+      console.error('❌ Error al enviar asignación:', {
+        mensaje: error.message,
+        tipo: error.name,
+        completo: error
+      });
       Alert.alert('Error', error.message || 'No se pudo asignar los elementos');
     } finally {
       setEnviando(false);

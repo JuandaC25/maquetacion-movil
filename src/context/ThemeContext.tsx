@@ -40,10 +40,10 @@ export interface Colors {
 
 const darkColors: Colors = {
   // Fondos
-  background: '#232838', // azul oscuro tipo Discord
-  cardBackground: '#2c3142',
-  modalBackground: '#2c3142',
-  inputBackground: '#35394a',
+  background: '#1b1b1bff', // azul oscuro tipo Discord
+  cardBackground: '#1b1b1bff',
+  modalBackground: '#1b1b1bff',
+  inputBackground: '#1b1b1bff',
   
   // Textos
   textPrimary: '#bfc2c9', // gris claro para texto normal

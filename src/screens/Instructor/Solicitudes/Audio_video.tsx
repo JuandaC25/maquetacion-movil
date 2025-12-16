@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,8 @@ import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { elementosService, solicitudesService, subcategoriasService, authService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Instructor/Solicitudes/AudioVideo';
+import { createAudioVideoStyles } from '../../../styles/Instructor/Solicitudes/AudioVideo';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +30,9 @@ const AUDIO_VIDEO_IMAGES = [
 ];
 
 export default function Audio_video({ navigation }: any) {
+      const { colors } = useTheme();
+      const styles = useMemo(() => createAudioVideoStyles(colors), [colors]);
+      
       const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<number | null>(null);
     // Listado de subcategorías filtradas para Multimedia
     const [subcategorias, setSubcategorias] = useState<any[]>([]);

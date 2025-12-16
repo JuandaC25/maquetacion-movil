@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { Colors } from '../../../context/ThemeContext';
 
-export const styles = StyleSheet.create({
+export const createHistorialStyles = (colors: Colors) => StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#000000ff',
+		backgroundColor: colors.background,
 	},
 	scrollView: {
 		flex: 1,
@@ -13,7 +14,7 @@ export const styles = StyleSheet.create({
 		marginTop: 15,
 		flexDirection: 'row',
 		justifyContent: 'space-around',
-		backgroundColor: '#e9ecef',
+		backgroundColor: colors.inputBackground,
 		marginBottom: 10,
 		padding: 5,
 		borderRadius: 5,
@@ -26,8 +27,8 @@ export const styles = StyleSheet.create({
 		borderRadius: 5,
 	},
 	activeTab: {
-		backgroundColor: 'white',
-		shadowColor: '#000',
+		backgroundColor: colors.cardBackground,
+		shadowColor: colors.shadow,
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.2,
 		shadowRadius: 1.41,
@@ -35,25 +36,26 @@ export const styles = StyleSheet.create({
 	},
 	tabText: {
 		fontSize: 14,
-		color: '#495057',
+		color: colors.textSecondary,
 	},
 	activeTabText: {
 		fontWeight: 'bold',
-		color: '#007bff',
+		color: colors.primary,
 	},
 	filterContainer: {
 		padding: 10,
-		backgroundColor: '#fff',
+		backgroundColor: colors.cardBackground,
 		borderRadius: 8,
 		marginBottom: 10,
 		borderWidth: 1,
-		borderColor: '#ddd',
+		borderColor: colors.border,
 	},
 	filterLabel: {
 		fontSize: 14,
 		fontWeight: 'bold',
 		marginTop: 5,
 		marginBottom: 5,
+		color: colors.textPrimary,
 	},
 	filterButtons: {
 		flexDirection: 'row',
@@ -64,12 +66,12 @@ export const styles = StyleSheet.create({
 		paddingVertical: 6,
 		paddingHorizontal: 12,
 		borderRadius: 20,
-		backgroundColor: '#6c757d',
+		backgroundColor: colors.buttonCancel,
 		marginRight: 8,
 		marginBottom: 8,
 	},
 	activeFilterTypeButton: {
-		backgroundColor: '#007bff',
+		backgroundColor: colors.primary,
 	},
 	filterButtonText: {
 		color: 'white',
@@ -77,26 +79,26 @@ export const styles = StyleSheet.create({
 	},
 	dropdownPicker: {
 		padding: 10,
-		backgroundColor: '#f1f1f1',
+		backgroundColor: colors.inputBackground,
 		borderRadius: 5,
 		borderWidth: 1,
-		borderColor: '#ccc',
+		borderColor: colors.border,
 		marginTop: 5,
 	},
 	dropdownPickerText: {
 		fontSize: 14,
-		color: '#333',
+		color: colors.textPrimary,
 	},
 	stackContainer: {
 		marginBottom: 20,
 	},
 	card: {
-		backgroundColor: '#fff',
+		backgroundColor: colors.cardBackground,
 		padding: 15,
 		borderRadius: 8,
 		borderLeftWidth: 5,
-		borderLeftColor: '#007bff', 
-		shadowColor: '#000',
+		borderLeftColor: colors.primary,
+		shadowColor: colors.shadow,
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.1,
 		shadowRadius: 1.41,
@@ -127,22 +129,22 @@ export const styles = StyleSheet.create({
 	},
 	cardLabel: {
 		fontWeight: 'bold',
-		color: '#333',
+		color: colors.textPrimary,
 	},
 	cardText: {
 		fontSize: 14,
 		marginBottom: 2,
-		color: '#555',
+		color: colors.textSecondary,
 	},
 	observationText: {
 		marginTop: 5,
 		fontSize: 13,
-		color: '#777',
+		color: colors.textTertiary,
 		fontStyle: 'italic',
 	},
 	cancelButton: {
 		marginTop: 10,
-		backgroundColor: '#dc3545',
+		backgroundColor: colors.error,
 		padding: 8,
 		borderRadius: 5,
 		alignItems: 'center',
@@ -153,18 +155,18 @@ export const styles = StyleSheet.create({
 		fontSize: 14,
 	},
 	disabledButton: {
-		backgroundColor: '#adb5bd',
+		backgroundColor: colors.disabled,
 	},
 	loading: {
 		padding: 20,
 	},
 	errorContainer: {
 		padding: 20,
-		backgroundColor: '#fff3cd',
+		backgroundColor: colors.warning,
 		margin: 10,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#ffc107',
+		borderColor: colors.warning,
 	},
 	errorTitle: {
 		color: '#856404',
@@ -185,22 +187,22 @@ export const styles = StyleSheet.create({
 	emptyText: {
 		padding: 20,
 		textAlign: 'center',
-		color: '#6c757d',
+		color: colors.textTertiary,
 	},
 	paginationContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
 		paddingVertical: 15,
-		backgroundColor: '#fff',
+		backgroundColor: colors.cardBackground,
 		borderTopWidth: 1,
-		borderTopColor: '#eee',
+		borderTopColor: colors.border,
 	},
 	paginationButton: {
 		paddingVertical: 8,
 		paddingHorizontal: 15,
 		marginHorizontal: 5,
-		backgroundColor: '#007bff',
+		backgroundColor: colors.primary,
 		borderRadius: 5,
 	},
 	paginationText: {
@@ -209,17 +211,17 @@ export const styles = StyleSheet.create({
 	},
 	pageIndicator: {
 		paddingHorizontal: 10,
-		backgroundColor: '#e9ecef',
+		backgroundColor: colors.inputBackground,
 		borderRadius: 5,
 		paddingVertical: 8,
 	},
 	footerContainer: {
 		padding: 10,
-		backgroundColor: '#343a40',
+		backgroundColor: colors.cardBackground,
 		alignItems: 'center',
 	},
 	footerText: {
-		color: '#f8f9fa',
+		color: colors.textSecondary,
 		fontSize: 12,
-	}
+	},
 });

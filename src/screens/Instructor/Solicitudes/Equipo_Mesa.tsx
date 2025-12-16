@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Modal, TextInput, Button } from 'react-native';
 import {
@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { elementosService, solicitudesService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
-import { styles } from '../../../styles/Instructor/Solicitudes/EquipoMesa';
+import { createEquipoMesaStyles } from '../../../styles/Instructor/Solicitudes/EquipoMesa';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,9 @@ const ESCRITORIO_IMAGES = [
 ];
 
 export default function Equipo_Mesa({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createEquipoMesaStyles(colors), [colors]);
+  
   const [subcatInfo, setSubcatInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [categoriaFiltro, setCategoriaFiltro] = useState('computo');
@@ -188,13 +192,13 @@ export default function Equipo_Mesa({ navigation }: any) {
         fecha_fn: `${form.fecha_fn}T${form.hora_fn}:00`,
         ambient: form.ambient,
         num_fich: form.num_ficha,
-        ids_elem: equiposActivos.slice(0, form.cantidad).map(eq => eq.id), // array de IDs de elementos
-        id_categoria: idCategoriaNumerico, // ID numérico de la categoría
-        id_subcategoria: idSubcategoria, // ID numérico de la subcategoría
+        ids_elem: equiposActivos.slice(0, form.cantidad).map(eq => eq.id),
+        id_categoria: idCategoriaNumerico,
+        id_subcategoria: idSubcategoria,
         id_usu: ID_USUARIO,
-        id_estado_soli: ESTADO_SOLI_INICIAL, // nombre correcto según backend
+        id_estado_soli: ESTADO_SOLI_INICIAL,
+        cantid: Number(form.cantidad),
       };
-
       await solicitudesService.create(dto);
 
       Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente ✅');
@@ -218,7 +222,7 @@ export default function Equipo_Mesa({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderWithDrawer navigation={navigation} title="Equipos de Escritorio" />
+      <HeaderWithDrawer navigation={navigation} title="Equipos de mesa" />
       
       <ScrollView style={styles.content}>
         {/* Toggle de categorías */}

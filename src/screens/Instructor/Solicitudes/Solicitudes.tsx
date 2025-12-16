@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, ImageBackground, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SolicitudesStyles } from '../../../styles/Instructor/Solicitudes/Solicitudes';
+import { createSolicitudesStyles } from '../../../styles/Instructor/Solicitudes/Solicitudes';
 import HeaderWithDrawer from '../Header/Header';
 import EspaciosContent from './Espacios';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function SolicitudesScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const SolicitudesStyles = useMemo(() => createSolicitudesStyles(colors), [colors]);
   const [activeTab, setActiveTab] = useState<string>('equipos');
 
   return (
