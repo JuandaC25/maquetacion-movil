@@ -335,15 +335,7 @@ export default function SolicitudesTecnico({ navigation }: any) {
             </View>
           </View>
 
-          <View style={{ marginBottom: 12 }}>
-            <TextInput
-              style={{ borderWidth: 2, borderColor: '#3fbb34', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, backgroundColor: colors.inputBackground, color: colors.textPrimary }}
-              placeholder="🔍 Buscar por Marca"
-              placeholderTextColor={colors.textTertiary}
-              value={busquedaMarca}
-              onChangeText={setBusquedaMarca}
-            />
-          </View>
+          {/* Eliminado campo de búsqueda por marca */}
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>

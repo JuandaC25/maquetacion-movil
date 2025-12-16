@@ -140,12 +140,6 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
               <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Usuario: </Text>
               {solicitud.nom_usu}
             </Text>
-
-            <Text style={SolicitudesTecnicoStyles.cardInfo}>
-              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Correo: </Text>
-              {solicitud.correo}
-            </Text>
-
             <Text style={SolicitudesTecnicoStyles.cardInfo}>
               <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Fecha Inicio: </Text>
               {new Date(solicitud.fecha_ini).toLocaleString()}
@@ -155,17 +149,6 @@ export default function DetallesEspacios({ route, navigation }: DetallesEspacios
               <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Fecha Fin: </Text>
               {new Date(solicitud.fecha_fn).toLocaleString()}
             </Text>
-
-            <Text style={SolicitudesTecnicoStyles.cardInfo}>
-              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Número de Ficha: </Text>
-              {solicitud.num_fich}
-            </Text>
-
-            <Text style={SolicitudesTecnicoStyles.cardInfo}>
-              <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Estado: </Text>
-              {estadoActual}
-            </Text>
-
             {solicitud.mensaj && (
               <Text style={SolicitudesTecnicoStyles.cardInfo}>
                 <Text style={SolicitudesTecnicoStyles.cardInfoLabel}>Mensaje: </Text>

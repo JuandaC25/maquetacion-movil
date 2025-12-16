@@ -432,9 +432,7 @@ const TicketsTecnico = ({ navigation }: any) => {
 
                 {/* Footer - Indicador de interacción */}
                 <View style={{ backgroundColor: colors.inputBackground, paddingVertical: 10, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border }}>
-                  <Text style={{ fontSize: 12, color: '#3fbb34', fontWeight: '600' }}>
-                    Ubicación: {item.ambient || 'No especificada'}
-                  </Text>
+                  {/* Ubicación eliminada */}
                   <Text style={{ fontSize: 16, color: '#3fbb34' }}>→</Text>
                 </View>
               </TouchableOpacity>
