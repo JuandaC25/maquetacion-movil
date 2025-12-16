@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import AdminHeader from './AdminHeader/AdminHeader';
 import ReservaEspacioCard, { ReservaEspacio } from './ReservaEspacioCard';
 import DatePickerModal from '../../components/DatePickerModal';
-import { espaciosService, solicitudesService, authService } from '../../services/Api';
+import { espaciosService, solicitudesService, authService, API_URL } from '../../services/Api';
 
 const SolicitudesEspacioAdmin = () => {
   const { colors, theme } = useTheme();
@@ -188,7 +188,7 @@ const SolicitudesEspacioAdmin = () => {
       imagenes = [];
     }
     if (imagenes.length === 0) {
-      imagenes = ['http://192.168.20.60:8081/imagenes/imagenes_espacios/default.jpg'];
+      imagenes = [`${API_URL}/imagenes/imagenes_espacios/default.jpg`];
     }
     const currentSlide = activeSlides[item.id] || 0;
     return (
@@ -220,7 +220,7 @@ const SolicitudesEspacioAdmin = () => {
             style={{ width: cardWidth }}
           >
             {imagenes.map((img, idx) => {
-              const fullUrl = img.startsWith('http') ? img : `http://192.168.20.60:8081${img}`;
+              const fullUrl = img.startsWith('http') ? img : `${API_URL}${img}`;
               return (
                 <Image
                   key={idx}
@@ -322,6 +322,17 @@ const SolicitudesEspacioAdmin = () => {
                   const estadoMap: any = { 1: 'Pendiente', 2: 'Aprobado', 3: 'Rechazado' };
                   estadoTexto = estadoMap[estadoNum] || 'Pendiente';
                 }
+                // Obtener imagen correctamente usando API_URL
+                let imagenFinal = undefined;
+                try {
+                  const imgs = espacio?.imagenes ? JSON.parse(espacio.imagenes) : [];
+                  if (imgs.length > 0) {
+                    const firstImg = imgs[0];
+                    imagenFinal = firstImg.startsWith('http') ? firstImg : `${API_URL}${firstImg}`;
+                  }
+                } catch {
+                  imagenFinal = undefined;
+                }
                 const reserva: ReservaEspacio = {
                   id: solicitudId,
                   nom_espa: espacio?.nom_espa || 'Espacio',
@@ -331,7 +342,7 @@ const SolicitudesEspacioAdmin = () => {
                   fecha_ini: item.fecha_ini?.replace('T', ', ') || '',
                   fecha_fn: item.fecha_fn?.replace('T', ', ') || '',
                   estado: estadoTexto,
-                  imagen,
+                  imagen: imagenFinal,
                   _locked: !!item._locked,
                 };
                 const actualizarEstado = async (nuevoEstado: number) => {

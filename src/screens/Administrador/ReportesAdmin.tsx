@@ -142,13 +142,13 @@ const ReportesAdmin: FC = () => {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={{ flex: 1, backgroundColor: colors.background }}> 
       <AdminHeader title="Reportes" navigation={navigation} />
-      <View style={{ height: 12 }} />
-      {loading ? (
-        <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
-      ) : (
-        <ScrollView contentContainerStyle={styles.grid}>
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
+        ) : (
+          <ScrollView contentContainerStyle={styles.grid}>
           {tickets.map((t) => {
             // Compatibilidad con campos posibles: id, id_tickets, ticket, nom_elem, estado, id_est_tick
             const id = t.id ?? t.id_tickets;
@@ -197,7 +197,7 @@ const ReportesAdmin: FC = () => {
             <View style={styles.modalHeaderFull}>
               <Text style={[styles.modalTitleFull, { color: colors.title }]}>Detalles del Ticket</Text>
             </View>
-            <View style={styles.modalBodyFull}>
+            <ScrollView style={styles.modalBodyFull}>
               <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Número del Ticket:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.id_tickets ?? modalTicket?.id ?? '-'}</Text></View>
               <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Fecha de inicio:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.fecha_in ?? '-'}</Text></View>
               <View style={styles.modalRowFull}><Text style={[styles.modalLabelFull, { color: colors.title }]}>Fecha de fin:</Text><Text style={[styles.modalValueFull, { color: colors.textPrimary }]}>{modalTicket?.fecha_fin ?? '-'}</Text></View>
@@ -276,7 +276,7 @@ const ReportesAdmin: FC = () => {
                   );
                 })()}
               </View>
-            </View>
+            </ScrollView>
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalTicket(null)}>
                 <Text style={styles.btnCerrarTextFull}>Cerrar</Text>
@@ -292,9 +292,9 @@ const ReportesAdmin: FC = () => {
         <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}> 
           <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground }]}> 
             <View style={styles.modalHeaderFull}>
-              <Text style={styles.modalTitleFull}>Historial de entradas</Text>
+              <Text style={[styles.modalTitleFull, { color: colors.title }]}>Historial de entradas</Text>
             </View>
-            <View style={styles.modalBodyFull}>
+            <ScrollView style={styles.modalBodyFull}>
               <Text style={[styles.modalLabelFull, { fontWeight: 'bold', fontSize: 17, marginBottom: 10, color: colors.title }]}>Trazabilidad — Entrada #{modalHistorial?.id ?? '-'}</Text>
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, fontWeight: 'bold' }]}>Fecha</Text>
@@ -325,7 +325,7 @@ const ReportesAdmin: FC = () => {
                   <Text style={{ color: '#333', fontSize: 14 }}>{modalHistorial?.observacion ?? 'Sin respuesta registrada'}</Text>
                 </View>
               </View>
-            </View>
+            </ScrollView>
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalHistorial(null)}>
                 <Text style={styles.btnCerrarTextFull}>Cerrar</Text>
@@ -334,6 +334,7 @@ const ReportesAdmin: FC = () => {
           </View>
         </View>
       </Modal>
+      </View>
     </View>
   );
 };
@@ -349,13 +350,13 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
       },
       modalHeaderFull: {
-        backgroundColor: '#12bb1a',
-        paddingVertical: 18,
+        backgroundColor: '#28a745',
+        paddingVertical: 14,
         paddingHorizontal: 20,
       },
       modalTitleFull: {
         color: '#fff',
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'left',
       },
@@ -515,7 +516,7 @@ const styles = StyleSheet.create({
       textTransform: 'uppercase',
       textAlign: 'center',
     },
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 16 },
+  container: { flex: 1, padding: 16 },
   header: { fontSize: 24, fontWeight: 'bold', /* color: 'rgb(9,180,26)', */ marginBottom: 16, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingBottom: 40 },
   ribbon: {

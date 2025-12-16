@@ -2,7 +2,7 @@ import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import AdminHeader from './AdminHeader/AdminHeader';
-import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DatePickerModal from '../../components/DatePickerModal';
 import { solicitudesService } from '../../services/Api';
@@ -226,6 +226,7 @@ const SolicitudesElementoAdmin = () => {
         <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
           <View style={[styles.modalContent, { backgroundColor: colors.background }]}> 
             <Text style={[styles.modalTitle, { color: colors.title }]}>Nueva Solicitud</Text>
+            <ScrollView showsVerticalScrollIndicator={true}>
             {/* Selector de Categoría */}
             <TouchableOpacity
               style={styles.input}
@@ -251,7 +252,7 @@ const SolicitudesElementoAdmin = () => {
                     <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona una categoría</Text>
                     <FlatList
                       data={categorias}
-                      keyExtractor={item => String(item.id ?? item.id_cat)}
+                      keyExtractor={(item, idx) => `cat-${Date.now()}-${idx}`}
                       renderItem={({ item }) => (
                         <TouchableOpacity
                           style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}
@@ -304,7 +305,7 @@ const SolicitudesElementoAdmin = () => {
                     <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona una subcategoría</Text>
                     <FlatList
                       data={subcategoriasFiltradas}
-                      keyExtractor={item => String(item.id ?? item.id_subcat)}
+                      keyExtractor={(item, idx) => `subcat-${Date.now()}-${idx}`}
                       renderItem={({ item }) => (
                         <TouchableOpacity
                           style={{ padding: 12, borderBottomWidth: 1, borderColor: colors.border }}
@@ -354,7 +355,7 @@ const SolicitudesElementoAdmin = () => {
                     <Text style={[styles.modalTitle, { color: colors.title }]}>Selecciona un elemento</Text>
                     <FlatList
                       data={elementosFiltrados}
-                      keyExtractor={item => String(item.id)}
+                      keyExtractor={(item, idx) => `elem-${Date.now()}-${idx}`}
                       renderItem={({ item }) => (
                         <TouchableOpacity
                           style={{ padding: 12, borderBottomWidth: 1, borderColor: colors.border }}
@@ -436,6 +437,7 @@ const SolicitudesElementoAdmin = () => {
               value={addData.ambiente}
               onChangeText={text => setAddData(prev => ({ ...prev, ambiente: text }))}
             />
+            </ScrollView>
             <View style={styles.modalActions}>
               <Button title="Cancelar" color="#888" onPress={() => setAddModalVisible(false)} />
               <Button
@@ -539,6 +541,7 @@ const SolicitudesElementoAdmin = () => {
       <View style={[styles.modalBg, { backgroundColor: 'rgba(0,0,0,0.4)' }]}> 
         <View style={[styles.modalContent, { backgroundColor: colors.background }]}> 
           <Text style={[styles.modalTitle, { color: colors.title, fontWeight: 'bold', fontSize: 20, textAlign: 'center', marginBottom: 18 }]}>Detalle de Solicitud</Text>
+          <ScrollView showsVerticalScrollIndicator={true}>
           <Text style={{ color: colors.textPrimary, marginBottom: 8, fontWeight: 'bold' }}>Cantidad</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.textPrimary, borderColor: colors.primary }]}
@@ -550,9 +553,9 @@ const SolicitudesElementoAdmin = () => {
           />
           <Text style={{ color: colors.textPrimary, marginBottom: 8, fontWeight: 'bold', marginTop: 12 }}>Estado</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-            {['Pendiente', 'Aprobado', 'Rechazado', 'Cancelado', 'Finalizado'].map(estado => (
+            {['Pendiente', 'Aprobado', 'Rechazado', 'Cancelado', 'Finalizado'].map((estado, idx) => (
               <TouchableOpacity
-                key={estado}
+                key={`estado-${idx}-${estado}`}
                 style={[ 
                   { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18, margin: 4, borderWidth: 2 },
                   editEstado === estado
@@ -565,6 +568,7 @@ const SolicitudesElementoAdmin = () => {
               </TouchableOpacity>
             ))}
           </View>
+          </ScrollView>
           <View style={[styles.modalActions, { marginTop: 18 }]}> 
             <Button title="Cancelar" color={isDark ? '#888' : '#444'} onPress={() => setEditModalVisible(false)} />
             <Button

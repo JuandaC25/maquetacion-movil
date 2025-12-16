@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import DatePickerModal from '../../../components/DatePickerModal';
 import { createEspaciosStyles } from '../../../styles/Instructor/Solicitudes/Espacios';
-import { espaciosService, solicitudesService } from '../../../services/Api';
+import { espaciosService, solicitudesService, API_URL } from '../../../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -150,7 +150,7 @@ export default function EspaciosContent({ navigation }: any) {
   const renderCarouselItem = ({ item, index }: { item: string; index: number }) => {
     const fullUrl = item.startsWith('http') 
       ? item 
-      : `http://192.168.0.7:8081${item}`;
+      : `${API_URL}${item}`;
 
     return (
       <View key={index} style={{ width: width - 30 }}>

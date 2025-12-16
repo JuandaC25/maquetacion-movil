@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { elementosService, solicitudesService, subcategoriasService, authService } from '../../../services/Api';
+import { elementosService, solicitudesService, subcategoriasService, categoriasService, authService } from '../../../services/Api';
 import HeaderWithDrawer from '../Header/Header';
 import { createElementosStyles } from '../../../styles/Instructor/Solicitudes/Elementos';
 import { Picker } from '@react-native-picker/picker';
@@ -45,6 +45,7 @@ export default function Elementos({ navigation }: any) {
     ambient: '',
     num_ficha: '',
     cantidad: 1,
+    id_categoria: null,
   });
   const [showTimePicker, setShowTimePicker] = useState<string | null>(null);
   const [pickerTime, setPickerTime] = useState<Date>(new Date());
@@ -90,8 +91,9 @@ export default function Elementos({ navigation }: any) {
   };
 
   // Envío de solicitud
-      const [subcategorias, setSubcategorias] = useState<any[]>([]);
-      const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<number | null>(null);
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [subcategorias, setSubcategorias] = useState<any[]>([]);
+  const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<number | null>(null);
   const handleSubmitSolicitud = async () => {
     // Verificar usuario y rol antes de enviar
     const usuario = await authService.getCurrentUser();
@@ -145,7 +147,7 @@ export default function Elementos({ navigation }: any) {
         num_fich: Number(form.num_ficha),
         cantid: Number(form.cantidad),
         ids_elem: idsElem,
-        id_categoria: 1, // Computo (ID válido)
+        id_categoria: form.id_categoria,
         id_subcategoria: subcategoriaSeleccionada,
         id_usu: usuario.id || 1, // Usa el id del usuario autenticado
         id_estado_soli: 1, // Ajusta según tu backend
@@ -161,7 +163,8 @@ export default function Elementos({ navigation }: any) {
         hora_fn: '', 
         ambient: '', 
         num_ficha: '', 
-        cantidad: 1 
+        cantidad: 1,
+        id_categoria: null
       });
     } catch (err: any) {
       console.error("Error en la solicitud:", err);
@@ -179,11 +182,30 @@ export default function Elementos({ navigation }: any) {
   }, []);
 
   useEffect(() => {
-    // Excluir subcategorías por nombre y asociadas a multimedia
+    // Cargar categorías excluyendo 'Multimedia'
+    const cargarCategorias = async () => {
+      try {
+        const resp = await categoriasService.getAll();
+        const data = resp.data || [];
+        const filtradas = data.filter((cat: any) => (cat.nom_cat || '').toLowerCase().trim() !== 'multimedia');
+        setCategorias(filtradas);
+      } catch (err) {
+        console.error('Error cargando categorías:', err);
+      }
+    };
+    cargarCategorias();
+  }, []);
+
+  useEffect(() => {
+    // Cargar subcategorías según la categoría seleccionada
     const cargarSubcategorias = async () => {
+      if (!form.id_categoria) {
+        setSubcategorias([]);
+        setSubcategoriaSeleccionada(null);
+        return;
+      }
       try {
         const resp = await subcategoriasService.getAll();
-        console.log('Respuesta subcategorias:', resp.data); // <-- LOG PARA DEPURAR
         const data = resp.data || [];
         const nombresExcluir = [
           'Equipo de mesa',
@@ -195,20 +217,21 @@ export default function Elementos({ navigation }: any) {
           const categoriaPadre = (subcat.nom_cat || '').toLowerCase().trim();
           return (
             !nombresExcluir.includes(subcat.nom_subcateg) &&
-            categoriaPadre !== 'multimedia'
+            categoriaPadre !== 'multimedia' &&
+            String(subcat.id_cat) === String(form.id_categoria)
           );
         }).map((subcat: any) => ({
           id: subcat.id_subcategoria ?? subcat.id,
           nom_subcateg: subcat.nom_subcateg
         }));
         setSubcategorias(filtradas);
-        if (filtradas.length > 0) setSubcategoriaSeleccionada(filtradas[0].id_subcategoria);
+        setSubcategoriaSeleccionada(filtradas.length > 0 ? filtradas[0].id : null);
       } catch (err) {
         console.error('Error cargando subcategorías:', err);
       }
     };
     cargarSubcategorias();
-  }, []);
+  }, [form.id_categoria]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -364,23 +387,35 @@ export default function Elementos({ navigation }: any) {
                     keyboardType="numeric"
                   />
                   <Text style={styles.modalText}>Categoría</Text>
-                  <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1', fontWeight: 'bold'}]}>Computo</Text>
+                  <View style={{ width: '100%', marginBottom: 10, borderBlockColor: '#ccc', borderWidth: 1 }}>
+                    <Picker
+                      selectedValue={form.id_categoria}
+                      onValueChange={(itemValue) => setForm(f => ({ ...f, id_categoria: itemValue }))}
+                      style={{ color: '#000000ff', fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius: 5 }}
+                    >
+                      <Picker.Item label="Seleccione..." value={null} />
+                      {categorias.map(cat => (
+                        <Picker.Item key={cat.id_cat} label={cat.nom_cat} value={cat.id_cat} />
+                      ))}
+                    </Picker>
+                  </View>
                   <Text style={styles.modalText}>Subcategoría</Text>
-                  <View style={{ width: '100%', marginBottom: 10, borderBlockColor: '#ccc', borderWidth: 1}}>
-                      <Picker
-                        selectedValue={subcategoriaSeleccionada}
-                        onValueChange={(itemValue) => setSubcategoriaSeleccionada(itemValue)}
-                        style={{ color: '#000000ff', fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius:  5}}
-                      >
-                        <Picker.Item label="Seleccione..." value={null} />
-                        {subcategorias.map(subcat => (
-                          <Picker.Item
-                            key={subcat.id}
-                            label={subcat.nom_subcateg}
-                            value={subcat.id}
-                          />
-                        ))}
-                      </Picker>
+                  <View style={{ width: '100%', marginBottom: 10, borderBlockColor: '#ccc', borderWidth: 1 }}>
+                    <Picker
+                      selectedValue={subcategoriaSeleccionada}
+                      onValueChange={(itemValue) => setSubcategoriaSeleccionada(itemValue)}
+                      enabled={!!form.id_categoria}
+                      style={{ color: '#000000ff', fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius: 5 }}
+                    >
+                      <Picker.Item label="Seleccione..." value={null} />
+                      {subcategorias.map(subcat => (
+                        <Picker.Item
+                          key={subcat.id}
+                          label={subcat.nom_subcateg}
+                          value={subcat.id}
+                        />
+                      ))}
+                    </Picker>
                   </View>
                   <View style={{ marginTop: 10 }}>
                     <Button title="Enviar Solicitud" color="#4caf50" onPress={handleSubmitSolicitud} />
