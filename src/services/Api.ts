@@ -9,9 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // Ajusta la IP local según tu máquina (ejecuta `ipconfig` y usa la Dirección IPv4)
-const LOCAL_IP = '192.168.1.6'; // IP elegida durante el merge
-
-const LOCAL_IP = '192.168.1.90'; // IP actualizada según el usuario
+const LOCAL_IP = '192.168.0.7'; // IP actualizada según el usuario
 
 
 export const API_URL = `http://${LOCAL_IP}:8081`;

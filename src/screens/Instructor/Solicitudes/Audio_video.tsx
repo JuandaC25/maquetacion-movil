@@ -314,7 +314,7 @@ export default function Audio_video({ navigation }: any) {
                   <Text style={styles.modalText}>Hora inicio</Text>
                   <TouchableOpacity onPress={() => { setShowTimePicker('hora_ini'); setPickerTime(new Date()); }}>
                     <View pointerEvents="none">
-                      <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" value={formatTo12Hour(form.hora_ini)} editable={false} />
+                      <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" placeholderTextColor={colors.textSecondary} value={formatTo12Hour(form.hora_ini)} editable={false} />
                     </View>
                   </TouchableOpacity>
                   {/* Fecha Fin */}
@@ -324,7 +324,7 @@ export default function Audio_video({ navigation }: any) {
                   <Text style={styles.modalText}>Hora fin</Text>
                   <TouchableOpacity onPress={() => { setShowTimePicker('hora_fn'); setPickerTime(new Date()); }}>
                     <View pointerEvents="none">
-                      <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" value={formatTo12Hour(form.hora_fn)} editable={false} />
+                      <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" placeholderTextColor={colors.textSecondary} value={formatTo12Hour(form.hora_fn)} editable={false} />
                     </View>
                   </TouchableOpacity>
                   {showTimePicker && (
@@ -335,6 +335,7 @@ export default function Audio_video({ navigation }: any) {
                   <TextInput
                     style={styles.modalInput}
                     placeholder="1"
+                    placeholderTextColor={colors.textSecondary}
                     value={String(form.cantidad)}
                     keyboardType="numeric"
                     onChangeText={(v: string) => {
@@ -344,23 +345,24 @@ export default function Audio_video({ navigation }: any) {
                     }}
                   />
                   <Text style={styles.modalText}>Ambiente</Text>
-                  <TextInput style={styles.modalInput} placeholder="Ej: Ambiente 301" value={form.ambient} onChangeText={(v: string) => setForm(f => ({ ...f, ambient: v }))} />
+                  <TextInput style={styles.modalInput} placeholder="Ej: Ambiente 301" placeholderTextColor={colors.textSecondary} value={form.ambient} onChangeText={(v: string) => setForm(f => ({ ...f, ambient: v }))} />
                   <Text style={styles.modalText}>Número de ficha</Text>
                   <TextInput 
                     style={styles.modalInput} 
                     placeholder="Ej: 2560014" 
+                    placeholderTextColor={colors.textSecondary}
                     value={form.num_ficha} 
                     onChangeText={(v: string) => setForm(f => ({ ...f, num_ficha: v }))} 
                     keyboardType="numeric"
                   />
                   <Text style={styles.modalText}>Categoría</Text>
-                  <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1', fontWeight: 'bold' }]}>Multimedia</Text>
+                  <Text style={[styles.modalInput, { fontWeight: 'bold' }]}>Multimedia</Text>
                   <Text style={styles.modalText}>Subcategoría</Text>
-                  <View style={styles.pickerInput}>
+                  <View style={{ width: '100%', marginBottom: 10, borderColor: colors.border, borderWidth: 1, backgroundColor: colors.inputBackground, borderRadius: 7 }}>
                     <Picker
                       selectedValue={subcategoriaSeleccionada}
                       onValueChange={(itemValue) => setSubcategoriaSeleccionada(itemValue)}
-                      style={{ color: '#000000ff', fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius: 5 }}
+                      style={{ color: colors.textPrimary, fontWeight: 'bold', backgroundColor: 'transparent', borderWidth: 0, borderColor: 'transparent', borderRadius: 5 }}
                     >
                       <Picker.Item label="Seleccione..." value={null} />
                       {subcategorias.map(subcat => (
