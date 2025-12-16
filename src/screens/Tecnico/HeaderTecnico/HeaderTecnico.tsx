@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, PanResponder, Switch, TextInput, Alert } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { HeaderTecnicoStyles } from '../../../styles/Tecnico/Header/HeaderTecnico';
+import { HeaderTecnicoStyles, CAMERA_OFFSET } from '../../../styles/Tecnico/Header/HeaderTecnico';
 import { useTheme } from '../../../context/ThemeContext';
 import { usuariosService } from '../../../services/Api';
 
@@ -28,6 +28,7 @@ export default function HeaderTecnico({ title, navigation }: HeaderTecnicoProps)
   });
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const { theme, toggleTheme, colors } = useTheme();
+  const PROFILE_TOP = CAMERA_OFFSET + 60; // coloca modal justo debajo del header
 
   useEffect(() => {
     AsyncStorage.getItem('usuario').then(u => {
@@ -165,7 +166,7 @@ export default function HeaderTecnico({ title, navigation }: HeaderTecnicoProps)
 
       {/* Modal de perfil */}
       {showProfile && (
-        <View style={{ position: 'absolute', top: 110, right: 18, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.0)' }}>
+        <View style={{ position: 'absolute', top: PROFILE_TOP, right: 18, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.0)' }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: 250, elevation: 20, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8 }}>
             <TouchableOpacity onPress={handleCloseProfile} style={{ position: 'absolute', top: 12, right: 12 }}>
               <Text style={{ fontWeight: 'bold', fontSize: 18 }}>✖</Text>
