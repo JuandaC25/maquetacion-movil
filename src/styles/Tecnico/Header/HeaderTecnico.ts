@@ -1,9 +1,14 @@
 import { StyleSheet } from 'react-native';
 
+export const CAMERA_OFFSET = 40; // Desplaza el header para quedar debajo de la cámara (ajustado)
+
 export const HeaderTecnicoStyles = StyleSheet.create({
   header: {
     backgroundColor: '#3fbb34',
     paddingHorizontal: 20,
+    
+    // Mantiene el tamaño (height) pero lo desplaza hacia abajo
+    marginTop: CAMERA_OFFSET,
     flexDirection: 'row-reverse',
     alignItems: 'center',
     shadowColor: '#000',
@@ -27,19 +32,10 @@ export const HeaderTecnicoStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  drawerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 999,
-  },
   drawer: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    top: CAMERA_OFFSET,
     bottom: 0,
     width: 280,
     backgroundColor: '#fff',
@@ -95,9 +91,18 @@ export const HeaderTecnicoStyles = StyleSheet.create({
   gestureArea: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    top: CAMERA_OFFSET,
     bottom: 0,
     width: 20,
     zIndex: 100,
+  },
+  drawerOverlay: {
+    position: 'absolute',
+    top: CAMERA_OFFSET,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999,
   },
 });

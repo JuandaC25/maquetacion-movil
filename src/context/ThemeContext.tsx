@@ -39,16 +39,16 @@ export interface Colors {
 }
 
 const darkColors: Colors = {
-  // Fondos
-  background: '#1b1b1bff', // azul oscuro tipo Discord
-  cardBackground: '#1b1b1bff',
-  modalBackground: '#1b1b1bff',
-  inputBackground: '#1b1b1bff',
+  // Fondos (azul oscuro para evitar negros puros)
+  background: '#071a33',
+  cardBackground: '#071a33',
+  modalBackground: '#071a33',
+  inputBackground: '#0b2740',
   
   // Textos
-  textPrimary: '#bfc2c9', // gris claro para texto normal
-  textSecondary: '#bfc2c9',
-  textTertiary: '#888888',
+  textPrimary: '#cbd6e1', // gris muy claro con matiz frío
+  textSecondary: '#bfc9d6',
+  textTertiary: '#9aa6b6',
     
   // Títulos (verde)
   title: '#3fbb34',
@@ -61,18 +61,18 @@ const darkColors: Colors = {
   warning: '#ffaa00',
   
   // Bordes
-  border: '#2a2a2a',
-  borderLight: '#3a3a3a',
-  borderDark: '#1a1a1a',
+  border: '#123040',
+  borderLight: '#20495f',
+  borderDark: '#061424',
   
   // Otros
-  overlay: 'rgba(0, 0, 0, 0.8)',
-  shadow: '#000000',
-  disabled: '#555555',
+  overlay: 'rgba(7, 26, 51, 0.8)',
+  shadow: '#031026',
+  disabled: '#4d5b6a',
 
   // Botones
   buttonPrimary: '#3fbb34',
-  buttonCancel: '#35394a',
+  buttonCancel: '#16314a',
 };
 
 const lightColors: Colors = {
