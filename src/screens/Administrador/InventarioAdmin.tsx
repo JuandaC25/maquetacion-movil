@@ -221,28 +221,38 @@ const InventarioAdmin = () => {
           contentContainerStyle={{ paddingBottom: 30 }}
           renderItem={({ item }) => (
             <View style={[styles.inventoryCard, { backgroundColor: colors.cardBackground }]}> 
-              <View style={styles.inventoryBadge} />
-              <View style={styles.inventoryIconWrap}>
-                {item.categoria === 'Portátil' && <MaterialIcons name="laptop" size={60} color={colors.success} style={styles.inventoryIcon} />}
-                {item.categoria === 'Equipo de Escritorio' && <MaterialIcons name="desktop-windows" size={60} color={colors.success} style={styles.inventoryIcon} />}
-                {item.categoria === 'Televisor' && <MaterialIcons name="tv" size={60} color={colors.success} style={styles.inventoryIcon} />}
-                {item.categoria === 'Accesorio' && <MaterialIcons name="settings" size={60} color={colors.success} style={styles.inventoryIcon} />}
-                {['Portátil','Equipo de Escritorio','Televisor','Accesorio'].indexOf(item.categoria) === -1 && <MaterialIcons name="devices" size={60} color={colors.success} style={styles.inventoryIcon} />}
-              </View>
-              <View style={styles.inventoryInfoWrap}>
-                <Text style={[styles.inventoryName, { color: colors.success }]}>{item.nombre ? `Nombre: ${item.nombre}` : 'Nombre: (sin dato)'}</Text>
-                <Text style={[styles.inventoryCategoria, { color: colors.textSecondary }]}>{item.categoria ? `Categoría: ${item.categoria}` : 'Categoría: (sin dato)'}</Text>
-                <Text style={[styles.inventorySerie, { color: colors.textPrimary }]}>{item.serie ? `Serie: ${item.serie}` : 'Serie: (sin dato)'}</Text>
-                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.marca ? `Marca: ${item.marca}` : 'Marca: (sin dato)'}</Text>
-                <Text style={[styles.inventoryMarca, { color: colors.success }]}>
-                  Estado: {item.estado === 1 || item.estado === '1' ? 'Activo' : item.estado === 0 || item.estado === '0' ? 'Inactivo' : '(sin dato)'}
+              <View style={styles.inventoryBadge}>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
+                  {item.categoria || 'Sin categoría'}
                 </Text>
-                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.observaciones ? `Observaciones: ${item.observaciones}` : 'Observaciones: (sin dato)'}</Text>
-                <Text style={[styles.inventoryMarca, { color: colors.success }]}>{item.componentes ? `Componentes: ${item.componentes}` : 'Componentes: (sin dato)'}</Text>
               </View>
-              <TouchableOpacity style={styles.inventoryEditBtn} onPress={() => handleEdit(item)}>
-                <MaterialIcons name="edit" size={32} color="#fff" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingTop: 12 }}>
+                <View style={styles.inventoryIconWrap}>
+                  {item.categoria === 'Portátil' && <MaterialIcons name="laptop" size={50} color={colors.success} style={styles.inventoryIcon} />}
+                  {item.categoria === 'Equipo de Escritorio' && <MaterialIcons name="desktop-windows" size={50} color={colors.success} style={styles.inventoryIcon} />}
+                  {item.categoria === 'Televisor' && <MaterialIcons name="tv" size={50} color={colors.success} style={styles.inventoryIcon} />}
+                  {item.categoria === 'Accesorio' && <MaterialIcons name="settings" size={50} color={colors.success} style={styles.inventoryIcon} />}
+                  {['Portátil','Equipo de Escritorio','Televisor','Accesorio'].indexOf(item.categoria) === -1 && <MaterialIcons name="devices" size={50} color={colors.success} style={styles.inventoryIcon} />}
+                </View>
+                <View style={styles.inventoryInfoWrap}>
+                  <Text style={[styles.inventoryName, { color: colors.textPrimary }]}>
+                    {item.nombre || '(sin dato)'}
+                  </Text>
+                  <Text style={[styles.inventoryCategoria]}>
+                    {item.categoria ? `Categoría: ${item.categoria}` : 'Categoría: (sin dato)'}
+                  </Text>
+                  <Text style={[styles.inventorySerie]}>
+                    {item.serie ? `Serie: ${item.serie}` : 'Serie: (sin dato)'}
+                  </Text>
+                  {item.marca && <Text style={[styles.inventoryMarca]}>{`Marca: ${item.marca}`}</Text>}
+                  <Text style={[styles.inventoryMarca]}>
+                    Estado: {item.estado === 1 || item.estado === '1' ? 'Activo' : item.estado === 0 || item.estado === '0' ? 'Inactivo' : '(sin dato)'}
+                  </Text>
+                </View>
+                <TouchableOpacity style={styles.inventoryEditBtn} onPress={() => handleEdit(item)}>
+                  <MaterialIcons name="edit" size={28} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
@@ -411,40 +421,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inventoryCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    // backgroundColor: '#fff',
-    borderRadius: 22,
-    marginVertical: 14,
-    marginHorizontal: 8,
-    padding: 18,
-    shadowColor: '#28a745',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 16,
-    elevation: 10,
-    borderWidth: 3,
-    borderColor: '#28a745',
-    position: 'relative',
-    minHeight: 140,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    borderRadius: 16,
+    marginVertical: 12,
+    marginHorizontal: 10,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
+    backgroundColor: '#fff',
   },
   inventoryBadge: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    height: 38,
-    width: '100%',
+    height: 44,
     backgroundColor: '#28a745',
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
     zIndex: 1,
   },
   inventoryIconWrap: {
-    marginRight: 18,
-    marginTop: 10,
+    marginRight: 16,
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     width: 70,
+    paddingVertical: 12,
   },
   inventoryIcon: {
     alignSelf: 'center',
@@ -452,44 +455,45 @@ const styles = StyleSheet.create({
   },
   inventoryInfoWrap: {
     flex: 1,
-    justifyContent: 'flex-start',
-    marginTop: 8,
-    marginLeft: 2,
+    justifyContent: 'space-between',
+    paddingRight: 60,
+    paddingBottom: 12,
     zIndex: 2,
   },
   inventoryName: {
-    fontSize: 20,
-    color: '#28a745',
-    fontWeight: 'bold',
-    marginBottom: 2,
-    marginTop: 2,
+    fontSize: 18,
+    color: '#1a1a1a',
+    fontWeight: '700',
+    marginBottom: 6,
+    marginTop: 0,
   },
   inventoryCategoria: {
-    fontSize: 16,
-    color: '#8b5cf6',
-    marginTop: 2,
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#28a745',
+    marginTop: 4,
+    fontWeight: '600',
   },
   inventorySerie: {
-    fontSize: 15,
-    color: '#64748b',
-    marginTop: 2,
+    fontSize: 13,
+    color: '#666',
+    marginTop: 3,
+    fontWeight: '500',
   },
   inventoryMarca: {
-    fontSize: 15,
-    color: '#28a745',
-    marginTop: 2,
+    fontSize: 13,
+    color: '#555',
+    marginTop: 3,
+    fontWeight: '500',
   },
   inventoryEditBtn: {
     position: 'absolute',
-    top: 12,
+    top: 56,
     right: 12,
     backgroundColor: '#28a745',
-    borderRadius: 20,
-    padding: 12,
-    borderWidth: 2,
-    borderColor: '#218838',
-    elevation: 4,
+    borderRadius: 24,
+    padding: 10,
+    borderWidth: 0,
+    elevation: 5,
     zIndex: 3,
   },
   searchContainer: {

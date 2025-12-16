@@ -322,6 +322,17 @@ const SolicitudesEspacioAdmin = () => {
                   const estadoMap: any = { 1: 'Pendiente', 2: 'Aprobado', 3: 'Rechazado' };
                   estadoTexto = estadoMap[estadoNum] || 'Pendiente';
                 }
+                // Obtener imagen correctamente usando API_URL
+                let imagenFinal = undefined;
+                try {
+                  const imgs = espacio?.imagenes ? JSON.parse(espacio.imagenes) : [];
+                  if (imgs.length > 0) {
+                    const firstImg = imgs[0];
+                    imagenFinal = firstImg.startsWith('http') ? firstImg : `${API_URL}${firstImg}`;
+                  }
+                } catch {
+                  imagenFinal = undefined;
+                }
                 const reserva: ReservaEspacio = {
                   id: solicitudId,
                   nom_espa: espacio?.nom_espa || 'Espacio',
@@ -331,7 +342,7 @@ const SolicitudesEspacioAdmin = () => {
                   fecha_ini: item.fecha_ini?.replace('T', ', ') || '',
                   fecha_fn: item.fecha_fn?.replace('T', ', ') || '',
                   estado: estadoTexto,
-                  imagen,
+                  imagen: imagenFinal,
                   _locked: !!item._locked,
                 };
                 const actualizarEstado = async (nuevoEstado: number) => {
