@@ -203,15 +203,7 @@ const DetallesTicket = ({ route, navigation }: any) => {
           {/* Grid de 2x2 - Información Principal */}
           <View style={{ marginBottom: 16 }}>
             <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
-              {/* Categoría */}
-              <View style={{ flex: 1, backgroundColor: colors.cardBackground, padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textSecondary, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  🏷️ Categoría
-                </Text>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
-                  {ticket.nom_cat || 'N/A'}
-                </Text>
-              </View>
+              
               {/* Equipo */}
               <View style={{ flex: 1, backgroundColor: colors.cardBackground, padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
                 <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textSecondary, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -236,7 +228,7 @@ const DetallesTicket = ({ route, navigation }: any) => {
               {/* Ubicación */}
               <View style={{ flex: 1, backgroundColor: colors.cardBackground, padding: 14, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: '#3fbb34', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
                 <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textSecondary, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  📄 Ubicación
+                  📄 Ambiente
                 </Text>
                 <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
                   {ticket.ambient || 'No especificada'}

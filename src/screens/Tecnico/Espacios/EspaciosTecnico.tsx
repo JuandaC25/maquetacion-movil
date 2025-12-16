@@ -296,7 +296,7 @@ export default function EspaciosTecnico({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <HeaderTecnico title="Solicitudes de Espacios" navigation={navigation} />
+      <HeaderTecnico title="Espacios" navigation={navigation} />
       
       <ScrollView style={{ flex: 1 }}>
         {/* Filtros Compactos */}
