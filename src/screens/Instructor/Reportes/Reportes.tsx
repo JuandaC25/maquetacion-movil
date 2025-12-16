@@ -256,7 +256,7 @@ export default function ReportesScreen({ navigation }: any) {
 
         {/* ID del Equipo */}
         <View style={ReportesStyles.formGroup}>
-          <Text style={ReportesStyles.label}>ID del Equipo *</Text>
+          <Text style={ReportesStyles.label}>Identificador del equipo*</Text>
           <TextInput
             style={ReportesStyles.input}
             placeholder="Ingrese el ID del equipo"

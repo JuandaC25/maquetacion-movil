@@ -327,7 +327,7 @@ export default function Portatiles({ navigation }: any) {
                     <Text style={styles.modalText}>Hora inicio</Text>
                     <TouchableOpacity onPress={() => { setShowTimePicker('hora_ini'); setPickerTime(new Date()); }}>
                       <View pointerEvents="none">
-                        <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" value={formatTo12Hour(form.hora_ini)} editable={false} />
+                        <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" placeholderTextColor={colors.textSecondary} value={formatTo12Hour(form.hora_ini)} editable={false} />
                       </View>
                     </TouchableOpacity>
                     {/* Fecha Fin */}
@@ -337,7 +337,7 @@ export default function Portatiles({ navigation }: any) {
                     <Text style={styles.modalText}>Hora fin</Text>
                     <TouchableOpacity onPress={() => { setShowTimePicker('hora_fn'); setPickerTime(new Date()); }}>
                       <View pointerEvents="none">
-                        <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" value={formatTo12Hour(form.hora_fn)} editable={false} />
+                        <TextInput style={styles.modalInput} placeholder="HH:MM AM/PM" placeholderTextColor={colors.textSecondary} value={formatTo12Hour(form.hora_fn)} editable={false} />
                       </View>
                     </TouchableOpacity>
                     {showTimePicker && (
@@ -347,6 +347,7 @@ export default function Portatiles({ navigation }: any) {
                     <TextInput
                       style={styles.modalInput}
                       placeholder="1"
+                      placeholderTextColor={colors.textSecondary}
                       value={String(form.cantidad)}
                       keyboardType="numeric"
                       onChangeText={v => {
@@ -356,21 +357,22 @@ export default function Portatiles({ navigation }: any) {
                       }}
                     />
                     <Text style={styles.modalText}>Ambiente</Text>
-                    <TextInput style={styles.modalInput} placeholder="Ej: Ambiente 301" value={form.ambient} onChangeText={v => setForm(f => ({ ...f, ambient: v }))} />
+                    <TextInput style={styles.modalInput} placeholder="Ej: Ambiente 301" placeholderTextColor={colors.textSecondary} value={form.ambient} onChangeText={v => setForm(f => ({ ...f, ambient: v }))} />
                     <Text style={styles.modalText}>Número de ficha</Text>
                     <TextInput 
                       style={styles.modalInput} 
                       placeholder="Ej: 2560014" 
+                      placeholderTextColor={colors.textSecondary}
                       value={form.num_ficha} 
                       onChangeText={v => setForm(f => ({ ...f, num_ficha: v }))} 
                       keyboardType="numeric"
                     />
                     <Text style={styles.modalText}>Categoría</Text>
-                    <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1', fontWeight: 'bold' }]}> 
+                    <Text style={[styles.modalInput, { fontWeight: 'bold' }]}> 
                       {categoriaFiltro === 'computo' ? 'Computo' : 'Multimedia'}
                     </Text>
                     <Text style={styles.modalText}>Subcategoría</Text>
-                    <Text style={[styles.modalInput, { backgroundColor: '#e3f2fd', color: '#0d47a1' }]}> 
+                    <Text style={styles.modalInput}> 
                       {portatilInfo?.nombre}
                     </Text>
                     <View style={{ marginTop: 10 }}>
