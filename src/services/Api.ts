@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Ajusta la IP local según tu máquina (ejecuta `ipconfig` y usa la Dirección IPv4)
 const LOCAL_IP = '10.129.74.240'; // IP actualizada según el usuario
+const LOCAL_IP = '10.232.222.133'; // IP actualizada según el usuario
 
 
 export const API_URL = `http://${LOCAL_IP}:8081`;
@@ -59,9 +60,16 @@ api.interceptors.response.use(
 // ==================== AUTH SERVICE ====================
 export const authService = {
   login: async (username: string, password: string) => {
-    // El backend espera 'username' y 'password' en el payload
     const response = await api.post('/auth/login', { username, password });
     const data = response.data as any;
+    
+    const estado = data.est_usu ?? data.estadousuario ?? data.estado ?? data.nom_est ?? 1;
+    const estadoNum = Number(estado);
+    
+    if (estadoNum === 2) {
+      throw new Error('Usuario desactivado. No tiene permiso para acceder a la plataforma.');
+    }
+    
     if (data.token) {
       await AsyncStorage.setItem('token', data.token);
     }
