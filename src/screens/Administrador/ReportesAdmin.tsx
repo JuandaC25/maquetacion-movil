@@ -220,42 +220,69 @@ const ReportesAdmin: FC = () => {
               <View style={{ marginTop: 10 }}>
                 <Text style={[styles.modalLabelFull, { color: colors.title, marginBottom: 8 }]}>Imágenes:</Text>
                 {(() => {
-                  const raw = modalTicket?.imageness ?? modalTicket?.imagenes ?? modalTicket?.imagen ?? null;
-                  if (!raw) return <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>;
+                  // Intentar obtener imágenes de múltiples campos posibles
+                  const raw = modalTicket?.imageness ?? modalTicket?.imagenes ?? modalTicket?.imagen ?? modalTicket?.fotos ?? null;
+                  
+                  console.log('[IMAGES DEBUG] modalTicket completo:', modalTicket);
+                  console.log('[IMAGES DEBUG] Campo raw de imágenes:', raw);
+                  console.log('[IMAGES DEBUG] Tipo de raw:', typeof raw);
+                  
+                  if (!raw) {
+                    return (
+                      <View style={{ backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8 }}>
+                        <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>
+                      </View>
+                    );
+                  }
 
                   let urls: string[] = [];
                   try {
                     if (Array.isArray(raw)) {
-                      urls = raw;
+                      urls = raw.filter(u => u); // Filtrar valores vacíos
                     } else if (typeof raw === 'string') {
                       const s = raw.trim();
                       if ((s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'))) {
                         const parsed = JSON.parse(s);
-                        if (Array.isArray(parsed)) urls = parsed;
+                        if (Array.isArray(parsed)) urls = parsed.filter(u => u);
                         else if (typeof parsed === 'string') urls = [parsed];
-                      } else {
+                      } else if (s.length > 0) {
                         urls = [s];
                       }
                     }
                   } catch (e) {
+                    console.log('[IMAGES ERROR] Error al parsear imágenes:', e);
                     urls = typeof raw === 'string' ? [raw] : [];
                   }
 
-                  if (!urls || urls.length === 0) return <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>;
+                  console.log('[IMAGES DEBUG] URLs procesadas:', urls);
+
+                  if (!urls || urls.length === 0) {
+                    return (
+                      <View style={{ backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8 }}>
+                        <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>
+                      </View>
+                    );
+                  }
 
                   const normalizeUrl = (u: string) => {
                     if (!u) return null;
                     if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:')) return u;
                     if (u.startsWith('/uploads/')) {
-                      return `http://192.168.20.60:8081${u}`;
+                      const finalUrl = `http://10.232.222.133:8081${u}`;
+                      console.log('[IMAGES] URL final construida:', finalUrl);
+                      return finalUrl;
                     }
-                    return u;
+                    // Si no tiene protocolo, asumir que es una ruta en uploads
+                    const finalUrl = `http://10.232.222.133:8081/uploads/${u}`;
+                    console.log('[IMAGES] URL final construida (sin /uploads):', finalUrl);
+                    return finalUrl;
                   };
 
                   return (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
                       {urls.map((url, idx) => {
                         const src = normalizeUrl(url);
+                        console.log('[IMAGES] Intentando cargar imagen:', src);
                         if (!src) return null;
                         return (
                           <View key={idx} style={{ marginRight: 12 }}>
@@ -263,6 +290,8 @@ const ReportesAdmin: FC = () => {
                               source={{ uri: src }}
                               style={{ width: 180, height: 120, borderRadius: 8, backgroundColor: '#f0f0f0' }}
                               resizeMode="cover"
+                              onError={(e) => console.log('[IMAGES ERROR] Error cargando imagen:', e.nativeEvent.error)}
+                              onLoad={() => console.log('[IMAGES] Imagen cargada exitosamente:', src)}
                             />
                             {urls.length > 1 && (
                               <Text style={{ color: colors.textPrimary, fontSize: 12, textAlign: 'center', marginTop: 4 }}>
