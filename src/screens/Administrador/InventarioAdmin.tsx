@@ -7,12 +7,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { elementosService, subcategoriasService, categoriasService } from '../../services/Api';
 
 type Elemento = {
-  id: number;
+  id: number | string;
   nombre: string;
   categoria: string;
   serie: string;
   marca?: string;
-  estado?: number;
+  estado?: number | string;
   observaciones?: string;
   componentes?: string;
   // For modal display only
@@ -154,7 +154,7 @@ const InventarioAdmin = () => {
         marc: editData.marca,
         tip_catg: editData.categoria,
       };
-      await elementosService.update(selectedElem.id, payload);
+      await elementosService.update(selectedElem.id as number, payload);
       setMessage('✅ Elemento actualizado correctamente');
       await fetchElementos();
       setEditModalVisible(false);
@@ -246,7 +246,7 @@ const InventarioAdmin = () => {
                   </Text>
                   {item.marca && <Text style={[styles.inventoryMarca]}>{`Marca: ${item.marca}`}</Text>}
                   <Text style={[styles.inventoryMarca]}>
-                    Estado: {item.estado === 1 || item.estado === '1' ? 'Activo' : item.estado === 0 || item.estado === '0' ? 'Inactivo' : '(sin dato)'}
+                    Estado: {Number(item.estado) === 1 ? 'Activo' : Number(item.estado) === 0 ? 'Inactivo' : '(sin dato)'}
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.inventoryEditBtn} onPress={() => handleEdit(item)}>
