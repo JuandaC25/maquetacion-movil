@@ -315,7 +315,7 @@ export default function ReportesScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Problemas */}
+        {/* Problemas agrupados por tipo */}
         <View style={ReportesStyles.formGroup}>
           <Text style={ReportesStyles.label}>Seleccione los problemas *</Text>
           {loading ? (
@@ -324,40 +324,52 @@ export default function ReportesScreen({ navigation }: any) {
               <Text style={ReportesStyles.loadingText}>Cargando problemas...</Text>
             </View>
           ) : (
-            <View style={ReportesStyles.problemasGrid}>
-              {problemas.map(problema => {
-                const isSelected = !!formData.problemas[problema.id];
-                return (
-                  <View key={problema.id} style={ReportesStyles.problemaItemContainer}>
-                    <TouchableOpacity
-                      style={ReportesStyles.problemaItem}
-                      onPress={() => handleProblemaChange(problema)}
-                    >
-                      <View style={[
-                        ReportesStyles.checkbox,
-                        isSelected && ReportesStyles.checkboxChecked
-                      ]}>
+            Object.entries(
+              problemas.reduce((acc, problema) => {
+                const tipo = problema.tipo_problema || 'Otros';
+                if (!acc[tipo]) acc[tipo] = [];
+                acc[tipo].push(problema);
+                return acc;
+              }, {} as Record<string, Problema[]>)
+            ).map(([tipo, problemasDelTipo]) => (
+              <View key={tipo} style={{ marginBottom: 18 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: colors.primary }}>{tipo}</Text>
+                <View style={ReportesStyles.problemasGrid}>
+                  {problemasDelTipo.map(problema => {
+                    const isSelected = !!formData.problemas[problema.id];
+                    return (
+                      <View key={problema.id} style={ReportesStyles.problemaItemContainer}>
+                        <TouchableOpacity
+                          style={ReportesStyles.problemaItem}
+                          onPress={() => handleProblemaChange(problema)}
+                        >
+                          <View style={[
+                            ReportesStyles.checkbox,
+                            isSelected && ReportesStyles.checkboxChecked
+                          ]}>
+                            {isSelected && (
+                              <Text style={ReportesStyles.checkmark}>✓</Text>
+                            )}
+                          </View>
+                          <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
+                        </TouchableOpacity>
                         {isSelected && (
-                          <Text style={ReportesStyles.checkmark}>✓</Text>
+                          <TouchableOpacity
+                            style={ReportesStyles.detailsButton}
+                            onPress={() => {
+                              setProblemaSeleccionado(problema);
+                              setModalVisible(true);
+                            }}
+                          >
+                            <Text style={ReportesStyles.detailsButtonText}>📝 Detalles</Text>
+                          </TouchableOpacity>
                         )}
                       </View>
-                      <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
-                    </TouchableOpacity>
-                    {isSelected && (
-                      <TouchableOpacity
-                        style={ReportesStyles.detailsButton}
-                        onPress={() => {
-                          setProblemaSeleccionado(problema);
-                          setModalVisible(true);
-                        }}
-                      >
-                        <Text style={ReportesStyles.detailsButtonText}>📝 Detalles</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                );
-              })}
-            </View>
+                    );
+                  })}
+                </View>
+              </View>
+            ))
           )}
         </View>
 
