@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // Ajusta la IP local según tu máquina (ejecuta `ipconfig` y usa la Dirección IPv4)
-const LOCAL_IP = '172.16.101.5'; // IP actualizada según el usuario
+const LOCAL_IP = '172.16.110.57'; // IP actualizada según el usuario
 
 
 export const API_URL = `http://${LOCAL_IP}:8081`;
@@ -295,7 +295,7 @@ export const ticketsService = {
 
 // ==================== PROBLEMAS SERVICE ====================
 export const problemasService = {
-  getDescripciones: async () => api.get('/api/problemas/descripcion', await withAuth()),
+  getDescripciones: async () => api.get('/api/problemas', await withAuth()),
 };
 
 // ==================== ESPACIOS SERVICE ====================
