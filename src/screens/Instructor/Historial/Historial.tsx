@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
     View, 
@@ -155,6 +156,8 @@ export default function HistorialPedidosMovil({ navigation }: any) {
     const [currentPage, setCurrentPage] = useState(1);
     const [solicitudesPerPage] = useState(5);
     const [activeTab, setActiveTab] = useState('solicitudes'); 
+    // Estado para errores de imagen: { [ticketId-probId]: [bool, bool, ...] }
+    const [imageErrors, setImageErrors] = useState<{[key: string]: boolean[]}>({});
 
     const cargarSubcategorias = async () => {
         try {
@@ -435,30 +438,95 @@ export default function HistorialPedidosMovil({ navigation }: any) {
         );
     };
 
-    const renderTicketItem = (ticket: Ticket) => {
+    const renderTicketItem = (ticket: any) => {
         const statusTicket = ticket.id_est_tick === 2 ? 
             { text: 'Activo', color: '#dc3545', emoji: '🚨' } : 
             { text: 'Resuelto', color: '#198754', emoji: '👍' };
+
+        // Soporte para tickets con múltiples problemas (nuevo formato)
+        const problemas = Array.isArray(ticket.problemas) && ticket.problemas.length > 0
+            ? ticket.problemas.map((p: any) => ({
+                ...p,
+                imagenes: Array.isArray(p.imagenes)
+                    ? p.imagenes
+                    : p.imagenes
+                        ? typeof p.imagenes === 'string'
+                            ? [p.imagenes]
+                            : []
+                        : [],
+            }))
+            : [{
+                id: ticket.id_problema || 0,
+                tipoProblema: ticket.nom_problm || '',
+                descripcion: ticket.descripcion || ticket.Obser || '',
+                imagenes: Array.isArray(ticket.imagenes)
+                    ? ticket.imagenes
+                    : ticket.imagenes
+                        ? typeof ticket.imagenes === 'string'
+                            ? [ticket.imagenes]
+                            : []
+                        : [],
+            }];
 
         return (
             <View style={styles.card} key={ticket.id_tickets}>
                 <View style={styles.cardHeader}>
                     <Text style={styles.cardEmoji}>🔧</Text>
-                    <View style={[styles.badge, { backgroundColor: statusTicket.color }]}>
+                    <View style={[styles.badge, { backgroundColor: statusTicket.color }]}>\
                         <Text style={styles.badgeText}>{statusTicket.emoji} {statusTicket.text}</Text>
                     </View>
                 </View>
                 <View style={styles.cardBody}>
                     <Text style={styles.cardText}><Text style={styles.cardLabel}>ID Ticket:</Text> {ticket.id_tickets || 'N/A'}</Text>
                     <Text style={styles.cardText}><Text style={styles.cardLabel}>Equipo:</Text> {ticket.nom_elem || `ID ${ticket.id_eleme}`}</Text>
-                    <Text style={styles.cardText}><Text style={styles.cardLabel}>Problema:</Text> {ticket.nom_problm || 'N/A'}</Text>
-                    <Text style={styles.cardText}><Text style={styles.cardLabel}>Ambiente:</Text> {ticket.ambient || 'N/A'}</Text>
+                    <Text style={styles.cardText}><Text style={styles.cardLabel}>Ambiente:</Text> {ticket.ambiente || ticket.ambient || 'N/A'}</Text>
                     <Text style={styles.cardText}><Text style={styles.cardLabel}>Fecha:</Text> {formatFecha(ticket.fecha_in || 'N/A')}</Text>
-                    {ticket.Obser && (
-                        <Text style={[styles.cardText, styles.observationText]}>
-                            <Text style={styles.cardLabel}>Observaciones:</Text> {ticket.Obser}
-                        </Text>
-                    )}
+                    {/* Mostrar todos los problemas asociados */}
+                    {problemas.map((prob: any, idx: number) => (
+                        <View key={prob.id || idx} style={{ marginTop: 10, marginBottom: 10, padding: 8, backgroundColor: '#f7f7f7', borderRadius: 8 }}>
+                            <Text style={[styles.cardText, { fontWeight: 'bold', color: '#1976d2' }]}>Problema {idx + 1}</Text>
+                            <Text style={styles.cardText}><Text style={styles.cardLabel}>Tipo:</Text> {prob.tipoProblema || 'Sin tipo'}</Text>
+                            <Text style={styles.cardText}><Text style={styles.cardLabel}>Descripción:</Text> {prob.descripcion || 'Sin descripción'}</Text>
+                            {/* Imágenes del problema */}
+                            {Array.isArray(prob.imagenes) && prob.imagenes.length > 0 && (
+                                <ScrollView horizontal style={{ marginTop: 6 }}>
+                                    {prob.imagenes.filter((img: string) => !!img).map((img: string, i: number) => {
+                                        // Normalizar URL si es relativa
+                                        let imgUrl = img;
+                                        if (img && !img.startsWith('http') && !img.startsWith('data:')) {
+                                            imgUrl = `http://172.16.110.57:8081${img.startsWith('/') ? '' : '/'}${img}`;
+                                        }
+                                        // Clave única para ticket y problema
+                                        const errorKey = `${ticket.id_tickets}_${prob.id || idx}`;
+                                        const imgError = imageErrors[errorKey]?.[i] || false;
+                                        const handleImgError = () => {
+                                            setImageErrors(prev => {
+                                                const arr = prev[errorKey] ? [...prev[errorKey]] : [];
+                                                arr[i] = true;
+                                                return { ...prev, [errorKey]: arr };
+                                            });
+                                        };
+                                        return (
+                                            <View key={i} style={{ marginRight: 8 }}>
+                                                <View style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', backgroundColor: '#e0e0e0', justifyContent: 'center', alignItems: 'center' }}>
+                                                    {!imgError ? (
+                                                        <Image 
+                                                            source={{ uri: imgUrl }} 
+                                                            style={{ width: 80, height: 80 }} 
+                                                            resizeMode="cover"
+                                                            onError={handleImgError}
+                                                        />
+                                                    ) : (
+                                                        <Text style={{ color: '#888', fontSize: 12 }}>No se pudo cargar</Text>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </ScrollView>
+                            )}
+                        </View>
+                    ))}
                 </View>
             </View>
         );

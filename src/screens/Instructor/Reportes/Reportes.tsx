@@ -12,23 +12,31 @@ import {
   SafeAreaView,
   StatusBar
 } from 'react-native';
-import { createReportesStyles } from '../../../styles/Usuario/Solicitudes/Reportes/Reportes';
+import { createReportesStyles } from '../../../styles/Instructor/Reportes/Reportes';
 import HeaderWithDrawer from '../Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { problemasService, API_URL } from '../../../services/Api';
 import { useTheme } from '../../../context/ThemeContext';
+import { Modal } from 'react-native';
 
 interface Problema {
   id: number;
   descr_problem: string;
+  tipo_problema?: string; // Añadir tipo_problema
+}
+
+// Estado para los detalles de cada problema (descripción e imágenes)
+interface ProblemaDetalles {
+  descripcion: string;
+  imagenes: string[];
 }
 
 interface FormData {
   idElemento: string;
   ambiente: string;
-  observaciones: string;
-  problemasSeleccionados: number[];
+  // Se elimina 'observaciones' y 'problemasSeleccionados' del nivel superior
+  problemas: Record<number, ProblemaDetalles>; // Usamos un objeto para detalles por ID de problema
 }
 
 export default function ReportesScreen({ navigation }: any) {
@@ -41,15 +49,19 @@ export default function ReportesScreen({ navigation }: any) {
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [imagenCargando, setImagenCargando] = useState(false);
+  
+  // Estado para el modal de detalles
+  const [modalVisible, setModalVisible] = useState(false);
+  const [problemaSeleccionado, setProblemaSeleccionado] = useState<Problema | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     idElemento: '',
     ambiente: '',
-    observaciones: '',
-    problemasSeleccionados: []
+    problemas: {}
   });
 
   const [imagenes, setImagenes] = useState<string[]>([]);
+
   // Cargar problemas
   useEffect(() => {
     cargarProblemas();
@@ -70,16 +82,19 @@ export default function ReportesScreen({ navigation }: any) {
     }
   };
 
-  const handleProblemaChange = (problemaId: number) => {
+  const handleProblemaChange = (problema: Problema) => {
     setFormData(prev => {
-      const problemas = prev.problemasSeleccionados.includes(problemaId)
-        ? prev.problemasSeleccionados.filter(id => id !== problemaId)
-        : [...prev.problemasSeleccionados, problemaId];
-      return { ...prev, problemasSeleccionados: problemas };
+      const nuevosProblemas = { ...prev.problemas };
+      if (nuevosProblemas[problema.id]) {
+        delete nuevosProblemas[problema.id]; // Deseleccionar
+      } else {
+        nuevosProblemas[problema.id] = { descripcion: '', imagenes: [] }; // Seleccionar
+      }
+      return { ...prev, problemas: nuevosProblemas };
     });
   };
 
-  const handleInputChange = (name: keyof FormData, value: string) => {
+  const handleInputChange = (name: keyof Omit<FormData, 'problemas'>, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -95,9 +110,15 @@ export default function ReportesScreen({ navigation }: any) {
         base64: true,
       });
 
-      if (!result.canceled && result.assets[0].base64) {
+      if (!result.canceled && result.assets[0].base64 && problemaSeleccionado) {
         const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
-        setImagenes(prev => [...prev, base64Image]);
+        
+        setFormData(prev => {
+          const nuevosProblemas = { ...prev.problemas };
+          nuevosProblemas[problemaSeleccionado.id].imagenes.push(base64Image);
+          return { ...prev, problemas: nuevosProblemas };
+        });
+
         setSuccess('✓ Imagen agregada correctamente');
         setTimeout(() => setSuccess(null), 2000);
       }
@@ -109,7 +130,18 @@ export default function ReportesScreen({ navigation }: any) {
   };
 
   const handleEliminarImagen = (index: number) => {
-    setImagenes(prev => prev.filter((_, i) => i !== index));
+    if (!problemaSeleccionado) return;
+
+    setFormData(prev => {
+      const nuevosProblemas = { ...prev.problemas };
+      nuevosProblemas[problemaSeleccionado.id].imagenes.splice(index, 1);
+      return { ...prev, problemas: nuevosProblemas };
+    });
+  };
+
+  const handleGuardarDetalles = () => {
+    setModalVisible(false);
+    setProblemaSeleccionado(null);
   };
 
   const handleSubmit = async () => {
@@ -125,7 +157,7 @@ export default function ReportesScreen({ navigation }: any) {
       setError('El ambiente es obligatorio');
       return;
     }
-    if (formData.problemasSeleccionados.length === 0) {
+    if (Object.keys(formData.problemas).length === 0) {
       setError('Debe seleccionar al menos un problema');
       return;
     }
@@ -139,76 +171,82 @@ export default function ReportesScreen({ navigation }: any) {
       if (!usuario?.id) {
         throw new Error('No se pudo obtener el ID del usuario');
       }
-       // Subir imágenes si hay
-      let imageUrls: string[] = [];
-      if (imagenes.length > 0) {
-        const token = await AsyncStorage.getItem('token');
-        const authHeader = token 
-          ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
-          : '';
-        
-        const uploadResponse = await fetch(`${API_URL}/api/tickets/upload-images`, {
-          method: 'POST',
-          headers: {
-            'Authorization': authHeader,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ images: imagenes })
-        });
 
-        if (!uploadResponse.ok) throw new Error('Error al subir imágenes');
-        
-        const uploadResult = await uploadResponse.json();
-        imageUrls = uploadResult.urls || [];
-      }
-
-      // Crear tickets
       const token = await AsyncStorage.getItem('token');
       const authHeader = token 
         ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
         : '';
-      
-      const problemasNombres = problemas
-        .filter(p => formData.problemasSeleccionados.includes(p.id))
-        .map(p => p.descr_problem);
 
-      await Promise.all(
-        formData.problemasSeleccionados.map(async idProblema => {
-          const response = await fetch(`${API_URL}/api/tickets`, {
-            method: 'POST',
-            headers: {
-              'Authorization': authHeader,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id_elem: parseInt(formData.idElemento),
-              id_problem: idProblema,
-              ambient: formData.ambiente,
-              obser: formData.observaciones || '',
-              imageness: imageUrls.length > 0 ? JSON.stringify(imageUrls) : null,
-              id_usu: usuario.id,
-              fecha_in: new Date().toISOString(),
-              id_est_tick: 2
-            })
-          });
+      // 1. Agrupar problemas por tipo
+      const problemasSeleccionados = problemas.filter(p => formData.problemas[p.id]);
+      const gruposPorTipo = problemasSeleccionados.reduce((grupos, problema) => {
+        const tipo = problema.tipo_problema || 'Otros';
+        if (!grupos[tipo]) {
+          grupos[tipo] = [];
+        }
+        grupos[tipo].push(problema);
+        return grupos;
+      }, {} as Record<string, Problema[]>);
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error ${response.status}: ${errorText}`);
-          }
-        })
-      );
+      // 2. Crear un ticket por cada tipo de problema
+      const promesasTickets = Object.entries(gruposPorTipo).map(async ([tipo, problemasDelTipo]) => {
+        
+        // 3. Subir imágenes y construir el payload de problemas
+        const problemasConDetalles = await Promise.all(
+          problemasDelTipo.map(async p => {
+            const detalles = formData.problemas[p.id];
+            let urlsImagenes: string[] = [];
 
-      setSuccess(`✓ Reporte exitoso! Se crearon ${formData.problemasSeleccionados.length} ticket(s) para el equipo ID ${formData.idElemento}:\n• ${problemasNombres.join('\n• ')}`);
-      // Limpiar formulario
-      setFormData({
-        idElemento: '',
-        ambiente: '',
-        observaciones: '',
-        problemasSeleccionados: []
+            if (detalles.imagenes.length > 0) {
+              const uploadResponse = await fetch(`${API_URL}/api/tickets/upload-images`, {
+                method: 'POST',
+                headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ images: detalles.imagenes })
+              });
+              if (!uploadResponse.ok) throw new Error('Error al subir imágenes');
+              const uploadResult = await uploadResponse.json();
+              urlsImagenes = uploadResult.urls || [];
+            }
+
+            return {
+              id: p.id,
+              descripcion: detalles.descripcion || '',
+              imagenes: urlsImagenes
+            };
+          })
+        );
+
+        // 4. Enviar la petición para crear el ticket
+        const payload = {
+          id_elem: parseInt(formData.idElemento),
+          ambiente: formData.ambiente,
+          id_usu: usuario.id,
+          fecha_in: new Date().toISOString(),
+          id_est_tick: 2,
+          problemas: problemasConDetalles
+        };
+
+        const response = await fetch(`${API_URL}/api/tickets`, {
+          method: 'POST',
+          headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error creando ticket para tipo "${tipo}": ${errorText}`);
+        }
+        return response.json();
       });
-      setImagenes([]);
 
+      await Promise.all(promesasTickets);
+
+      const totalTickets = Object.keys(gruposPorTipo).length;
+      const nombresTipos = Object.keys(gruposPorTipo).join(', ');
+      setSuccess(`✓ Reporte exitoso! Se crearon ${totalTickets} ticket(s) para el equipo ID ${formData.idElemento} (Tipos: ${nombresTipos})`);
+      
+      // Limpiar formulario
+      handleLimpiar();
       RNAlert.alert('Éxito', 'Reporte creado correctamente');
 
     } catch (err: any) {
@@ -222,10 +260,8 @@ export default function ReportesScreen({ navigation }: any) {
     setFormData({
       idElemento: '',
       ambiente: '',
-      observaciones: '',
-      problemasSeleccionados: []
+      problemas: {}
     });
-    setImagenes([]);
     setError(null);
     setSuccess(null);
   };
@@ -279,7 +315,7 @@ export default function ReportesScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Problemas */}
+        {/* Problemas agrupados por tipo */}
         <View style={ReportesStyles.formGroup}>
           <Text style={ReportesStyles.label}>Seleccione los problemas *</Text>
           {loading ? (
@@ -288,81 +324,138 @@ export default function ReportesScreen({ navigation }: any) {
               <Text style={ReportesStyles.loadingText}>Cargando problemas...</Text>
             </View>
           ) : (
-            <View style={ReportesStyles.problemasGrid}>
-              {problemas.map(problema => (
-                <TouchableOpacity
-                  key={problema.id}
-                  style={ReportesStyles.problemaItem}
-                  onPress={() => handleProblemaChange(problema.id)}
-                >
-                  <View style={[
-                    ReportesStyles.checkbox,
-                    formData.problemasSeleccionados.includes(problema.id) && ReportesStyles.checkboxChecked
-                  ]}>
-                    {formData.problemasSeleccionados.includes(problema.id) && (
-                      <Text style={ReportesStyles.checkmark}>✓</Text>
-                    )}
-                  </View>
-                  <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Observaciones */}
-        <View style={ReportesStyles.formGroup}>
-          <Text style={ReportesStyles.label}>Observaciones (Opcional)</Text>
-          <TextInput
-            style={[ReportesStyles.input, ReportesStyles.textarea]}
-            placeholder="Detalles adicionales del problema..."
-            placeholderTextColor={colors.textTertiary}
-            multiline
-            numberOfLines={4}
-            maxLength={255}
-            value={formData.observaciones}
-            onChangeText={(text) => handleInputChange('observaciones', text)}
-          />
-          <Text style={ReportesStyles.charCount}>{formData.observaciones.length}/255 caracteres</Text>
-        </View>
-
-        {/* Imágenes */}
-        <View style={ReportesStyles.formGroup}>
-          <View style={ReportesStyles.imageHeader}>
-            <Text style={ReportesStyles.label}>Imágenes (Opcional)</Text>
-            <TouchableOpacity 
-              style={ReportesStyles.addImageButton}
-              onPress={handleAgregarImagen}
-              disabled={imagenCargando}
-            >
-              <Text style={ReportesStyles.addImageText}>
-                {imagenCargando ? 'Procesando...' : '📷 Agregar Imagen'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {imagenes.length > 0 && (
-            <ScrollView horizontal style={ReportesStyles.imagePreviewContainer}>
-              {imagenes.map((img, index) => (
-                <View key={index} style={ReportesStyles.imageCard}>
-                  <Image source={{ uri: img }} style={ReportesStyles.imagePreview} />
-                  <TouchableOpacity
-                    style={ReportesStyles.deleteImageButton}
-                    onPress={() => handleEliminarImagen(index)}
-                  >
-                    <Text style={ReportesStyles.deleteImageText}>Eliminar</Text>
-                  </TouchableOpacity>
+            Object.entries(
+              problemas.reduce((acc, problema) => {
+                const tipo = problema.tipo_problema || 'Otros';
+                if (!acc[tipo]) acc[tipo] = [];
+                acc[tipo].push(problema);
+                return acc;
+              }, {} as Record<string, Problema[]>)
+            ).map(([tipo, problemasDelTipo]) => (
+              <View key={tipo} style={{ marginBottom: 18 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: colors.primary }}>{tipo}</Text>
+                <View style={ReportesStyles.problemasGrid}>
+                  {problemasDelTipo.map(problema => {
+                    const isSelected = !!formData.problemas[problema.id];
+                    return (
+                      <View key={problema.id} style={ReportesStyles.problemaItemContainer}>
+                        <TouchableOpacity
+                          style={ReportesStyles.problemaItem}
+                          onPress={() => handleProblemaChange(problema)}
+                        >
+                          <View style={[
+                            ReportesStyles.checkbox,
+                            isSelected && ReportesStyles.checkboxChecked
+                          ]}>
+                            {isSelected && (
+                              <Text style={ReportesStyles.checkmark}>✓</Text>
+                            )}
+                          </View>
+                          <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
+                        </TouchableOpacity>
+                        {isSelected && (
+                          <TouchableOpacity
+                            style={ReportesStyles.detailsButton}
+                            onPress={() => {
+                              setProblemaSeleccionado(problema);
+                              setModalVisible(true);
+                            }}
+                          >
+                            <Text style={ReportesStyles.detailsButtonText}>📝 Detalles</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
-              ))}
-            </ScrollView>
+              </View>
+            ))
           )}
-
-          <Text style={ReportesStyles.imageCount}>
-            {imagenes.length > 0 
-              ? `${imagenes.length} imagen(es) agregada(s)` 
-              : 'No hay imágenes agregadas'}
-          </Text>
         </View>
+
+        {/* Modal para Detalles del Problema */}
+        {problemaSeleccionado && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={handleGuardarDetalles}
+          >
+            <View style={ReportesStyles.modalContainer}>
+              <View style={ReportesStyles.modalContent}>
+                <Text style={ReportesStyles.modalTitle}>Detalles para "{problemaSeleccionado.descr_problem}"</Text>
+                
+                {/* Observaciones del problema */}
+                <View style={ReportesStyles.formGroup}>
+                  <Text style={ReportesStyles.label}>Observaciones (Opcional)</Text>
+                  <TextInput
+                    style={[ReportesStyles.input, ReportesStyles.textarea]}
+                    placeholder="Detalles adicionales del problema..."
+                    placeholderTextColor={colors.textTertiary}
+                    multiline
+                    numberOfLines={4}
+                    maxLength={255}
+                    value={formData.problemas[problemaSeleccionado.id]?.descripcion || ''}
+                    onChangeText={(text) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        problemas: {
+                          ...prev.problemas,
+                          [problemaSeleccionado.id]: {
+                            ...prev.problemas[problemaSeleccionado.id],
+                            descripcion: text
+                          }
+                        }
+                      }));
+                    }}
+                  />
+                  <Text style={ReportesStyles.charCount}>
+                    {(formData.problemas[problemaSeleccionado.id]?.descripcion || '').length}/255 caracteres
+                  </Text>
+                </View>
+
+                {/* Imágenes del problema */}
+                <View style={ReportesStyles.formGroup}>
+                  <View style={ReportesStyles.imageHeader}>
+                    <Text style={ReportesStyles.label}>Imágenes (Opcional)</Text>
+                    <TouchableOpacity 
+                      style={ReportesStyles.addImageButton}
+                      onPress={handleAgregarImagen}
+                      disabled={imagenCargando}
+                    >
+                      <Text style={ReportesStyles.addImageText}>
+                        {imagenCargando ? 'Procesando...' : '📷 Agregar'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {formData.problemas[problemaSeleccionado.id]?.imagenes.length > 0 && (
+                    <ScrollView horizontal style={ReportesStyles.imagePreviewContainer}>
+                      {formData.problemas[problemaSeleccionado.id].imagenes.map((img, index) => (
+                        <View key={index} style={ReportesStyles.imageCard}>
+                          <Image source={{ uri: img }} style={ReportesStyles.imagePreview} />
+                          <TouchableOpacity
+                            style={ReportesStyles.deleteImageButton}
+                            onPress={() => handleEliminarImagen(index)}
+                          >
+                            <Text style={ReportesStyles.deleteImageText}>Eliminar</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  style={[ReportesStyles.button, ReportesStyles.buttonSubmit]}
+                  onPress={handleGuardarDetalles}
+                >
+                  <Text style={ReportesStyles.buttonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
 
         {/* Botones */}
         <View style={ReportesStyles.buttonContainer}>

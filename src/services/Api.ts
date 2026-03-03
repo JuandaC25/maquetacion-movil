@@ -295,7 +295,7 @@ export const ticketsService = {
 
 // ==================== PROBLEMAS SERVICE ====================
 export const problemasService = {
-  getDescripciones: async () => api.get('/api/problemas/descripcion', await withAuth()),
+  getDescripciones: async () => api.get('/api/problemas', await withAuth()),
 };
 
 // ==================== ESPACIOS SERVICE ====================
