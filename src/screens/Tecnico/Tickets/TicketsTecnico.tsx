@@ -21,6 +21,7 @@ interface Ticket {
   num_ticket?: string;
   nom_problema?: string;
   nom_problm?: string;
+  id_cat?: number;
   nom_cat?: string;
   nom_subcateg?: string;
   nom_elem?: string;

@@ -53,6 +53,7 @@ export default function ReportesScreen({ navigation }: any) {
   // Estado para el modal de detalles
   const [modalVisible, setModalVisible] = useState(false);
   const [problemaSeleccionado, setProblemaSeleccionado] = useState<Problema | null>(null);
+  const [selectedTipo, setSelectedTipo] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     idElemento: '',
@@ -66,6 +67,21 @@ export default function ReportesScreen({ navigation }: any) {
   useEffect(() => {
     cargarProblemas();
   }, []);
+
+  // Inicializar selectedTipo cuando se cargan los problemas
+  useEffect(() => {
+    if (problemas && problemas.length > 0) {
+      const tipos = Object.keys(
+        problemas.reduce((acc, problema) => {
+          const tipo = problema.tipo_problema || 'Otros';
+          if (!acc[tipo]) acc[tipo] = [];
+          acc[tipo].push(problema);
+          return acc;
+        }, {} as Record<string, Problema[]>)
+      );
+      setSelectedTipo(prev => prev || tipos[0] || null);
+    }
+  }, [problemas]);
 
   const cargarProblemas = async () => {
     setLoading(true);
@@ -176,6 +192,25 @@ export default function ReportesScreen({ navigation }: any) {
       const authHeader = token 
         ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`)
         : '';
+
+      // Pre-check: verificar disponibilidad del elemento en backend
+      try {
+        const elResp = await fetch(`${API_URL}/api/elementos/${formData.idElemento}`, {
+          headers: { 'Authorization': authHeader }
+        });
+        if (!elResp.ok) {
+          const txt = await elResp.text().catch(() => 'Error al verificar elemento');
+          throw new Error(txt || `Elemento ${formData.idElemento} no encontrado`);
+        }
+        const elementoJson = await elResp.json().catch(() => null);
+        const estadoElem = elementoJson?.estadosoelement ?? elementoJson?.est ?? elementoJson?.estado ?? null;
+        if (estadoElem != null && Number(estadoElem) !== 1) {
+          const estadoTexto = Number(estadoElem) === 2 ? 'Mantenimiento' : Number(estadoElem) === 0 ? 'Inactivo' : String(estadoElem);
+          throw new Error(`El elemento no está disponible: ${estadoTexto}`);
+        }
+      } catch (err: any) {
+        throw new Error('No se pudo verificar disponibilidad del elemento: ' + (err.message || err));
+      }
 
       // 1. Agrupar problemas por tipo
       const problemasSeleccionados = problemas.filter(p => formData.problemas[p.id]);
@@ -324,52 +359,85 @@ export default function ReportesScreen({ navigation }: any) {
               <Text style={ReportesStyles.loadingText}>Cargando problemas...</Text>
             </View>
           ) : (
-            Object.entries(
-              problemas.reduce((acc, problema) => {
-                const tipo = problema.tipo_problema || 'Otros';
-                if (!acc[tipo]) acc[tipo] = [];
-                acc[tipo].push(problema);
-                return acc;
-              }, {} as Record<string, Problema[]>)
-            ).map(([tipo, problemasDelTipo]) => (
-              <View key={tipo} style={{ marginBottom: 18 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: colors.primary }}>{tipo}</Text>
-                <View style={ReportesStyles.problemasGrid}>
-                  {problemasDelTipo.map(problema => {
-                    const isSelected = !!formData.problemas[problema.id];
-                    return (
-                      <View key={problema.id} style={ReportesStyles.problemaItemContainer}>
-                        <TouchableOpacity
-                          style={ReportesStyles.problemaItem}
-                          onPress={() => handleProblemaChange(problema)}
-                        >
-                          <View style={[
-                            ReportesStyles.checkbox,
-                            isSelected && ReportesStyles.checkboxChecked
-                          ]}>
-                            {isSelected && (
-                              <Text style={ReportesStyles.checkmark}>✓</Text>
-                            )}
-                          </View>
-                          <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
-                        </TouchableOpacity>
-                        {isSelected && (
-                          <TouchableOpacity
-                            style={ReportesStyles.detailsButton}
-                            onPress={() => {
-                              setProblemaSeleccionado(problema);
-                              setModalVisible(true);
-                            }}
-                          >
-                            <Text style={ReportesStyles.detailsButtonText}>📝 Detalles</Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
+            <View style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+              {/* Columna izquierda: Tipos de problemas */}
+              <View style={{ width: 140, paddingRight: 12 }}>
+                {Object.entries(
+                  problemas.reduce((acc, problema) => {
+                    const tipo = problema.tipo_problema || 'Otros';
+                    if (!acc[tipo]) acc[tipo] = [];
+                    acc[tipo].push(problema);
+                    return acc;
+                  }, {} as Record<string, Problema[]>)
+                ).map(([tipo, lista]) => (
+                  <TouchableOpacity
+                    key={tipo}
+                    style={[
+                      ReportesStyles.tipoItem,
+                      selectedTipo === tipo && ReportesStyles.tipoItemActive
+                    ]}
+                    onPress={() => setSelectedTipo(tipo)}
+                  >
+                    <Text style={[
+                      ReportesStyles.tipoItemText,
+                      selectedTipo === tipo && ReportesStyles.tipoItemTextActive
+                    ]}>
+                      {tipo}
+                    </Text>
+                    <Text style={[
+                      ReportesStyles.tipoCount,
+                      selectedTipo === tipo && ReportesStyles.tipoCountActive
+                    ]}>
+                      ({lista.length})
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-            ))
+
+              {/* Columna derecha: Descripciones */}
+              <View style={{ flex: 1 }}>
+                {selectedTipo ? (
+                  <View style={ReportesStyles.problemasGrid}>
+                    {problemas.filter(p => (p.tipo_problema || 'Otros') === selectedTipo).map(problema => {
+                      const isSelected = !!formData.problemas[problema.id];
+                      return (
+                        <View key={problema.id} style={ReportesStyles.problemaItemContainer}>
+                          <TouchableOpacity
+                            style={ReportesStyles.problemaItem}
+                            onPress={() => handleProblemaChange(problema)}
+                          >
+                            <View style={[
+                              ReportesStyles.checkbox,
+                              isSelected && ReportesStyles.checkboxChecked
+                            ]}>
+                              {isSelected && (
+                                <Text style={ReportesStyles.checkmark}>✓</Text>
+                              )}
+                            </View>
+                            <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
+                          </TouchableOpacity>
+                          {isSelected && (
+                            <TouchableOpacity
+                              style={ReportesStyles.detailsButton}
+                              onPress={() => {
+                                setProblemaSeleccionado(problema);
+                                setModalVisible(true);
+                              }}
+                            >
+                              <Text style={ReportesStyles.detailsButtonText}>📝 Detalles</Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <Text style={{ color: colors.textTertiary, textAlign: 'center', marginTop: 20 }}>
+                    Selecciona un tipo para ver las descripciones
+                  </Text>
+                )}
+              </View>
+            </View>
           )}
         </View>
 

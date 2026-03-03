@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // Ajusta la IP local según tu máquina (ejecuta `ipconfig` y usa la Dirección IPv4)
-const LOCAL_IP = '10.232.222.133'; // IP actualizada según el usuario
+const LOCAL_IP = '192.168.20.54'; // IP actualizada según el usuario
 
 
 export const API_URL = `http://${LOCAL_IP}:8081`;
@@ -296,6 +296,43 @@ export const ticketsService = {
 // ==================== PROBLEMAS SERVICE ====================
 export const problemasService = {
   getDescripciones: async () => api.get('/api/problemas', await withAuth()),
+  
+  obtenerProblemas: async () => {
+    try {
+      return await api.get(`/api/problemas/descripcion`, await withAuth());
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
+
+  crearProblema: async (problema: any) => {
+    try {
+      const payload = {
+        tipo_problema: problema.tipo ?? problema.tipo_problema ?? '',
+        descr_problem: problema.descripcion ?? problema.descr_problem ?? problema.descripcion_problem ?? ''
+      };
+
+      const config = await withAuth({
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const res = await api.post(`/api/problemas`, payload, config);
+
+      if (!res?.data) {
+        throw new Error('Error al crear problema: respuesta vacía');
+      }
+
+      return res.data;
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
 };
 
 // ==================== ESPACIOS SERVICE ====================

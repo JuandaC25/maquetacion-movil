@@ -7,21 +7,21 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 // --- INTERFACES ---
 interface Equipo {
   id: number;
-  nombre: string;
-  marca: string;
-  disponible: boolean;
-  descripcion?: string;
-  componentes?: string[];
-  categoria?: string;
-  tipo?: string;
-  tipo_categoria?: string;
+  id_elemen?: number;
+  nombre: string;
+  marca: string;
+  disponible: boolean;
+  descripcion?: string;
+  componentes?: string[];
+  categoria?: string;
+  tipo?: string;
+  tipo_categoria?: string;
+  estadosoelement?: number | string;
+  est?: number | string;
+  estado?: number | string;
 }
 
 interface SolicitudForm {
-  fecha_ini: string;
-  hora_ini: string;
-  fecha_fn: string;
-  hora_fn: string;
   ambient: string;
   num_ficha: string;
   id_subcategoria: string | number;
@@ -74,7 +74,9 @@ const SoliPortMovil = forwardRef((props, ref) => {
     id_subcategoria: "",
   };
 
-  const [form, setForm] = useState<SolicitudForm>(initialFormState);  const fetchEquipos = useCallback(async () => {
+  const [form, setForm] = useState<SolicitudForm>(initialFormState);
+
+  const fetchEquipos = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -117,13 +119,13 @@ const SoliPortMovil = forwardRef((props, ref) => {
   const handleConfirmDateTime = (date: Date) => {
     // Maneja la confirmación de cualquiera de los tres pickers
     if (currentPickerTarget === 'fecha_ini') {
-      setForm(f => ({ ...f, fecha_ini: date.toISOString().split('T')[0] }));
+      setForm((f: SolicitudForm) => ({ ...f, fecha_ini: date.toISOString().split('T')[0] }));
     } else if (currentPickerTarget === 'fecha_fn') {
-      setForm(f => ({ ...f, fecha_fn: date.toISOString().split('T')[0] }));
+      setForm((f: SolicitudForm) => ({ ...f, fecha_fn: date.toISOString().split('T')[0] }));
     } else if (currentPickerTarget === 'hora_ini') {
-      setForm(f => ({ ...f, hora_ini: date.toTimeString().split(' ')[0].substring(0, 5) }));
+      setForm((f: SolicitudForm) => ({ ...f, hora_ini: date.toTimeString().split(' ')[0].substring(0, 5) }));
     } else if (currentPickerTarget === 'hora_fn') {
-      setForm(f => ({ ...f, hora_fn: date.toTimeString().split(' ')[0].substring(0, 5) }));
+      setForm((f: SolicitudForm) => ({ ...f, hora_fn: date.toTimeString().split(' ')[0].substring(0, 5) }));
     }
     
     // Ocultar todos los pickers después de confirmar
@@ -156,7 +158,7 @@ const SoliPortMovil = forwardRef((props, ref) => {
 
   // Manejador para abrir el modal, asegurando que las fechas de fin tengan valores iniciales lógicos
   const handleAbrirModalSolicitud = () => {
-    setForm(f => {
+    setForm((f: SolicitudForm) => {
         // Si la fecha/hora de fin no están seteadas, las inicializamos
         let newForm = f;
         if (!f.fecha_fn) {
@@ -184,17 +186,47 @@ const SoliPortMovil = forwardRef((props, ref) => {
       Alert.alert('Error', 'Por favor, completa todos los campos de la solicitud.');
       return;
     }
-    try {
-      await solicitudesService.create(form);
-      Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente.');
-      setIsModalVisible(false);
-    } catch (err) {
-      Alert.alert('Error', 'No se pudo enviar la solicitud.');
-    }
-  };
-
-  if (loading) return <ActivityIndicator size="large" color="#007bff" style={styles.loading} />;
-  if (error) return <Text style={styles.errorText}>{error}</Text>;
+    
+    try {
+      setLoading(true);
+      // Pre-validación: verificar disponibilidad del elemento si se seleccionó
+      if (form.id_subcategoria) {
+        try {
+          // Obtener elementos de la subcategoría seleccionada
+          const elementoDisponible = elementosPorSubcategoria.find((el: Equipo) => {
+            const elId = el.id_elemen ?? el.id;
+            const subId = form.id_subcategoria;
+            return String(elId) === String(subId);
+          });
+          
+          if (elementoDisponible) {
+            const estado = elementoDisponible?.estadosoelement ?? elementoDisponible?.est ?? elementoDisponible?.estado ?? 1;
+            const estaDisponible = Number(estado) === 1;
+            
+            if (!estaDisponible) {
+              const estadoTexto = Number(estado) === 2 ? 'Mantenimiento' : Number(estado) === 0 ? 'Inactivo' : String(estado);
+              Alert.alert('Error', `No se puede crear la solicitud: el equipo seleccionado no está disponible — ${estadoTexto}`);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error verificando disponibilidad del elemento:', err);
+          Alert.alert('Error', 'No se pudo verificar la disponibilidad del equipo. Intente nuevamente.');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      await solicitudesService.create(form);
+      Alert.alert('Solicitud enviada', 'La solicitud se ha enviado correctamente.');
+      setIsModalVisible(false);
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo enviar la solicitud.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const datosGenerales: Equipo = equipos[0] || {} as Equipo; 
 
@@ -259,7 +291,7 @@ const SoliPortMovil = forwardRef((props, ref) => {
             <View style={[styles.pickerContainer, { marginBottom: 10 }]}> 
               <Picker
                 selectedValue={form.id_subcategoria}
-                onValueChange={(itemValue) => setForm(f => ({ ...f, id_subcategoria: itemValue }))}
+                onValueChange={(itemValue) => setForm((f: SolicitudForm) => ({ ...f, id_subcategoria: itemValue }))}
                 style={[styles.picker, { minHeight: 60, height: 60 }]}
               >
                 <Picker.Item label="Selecciona una subcategoría" value="" />
@@ -274,7 +306,7 @@ const SoliPortMovil = forwardRef((props, ref) => {
               style={styles.input}
               placeholder="Ej: Sala de reuniones piso 3"
               value={form.ambient}
-              onChangeText={v => setForm(f => ({ ...f, ambient: v }))}
+              onChangeText={v => setForm((f: SolicitudForm) => ({ ...f, ambient: v }))}
             />
 
             {/* SELECTORES DE FECHA Y HORA */}
@@ -312,7 +344,7 @@ const SoliPortMovil = forwardRef((props, ref) => {
               keyboardType="numeric"
               placeholder="Número de ficha"
               value={form.num_ficha}
-              onChangeText={v => setForm(f => ({ ...f, num_ficha: v }))}
+              onChangeText={v => setForm((f: SolicitudForm) => ({ ...f, num_ficha: v }))}
             />
 
             {/* Botones de Acción */}
@@ -360,9 +392,11 @@ const SoliPortMovil = forwardRef((props, ref) => {
   );
 });
 
+SoliPortMovil.displayName = 'SoliPortMovil';
+
 // 📏 Estilos de la Aplicación 
 const styles = StyleSheet.create({
-    // ... (Mantener estilos existentes)
+
     loading: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 },
     errorText: { color: 'red', fontSize: 16, textAlign: 'center', padding: 20 },
     scrollContent: { padding: 16, alignItems: 'center', minHeight: '100%' },
@@ -453,4 +487,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export { SoliPortMovil };
+export default SoliPortMovil;

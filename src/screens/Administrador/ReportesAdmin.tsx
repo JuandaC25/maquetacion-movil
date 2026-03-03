@@ -1,9 +1,9 @@
 
 import React, { FC, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, TextInput, Alert as RNAlert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AdminHeader from './AdminHeader/AdminHeader';
-import { ticketsService } from '../../services/Api';
+import { ticketsService, problemasService } from '../../services/Api';
 import { trazabilidadService } from '../../services/Api';
 import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,6 +26,12 @@ const ReportesAdmin: FC = () => {
   const [modalHistorial, setModalHistorial] = React.useState<any | null>(null);
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
   const [trazabilidades, setTrazabilidades] = React.useState<any[]>([]);
+  
+  const [showCrearProblemaModal, setShowCrearProblemaModal] = React.useState(false);
+  const [nuevoTipo, setNuevoTipo] = React.useState('');
+  const [nuevaDescripcion, setNuevaDescripcion] = React.useState('');
+  const [savingProblema, setSavingProblema] = React.useState(false);
+  const [crearError, setCrearError] = React.useState<string | null>(null);
 
   // Abrir modal del ticket con trazabilidad
   const openTicketModal = async (ticket: any) => {
@@ -152,6 +158,14 @@ const ReportesAdmin: FC = () => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}> 
       <AdminHeader title="Reportes" navigation={navigation} />
+      <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+        <TouchableOpacity 
+          style={styles.crearProblemaBtn}
+          onPress={() => { setShowCrearProblemaModal(true); setCrearError(null); }}
+        >
+          <Text style={styles.crearProblemaText}>+ Crear Problema</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.container}>
         {loading ? (
           <ActivityIndicator size="large" color="#1976d2" style={{ marginTop: 40 }} />
@@ -229,7 +243,20 @@ const ReportesAdmin: FC = () => {
                 <Text style={[styles.sectionLabel, { color: colors.title }]}>Observación del Ticket (BD)</Text>
                 <View style={[styles.observacionBox, { backgroundColor: colors.background }]}>
                   <Text style={[styles.observacionText, { color: colors.textPrimary }]}>
-                    {modalTicket?.obser ?? modalTicket?.Obser ?? modalTicket?.observa ?? modalTicket?.descripcion ?? modalTicket?.observacion ?? modalTicket?.observ ?? 'Sin observación en la base de datos'}
+                    {(() => {
+                      const baseObservation = modalTicket?.obser ?? modalTicket?.Obser ?? modalTicket?.observa ?? modalTicket?.descripcion ?? modalTicket?.observacion ?? modalTicket?.observ ?? 'Sin observación en la base de datos';
+                      
+                      if (Array.isArray(modalTicket?.problemas) && modalTicket.problemas.length > 0) {
+                        const problemDescriptions = modalTicket.problemas
+                          .map((p: any) => p?.problemaDesc || (p?.problema && (p.problema.desc_problema || p.problema.desc)) || p?.descripcion || p?.descr || null)
+                          .filter((desc: any) => desc && desc.trim())
+                          .join('\n\n');
+                        
+                        return problemDescriptions ? `${baseObservation}\n\n${problemDescriptions}` : baseObservation;
+                      }
+                      
+                      return baseObservation;
+                    })()}
                   </Text>
                 </View>
               </View>
@@ -249,8 +276,23 @@ const ReportesAdmin: FC = () => {
 
                 <View style={styles.infoRow}>
                   <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Problema</Text>
-                    <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.nom_problm ?? modalTicket?.problema ?? '-'}</Text>
+                    <Text style={[styles.metaLabel, { color: colors.title }]}>Problema(s)</Text>
+                    {Array.isArray(modalTicket?.problemas) && modalTicket.problemas.length > 0 ? (
+                      <View>
+                        {modalTicket.problemas.map((p: any, idx: number) => (
+                          <View key={idx} style={{ marginBottom: 12, borderLeftWidth: 2, borderLeftColor: colors.primary, paddingLeft: 12 }}>
+                            <Text style={[styles.metaLabel, { color: colors.primary, marginBottom: 4 }]}>
+                              Tipo: {p?.problema?.Tip_problema || p?.problema?.tip_problema || p?.tipoProblema || '-'}
+                            </Text>
+                            <Text style={[styles.metaValue, { color: colors.textPrimary }]}>
+                              {p?.problemaDesc || (p?.problema && (p.problema.desc_problema || p.problema.desc)) || p?.descripcion || p?.descr || '-'}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.nom_problm ?? modalTicket?.problema ?? '-'}</Text>
+                    )}
                   </View>
                   <View style={styles.infoPair}>
                     <Text style={[styles.metaLabel, { color: colors.title }]}>Usuario</Text>
@@ -273,11 +315,7 @@ const ReportesAdmin: FC = () => {
                 <Text style={[styles.modalLabelFull, { color: colors.title, marginBottom: 8 }]}>Imágenes:</Text>
                 {(() => {
                   // Intentar obtener imágenes de múltiples campos posibles
-                  const raw = modalTicket?.imageness ?? modalTicket?.imagenes ?? modalTicket?.imagen ?? modalTicket?.fotos ?? null;
-                  
-                  console.log('[IMAGES DEBUG] modalTicket completo:', modalTicket);
-                  console.log('[IMAGES DEBUG] Campo raw de imágenes:', raw);
-                  console.log('[IMAGES DEBUG] Tipo de raw:', typeof raw);
+                  const raw = modalTicket?.imagenes ?? modalTicket?.imagen ?? modalTicket?.fotos ?? null;
                   
                   if (!raw) {
                     return (
@@ -477,6 +515,83 @@ const ReportesAdmin: FC = () => {
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalHistorial(null)}>
                 <Text style={styles.btnCerrarTextFull}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* MODAL PARA CREAR PROBLEMA */}
+      <Modal visible={showCrearProblemaModal} transparent animationType="fade" onRequestClose={() => { setShowCrearProblemaModal(false); setCrearError(null); }}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.modalBackground }]}>
+            <Text style={[styles.modalTitle, { color: colors.title }]}>Crear Problema</Text>
+            
+            {crearError && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{crearError}</Text>
+              </View>
+            )}
+            
+            <View style={{ width: '100%', marginTop: 16 }}>
+              <Text style={[styles.labelInput, { color: colors.title }]}>Tipo de Problema</Text>
+              <TextInput
+                style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border }]}
+                placeholder="Ej: Hardware, Software, Redes..."
+                placeholderTextColor={colors.textSecondary}
+                value={nuevoTipo}
+                onChangeText={setNuevoTipo}
+                editable={!savingProblema}
+              />
+            </View>
+
+            <View style={{ width: '100%', marginTop: 12 }}>
+              <Text style={[styles.labelInput, { color: colors.title }]}>Descripción</Text>
+              <TextInput
+                style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border, height: 100, textAlignVertical: 'top' }]}
+                placeholder="Descripción del problema"
+                placeholderTextColor={colors.textSecondary}
+                value={nuevaDescripcion}
+                onChangeText={setNuevaDescripcion}
+                multiline
+                editable={!savingProblema}
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 20, justifyContent: 'flex-end' }}>
+              <TouchableOpacity 
+                style={[styles.btnModalCancel, savingProblema && styles.btnDisabled]}
+                onPress={() => { setShowCrearProblemaModal(false); setCrearError(null); }}
+                disabled={savingProblema}
+              >
+                <Text style={styles.btnModalCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.btnModalSave, savingProblema && styles.btnDisabled]}
+                onPress={async () => {
+                  try {
+                    setSavingProblema(true);
+                    setCrearError(null);
+                    if (!nuevoTipo || nuevoTipo.trim() === '') {
+                      setCrearError('Ingrese el tipo de problema');
+                      setSavingProblema(false);
+                      return;
+                    }
+                    await problemasService.crearProblema({ tipo: nuevoTipo.trim(), descripcion: nuevaDescripcion.trim() });
+                    RNAlert.alert('Éxito', 'Problema creado correctamente');
+                    setShowCrearProblemaModal(false);
+                    setNuevoTipo('');
+                    setNuevaDescripcion('');
+                  } catch (err: any) {
+                    console.error('Error creando problema:', err);
+                    setCrearError(err.message || 'Error al crear problema');
+                  } finally {
+                    setSavingProblema(false);
+                  }
+                }}
+                disabled={savingProblema}
+              >
+                <Text style={styles.btnModalSaveText}>{savingProblema ? 'Guardando...' : 'Guardar'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -774,6 +889,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: { fontSize: 20, fontWeight: 'bold', /* color: '#1976d2', */ marginBottom: 16, textAlign: 'center' },
+  crearProblemaBtn: {
+    backgroundColor: '#12bb1a',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  crearProblemaText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  errorBox: {
+    backgroundColor: '#ffebee',
+    borderColor: '#e53935',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    width: '100%',
+    marginBottom: 12,
+  },
+  errorText: {
+    color: '#c62828',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  labelInput: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  inputField: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontSize: 14,
+  },
+  btnModalCancel: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  btnModalCancelText: {
+    color: '#333',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  btnModalSave: {
+    backgroundColor: '#12bb1a',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  btnModalSaveText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  btnDisabled: {
+    opacity: 0.6,
+  },
 });
 
 export default ReportesAdmin;

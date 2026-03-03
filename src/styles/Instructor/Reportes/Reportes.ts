@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
-import { ThemeColors } from '../../../context/ThemeContext';
+import { Colors } from '../../../context/ThemeContext';
 
-export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
+export const createReportesStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -13,7 +13,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   text: {
     fontSize: 24,
-    color: colors.text,
+    color: colors.textPrimary,
     fontWeight: 'bold',
   },
   formContainer: {
@@ -21,7 +21,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingVertical: 15,
   },
   alertDanger: {
-    backgroundColor: colors.notification,
+    backgroundColor: colors.error,
     padding: 15,
     borderRadius: 8,
     marginBottom: 15,
@@ -39,11 +39,11 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
   },
   alertText: {
-    color: colors.text,
+    color: colors.textPrimary,
     flex: 1,
   },
   closeButton: {
-    color: colors.text,
+    color: colors.textPrimary,
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
@@ -54,12 +54,12 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
-    color: colors.text,
+    backgroundColor: colors.cardBackground,
+    color: colors.textPrimary,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
@@ -99,7 +99,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   problemaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.cardBackground,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -125,7 +125,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   problemaText: {
     flex: 1,
-    color: colors.text,
+    color: colors.textPrimary,
     fontSize: 15,
   },
   detailsButton: {
@@ -133,11 +133,11 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
     alignSelf: 'flex-end',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primaryLight,
     borderRadius: 20,
   },
   detailsButtonText: {
-    color: colors.text,
+    color: colors.textPrimary,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -161,7 +161,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.text,
+    color: colors.textPrimary,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -220,7 +220,7 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.primary,
   },
   buttonSecondary: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primaryLight,
     marginTop: 10,
   },
   buttonDisabled: {
@@ -233,5 +233,38 @@ export const createReportesStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   spinner: {
     marginRight: 10,
+  },
+  tipoItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: '#f8fff9',
+    borderWidth: 1,
+    borderColor: '#e6f4ea',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tipoItemActive: {
+    backgroundColor: '#2f855a',
+    borderColor: '#2f855a',
+  },
+  tipoItemText: {
+    fontWeight: '600',
+    color: '#2f855a',
+    fontSize: 13,
+  },
+  tipoItemTextActive: {
+    color: '#fff',
+  },
+  tipoCount: {
+    fontWeight: '500',
+    fontSize: 12,
+    color: 'rgba(0,0,0,0.6)',
+    marginLeft: 6,
+  },
+  tipoCountActive: {
+    color: 'rgba(255,255,255,0.9)',
   },
 });
