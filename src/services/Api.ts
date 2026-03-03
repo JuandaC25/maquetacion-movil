@@ -333,6 +333,86 @@ export const problemasService = {
       throw error;
     }
   },
+
+  editarProblema: async (id: number, problema: any) => {
+    try {
+      const payload = {
+        descr_problem: problema.descr_problem ?? problema.descripcion ?? ''
+      };
+
+      const config = await withAuth({
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const res = await api.put(`/api/problemas/${id}`, payload, config);
+
+      if (!res?.data) {
+        throw new Error('Error al actualizar problema: respuesta vacía');
+      }
+
+      return res.data;
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
+
+  eliminarProblema: async (id: number) => {
+    try {
+      const config = await withAuth();
+      const res = await api.delete(`/api/problemas/${id}`, config);
+      return res.data;
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
+
+  editarTipoProblema: async (problemaIds: number[], nuevoTipo: string) => {
+    try {
+      const config = await withAuth({
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      // Actualizar todos los problemas con el nuevo tipo
+      const resultados = await Promise.all(
+        problemaIds.map(id =>
+          api.put(`/api/problemas/${id}`, { tipo_problema: nuevoTipo }, config)
+        )
+      );
+
+      return resultados;
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
+
+  eliminarTipoProblema: async (problemaIds: number[]) => {
+    try {
+      const config = await withAuth();
+
+      // Eliminar todos los problemas del tipo
+      const resultados = await Promise.all(
+        problemaIds.map(id =>
+          api.delete(`/api/problemas/${id}`, config)
+        )
+      );
+
+      return resultados;
+    } catch (error: any) {
+      if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      throw error;
+    }
+  },
 };
 
 // ==================== ESPACIOS SERVICE ====================
