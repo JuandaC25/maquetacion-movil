@@ -12,7 +12,8 @@ const estadoInfo = (estado: number | string) => {
   switch (Number(estado)) {
     case 1: return { label: '🟢 Activo', color: '#12bb1a', bg: '#e8f5e8' };
     case 2: return { label: '🟡 Pendiente', color: '#ef6c00', bg: '#fff3e0' };
-    case 3: return { label: '🔴 Inactivo', color: '#e53935', bg: '#ffebee' };
+    case 3: return { label: '✅ Terminado', color: '#1976d2', bg: '#e3f2fd' };
+    case 4: return { label: '🔴 Inactivo', color: '#e53935', bg: '#ffebee' };
     default: return { label: '🟡 Pendiente', color: '#ef6c00', bg: '#fff3e0' };
   }
 };
@@ -33,30 +34,11 @@ const ReportesAdmin: FC = () => {
   const [savingProblema, setSavingProblema] = React.useState(false);
   const [crearError, setCrearError] = React.useState<string | null>(null);
 
-  // Abrir modal del ticket con trazabilidad
+  // Abrir modal del ticket (información del ticket)
   const openTicketModal = async (ticket: any) => {
     try {
       setModalTicket(ticket);
-      
-      // Obtener trazabilidad del ticket
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const ticketId = ticket.id ?? ticket.id_tickets;
-        try {
-          const res = await trazabilidadService.getByTicketId(ticketId);
-          let history = [];
-          if (res.data && Array.isArray(res.data)) {
-            history = res.data;
-          } else if (Array.isArray(res)) {
-            history = res;
-          }
-          setTrazabilidades(history);
-          console.log('[MODAL TICKET] Trazabilidades cargadas:', history);
-        } catch (err) {
-          console.log('[MODAL TICKET] Error cargando trazabilidades:', err);
-          setTrazabilidades([]);
-        }
-      }
+      console.log('[MODAL TICKET] Ticket abierto:', ticket);
     } catch (err) {
       console.error('[MODAL TICKET] Error abriendo modal:', err);
     }
@@ -80,9 +62,6 @@ const ReportesAdmin: FC = () => {
         return;
       }
       
-      // Cargar el ticket completo para mostrar en el modal
-      setModalTicket(ticket);
-      
       // Fetch trazabilidad history for the ticket
       const ticketId = ticket.id ?? ticket.id_tickets;
       console.log('[TRAZABILIDAD][MÓVIL] Intentando obtener historial para ticket:', ticketId);
@@ -102,6 +81,9 @@ const ReportesAdmin: FC = () => {
       
       // Guardar todas las trazabilidades
       setTrazabilidades(history);
+      
+      // Guardar el ticket para mostrar en el modal de trazabilidad
+      setModalTicket(ticket);
       
       // Asignar el modal historial para que el modal sepa que está abierto
       setModalHistorial({
@@ -199,13 +181,13 @@ const ReportesAdmin: FC = () => {
                 <View style={styles.cardRight}>
                   <TouchableOpacity 
                     style={[styles.newBtn, styles.btnVer]} 
-                    onPress={() => openHistorialModal(t)}
+                    onPress={() => openTicketModal(t)}
                   >
                     <Text style={styles.btnTextVer}>📊</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[styles.newBtn, styles.btnTrazabilidad]} 
-                    onPress={() => openTicketModal(t)}
+                    onPress={() => openHistorialModal(t)}
                   >
                     <Text style={styles.btnTextTraz}>👁️</Text>
                   </TouchableOpacity>
@@ -218,7 +200,10 @@ const ReportesAdmin: FC = () => {
 
       {/* Modal para ver ticket */}
       {modalTicket && console.log('modalTicket:', modalTicket)}
-      <Modal visible={!!modalTicket} transparent animationType="slide" onRequestClose={() => setModalTicket(null)}>
+      <Modal visible={!!modalTicket} transparent animationType="slide" onRequestClose={() => {
+        setModalTicket(null);
+        setTrazabilidades([]);
+      }}>
         <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}> 
           <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground }]}> 
             <View style={styles.modalHeaderFull}>
@@ -260,141 +245,6 @@ const ReportesAdmin: FC = () => {
                   </Text>
                 </View>
               </View>
-
-              {/* Información adicional */}
-              <View style={styles.additionalSection}>
-                <View style={styles.infoRow}>
-                  <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Estado</Text>
-                    <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{estadoInfo(modalTicket?.estado ?? modalTicket?.id_est_tick).label}</Text>
-                  </View>
-                  <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Ambiente</Text>
-                    <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.ambient ?? modalTicket?.ambiente ?? '-'}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.infoRow}>
-                  <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Problema(s)</Text>
-                    {Array.isArray(modalTicket?.problemas) && modalTicket.problemas.length > 0 ? (
-                      <View>
-                        {modalTicket.problemas.map((p: any, idx: number) => (
-                          <View key={idx} style={{ marginBottom: 12, borderLeftWidth: 2, borderLeftColor: colors.primary, paddingLeft: 12 }}>
-                            <Text style={[styles.metaLabel, { color: colors.primary, marginBottom: 4 }]}>
-                              Tipo: {p?.problema?.Tip_problema || p?.problema?.tip_problema || p?.tipoProblema || '-'}
-                            </Text>
-                            <Text style={[styles.metaValue, { color: colors.textPrimary }]}>
-                              {p?.problemaDesc || (p?.problema && (p.problema.desc_problema || p.problema.desc)) || p?.descripcion || p?.descr || '-'}
-                            </Text>
-                          </View>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.nom_problm ?? modalTicket?.problema ?? '-'}</Text>
-                    )}
-                  </View>
-                  <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Usuario</Text>
-                    <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.nom_usu ?? modalTicket?.usuario ?? '-'}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.infoRow}>
-                  <View style={styles.infoPair}>
-                    <Text style={[styles.metaLabel, { color: colors.title }]}>Fecha de fin</Text>
-                    <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{modalTicket?.fecha_fin ?? '-'}</Text>
-                  </View>
-                </View>
-              </View>
-              
-
-
-              {/* Sección de imágenes */}
-              <View style={{ marginTop: 10 }}>
-                <Text style={[styles.modalLabelFull, { color: colors.title, marginBottom: 8 }]}>Imágenes:</Text>
-                {(() => {
-                  // Intentar obtener imágenes de múltiples campos posibles
-                  const raw = modalTicket?.imagenes ?? modalTicket?.imagen ?? modalTicket?.fotos ?? null;
-                  
-                  if (!raw) {
-                    return (
-                      <View style={{ backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8 }}>
-                        <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>
-                      </View>
-                    );
-                  }
-
-                  let urls: string[] = [];
-                  try {
-                    if (Array.isArray(raw)) {
-                      urls = raw.filter(u => u); // Filtrar valores vacíos
-                    } else if (typeof raw === 'string') {
-                      const s = raw.trim();
-                      if ((s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'))) {
-                        const parsed = JSON.parse(s);
-                        if (Array.isArray(parsed)) urls = parsed.filter(u => u);
-                        else if (typeof parsed === 'string') urls = [parsed];
-                      } else if (s.length > 0) {
-                        urls = [s];
-                      }
-                    }
-                  } catch (e) {
-                    console.log('[IMAGES ERROR] Error al parsear imágenes:', e);
-                    urls = typeof raw === 'string' ? [raw] : [];
-                  }
-
-                  console.log('[IMAGES DEBUG] URLs procesadas:', urls);
-
-                  if (!urls || urls.length === 0) {
-                    return (
-                      <View style={{ backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8 }}>
-                        <Text style={{ color: colors.textPrimary }}>No hay imágenes disponibles</Text>
-                      </View>
-                    );
-                  }
-
-                  const normalizeUrl = (u: string) => {
-                    if (!u) return null;
-                    if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:')) return u;
-                    if (u.startsWith('/uploads/')) {
-                      const finalUrl = `http://10.232.222.133:8081${u}`;
-                      console.log('[IMAGES] URL final construida:', finalUrl);
-                      return finalUrl;
-                    }
-                    // Si no tiene protocolo, asumir que es una ruta en uploads
-                    const finalUrl = `http://10.232.222.133:8081/uploads/${u}`;
-                    console.log('[IMAGES] URL final construida (sin /uploads):', finalUrl);
-                    return finalUrl;
-                  };
-
-                  return (
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
-                      {urls.map((url, idx) => {
-                        const src = normalizeUrl(url);
-                        console.log('[IMAGES] Intentando cargar imagen:', src);
-                        if (!src) return null;
-                        return (
-                          <View key={idx} style={{ marginRight: 12 }}>
-                            <Image
-                              source={{ uri: src }}
-                              style={{ width: 180, height: 120, borderRadius: 8, backgroundColor: '#f0f0f0' }}
-                              resizeMode="cover"
-                              onError={(e) => console.log('[IMAGES ERROR] Error cargando imagen:', e.nativeEvent.error)}
-                              onLoad={() => console.log('[IMAGES] Imagen cargada exitosamente:', src)}
-                            />
-                            {urls.length > 1 && (
-                              <Text style={{ color: colors.textPrimary, fontSize: 12, textAlign: 'center', marginTop: 4 }}>
-                                Imagen {idx + 1}
-                              </Text>
-                            )}
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
-                  );
-                })()}
-              </View>
             </ScrollView>
             <View style={styles.modalFooterFull}>
               <TouchableOpacity style={styles.btnCerrarFull} onPress={() => {
@@ -410,7 +260,11 @@ const ReportesAdmin: FC = () => {
 
 
       {/* Modal para ver trazabilidad */}
-      <Modal visible={!!modalHistorial} transparent animationType="slide" onRequestClose={() => setModalHistorial(null)}>
+      <Modal visible={!!modalHistorial} transparent animationType="slide" onRequestClose={() => {
+        setModalHistorial(null);
+        setModalTicket(null);
+        setTrazabilidades([]);
+      }}>
         <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}> 
           <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground }]}> 
             <View style={styles.modalHeaderFull}>
@@ -513,7 +367,11 @@ const ReportesAdmin: FC = () => {
               )}
             </ScrollView>
             <View style={styles.modalFooterFull}>
-              <TouchableOpacity style={styles.btnCerrarFull} onPress={() => setModalHistorial(null)}>
+              <TouchableOpacity style={styles.btnCerrarFull} onPress={() => {
+                setModalHistorial(null);
+                setModalTicket(null);
+                setTrazabilidades([]);
+              }}>
                 <Text style={styles.btnCerrarTextFull}>Cerrar</Text>
               </TouchableOpacity>
             </View>
