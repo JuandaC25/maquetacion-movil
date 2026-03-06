@@ -28,13 +28,47 @@ const ReportesAdmin: FC = () => {
   const [expandedId, setExpandedId] = React.useState<string | number | null>(null);
   const [trazabilidades, setTrazabilidades] = React.useState<any[]>([]);
   
-  const [showCrearProblemaModal, setShowCrearProblemaModal] = React.useState(false);
-  const [nuevoTipo, setNuevoTipo] = React.useState('');
-  const [nuevaDescripcion, setNuevaDescripcion] = React.useState('');
-  const [savingProblema, setSavingProblema] = React.useState(false);
+  const [showCrearTicketModal, setShowCrearTicketModal] = React.useState(false);
+  const [idElemento, setIdElemento] = React.useState('');
+  const [ambiente, setAmbiente] = React.useState('');
+  const [problemas, setProblemas] = React.useState<any[]>([]);
+  const [problemasSeleccionados, setProblemasSeleccionados] = React.useState<number[]>([]);
+  const [selectedTipo, setSelectedTipo] = React.useState<string | null>(null);
+  const [loadingProblemas, setLoadingProblemas] = React.useState(false);
+  const [savingTicket, setSavingTicket] = React.useState(false);
   const [crearError, setCrearError] = React.useState<string | null>(null);
 
-  // Abrir modal del ticket (información del ticket)
+  const cargarProblemas = async () => {
+    setLoadingProblemas(true);
+    try {
+      const res = await problemasService.obtenerProblemas();
+      const problemasList = Array.isArray(res.data) ? res.data : [];
+      setProblemas(problemasList);
+      const tipos = [...new Set(problemasList.map((p: any) => p.tipo_problema || 'Otros'))];
+      if (tipos.length > 0 && !selectedTipo) {
+        setSelectedTipo(tipos[0]);
+      }
+    } catch (err) {
+      console.error('Error cargando problemas:', err);
+    } finally {
+      setLoadingProblemas(false);
+    }
+  };
+
+  const toggleProblema = (id: number) => {
+    setProblemasSeleccionados(prev => 
+      prev.includes(id) 
+        ? prev.filter(pid => pid !== id)
+        : [...prev, id]
+    );
+  };
+
+  const resetForm = () => {
+    setIdElemento('');
+    setAmbiente('');
+    setProblemasSeleccionados([]);
+    setCrearError(null);
+  };
   const openTicketModal = async (ticket: any) => {
     try {
       setModalTicket(ticket);
@@ -142,10 +176,14 @@ const ReportesAdmin: FC = () => {
       <AdminHeader title="Reportes" navigation={navigation} />
       <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
         <TouchableOpacity 
-          style={styles.crearProblemaBtn}
-          onPress={() => { setShowCrearProblemaModal(true); setCrearError(null); }}
+          style={styles.crearTicketBtn}
+          onPress={() => { 
+            setShowCrearTicketModal(true); 
+            setCrearError(null);
+            cargarProblemas();
+          }}
         >
-          <Text style={styles.crearProblemaText}>+ Crear Problema</Text>
+          <Text style={styles.crearTicketText}>+ Crear Ticket</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
@@ -379,77 +417,208 @@ const ReportesAdmin: FC = () => {
         </View>
       </Modal>
 
-      {/* MODAL PARA CREAR PROBLEMA */}
-      <Modal visible={showCrearProblemaModal} transparent animationType="fade" onRequestClose={() => { setShowCrearProblemaModal(false); setCrearError(null); }}>
+      {/* MODAL PARA CREAR TICKET - IGUAL A LA WEB */}
+      <Modal visible={showCrearTicketModal} transparent animationType="slide" onRequestClose={() => { setShowCrearTicketModal(false); resetForm(); }}>
         <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.modalBackground }]}>
-            <Text style={[styles.modalTitle, { color: colors.title }]}>Crear Problema</Text>
+          <View style={[styles.modalContentFull, { backgroundColor: colors.modalBackground, width: '95%', height: '90%' }]}>
+            <View style={[styles.modalHeaderFull, { backgroundColor: '#12bb1a' }]}>
+              <Text style={styles.modalTitleFull}>🚨 Reportar Equipo / Crear Ticket</Text>
+            </View>
             
-            {crearError && (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{crearError}</Text>
+            <ScrollView style={styles.modalBodyFullScroll} contentContainerStyle={{ paddingBottom: 20 }}>
+              {crearError && (
+                <View style={styles.errorBox}>
+                  <Text style={styles.errorText}>{crearError}</Text>
+                </View>
+              )}
+              
+              {/* ID Elemento */}
+              <View style={{ width: '100%', marginBottom: 16 }}>
+                <Text style={[styles.labelInput, { color: colors.title }]}>Identificador de Equipo *</Text>
+                <TextInput
+                  style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border }]}
+                  placeholder="Ingrese el identificador del equipo"
+                  placeholderTextColor={colors.textSecondary}
+                  value={idElemento}
+                  onChangeText={setIdElemento}
+                  keyboardType="numeric"
+                  editable={!savingTicket}
+                />
               </View>
-            )}
-            
-            <View style={{ width: '100%', marginTop: 16 }}>
-              <Text style={[styles.labelInput, { color: colors.title }]}>Tipo de Problema</Text>
-              <TextInput
-                style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border }]}
-                placeholder="Ej: Hardware, Software, Redes..."
-                placeholderTextColor={colors.textSecondary}
-                value={nuevoTipo}
-                onChangeText={setNuevoTipo}
-                editable={!savingProblema}
-              />
-            </View>
 
-            <View style={{ width: '100%', marginTop: 12 }}>
-              <Text style={[styles.labelInput, { color: colors.title }]}>Descripción</Text>
-              <TextInput
-                style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border, height: 100, textAlignVertical: 'top' }]}
-                placeholder="Descripción del problema"
-                placeholderTextColor={colors.textSecondary}
-                value={nuevaDescripcion}
-                onChangeText={setNuevaDescripcion}
-                multiline
-                editable={!savingProblema}
-              />
-            </View>
+              {/* Ambiente */}
+              <View style={{ width: '100%', marginBottom: 16 }}>
+                <Text style={[styles.labelInput, { color: colors.title }]}>Ambiente/Ubicación *</Text>
+                <TextInput
+                  style={[styles.inputField, { color: colors.textPrimary, borderColor: colors.border }]}
+                  placeholder="Ej: Ambiente 301"
+                  placeholderTextColor={colors.textSecondary}
+                  value={ambiente}
+                  onChangeText={setAmbiente}
+                  editable={!savingTicket}
+                />
+              </View>
 
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 20, justifyContent: 'flex-end' }}>
+              {/* Problemas */}
+              <View style={{ width: '100%', marginBottom: 16 }}>
+                <Text style={[styles.labelInput, { color: colors.title }]}>
+                  <Text style={{ fontSize: 16 }}>⚠️</Text> Seleccione los problemas *
+                </Text>
+                
+                {loadingProblemas ? (
+                  <ActivityIndicator size="small" color="#1976d2" />
+                ) : (
+                  <>
+                    {/* Tipos de problemas */}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {[...new Set(problemas.map((p: any) => p.tipo_problema || 'Otros'))].map((tipo: string) => (
+                          <TouchableOpacity
+                            key={tipo}
+                            onPress={() => setSelectedTipo(tipo)}
+                            style={{
+                              paddingHorizontal: 16,
+                              paddingVertical: 8,
+                              borderRadius: 20,
+                              backgroundColor: selectedTipo === tipo ? '#12bb1a' : '#e0e0e0',
+                            }}
+                          >
+                            <Text style={{ 
+                              color: selectedTipo === tipo ? '#fff' : '#333',
+                              fontWeight: '600',
+                              fontSize: 13 
+                            }}>
+                              {tipo}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </ScrollView>
+
+                    {/* Lista de problemas del tipo seleccionado */}
+                    <View style={{ 
+                      borderWidth: 1, 
+                      borderColor: colors.border, 
+                      borderRadius: 8,
+                      padding: 12,
+                      backgroundColor: colors.background 
+                    }}>
+                      {problemas
+                        .filter((p: any) => (p.tipo_problema || 'Otros') === selectedTipo)
+                        .map((problema: any) => {
+                          const isSelected = problemasSeleccionados.includes(problema.id);
+                          return (
+                            <TouchableOpacity
+                              key={problema.id}
+                              onPress={() => toggleProblema(problema.id)}
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                paddingVertical: 10,
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border,
+                              }}
+                            >
+                              <View style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 4,
+                                borderWidth: 2,
+                                borderColor: isSelected ? '#12bb1a' : colors.border,
+                                backgroundColor: isSelected ? '#12bb1a' : 'transparent',
+                                marginRight: 12,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}>
+                                {isSelected && <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>✓</Text>}
+                              </View>
+                              <Text style={{ 
+                                color: colors.textPrimary, 
+                                fontSize: 14,
+                                flex: 1 
+                              }}>
+                                {problema.descr_problem}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                    </View>
+                    
+                    {problemasSeleccionados.length > 0 && (
+                      <Text style={{ 
+                        color: '#12bb1a', 
+                        fontSize: 13, 
+                        marginTop: 8,
+                        fontWeight: '500' 
+                      }}>
+                        {problemasSeleccionados.length} problema(s) seleccionado(s)
+                      </Text>
+                    )}
+                  </>
+                )}
+              </View>
+            </ScrollView>
+
+            {/* Footer con botones */}
+            <View style={[styles.modalFooterFull, { flexDirection: 'row', justifyContent: 'space-between' }]}>
               <TouchableOpacity 
-                style={[styles.btnModalCancel, savingProblema && styles.btnDisabled]}
-                onPress={() => { setShowCrearProblemaModal(false); setCrearError(null); }}
-                disabled={savingProblema}
+                style={[styles.btnModalCancel, savingTicket && styles.btnDisabled, { flex: 1, marginRight: 8 }]}
+                onPress={() => { setShowCrearTicketModal(false); resetForm(); }}
+                disabled={savingTicket}
               >
                 <Text style={styles.btnModalCancelText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.btnModalSave, savingProblema && styles.btnDisabled]}
+                style={[styles.btnModalSave, savingTicket && styles.btnDisabled, { flex: 1, marginLeft: 8, backgroundColor: '#12bb1a' }]}
                 onPress={async () => {
                   try {
-                    setSavingProblema(true);
+                    setSavingTicket(true);
                     setCrearError(null);
-                    if (!nuevoTipo || nuevoTipo.trim() === '') {
-                      setCrearError('Ingrese el tipo de problema');
-                      setSavingProblema(false);
+                    
+                    // Validaciones
+                    if (!idElemento || idElemento.trim() === '') {
+                      setCrearError('Ingrese el identificador del equipo');
+                      setSavingTicket(false);
                       return;
                     }
-                    await problemasService.crearProblema({ tipo: nuevoTipo.trim(), descripcion: nuevaDescripcion.trim() });
-                    RNAlert.alert('Éxito', 'Problema creado correctamente');
-                    setShowCrearProblemaModal(false);
-                    setNuevoTipo('');
-                    setNuevaDescripcion('');
+                    if (!ambiente || ambiente.trim() === '') {
+                      setCrearError('Ingrese el ambiente/ubicación');
+                      setSavingTicket(false);
+                      return;
+                    }
+                    if (problemasSeleccionados.length === 0) {
+                      setCrearError('Seleccione al menos un problema');
+                      setSavingTicket(false);
+                      return;
+                    }
+                    
+                    // Crear payload igual a la web
+                    const payload = {
+                      id_elem: parseInt(idElemento.trim()),
+                      ambiente: ambiente.trim(),
+                      problemas: problemasSeleccionados.map(id => ({ id_problema: id })),
+                      id_est_tick: 1 // Activo por defecto
+                    };
+                    
+                    await ticketsService.create(payload);
+                    RNAlert.alert('Éxito', 'Ticket creado correctamente');
+                    setShowCrearTicketModal(false);
+                    resetForm();
+                    // Refrescar lista
+                    const res = await ticketsService.getAll();
+                    setTickets(Array.isArray(res.data) ? res.data : []);
                   } catch (err: any) {
-                    console.error('Error creando problema:', err);
-                    setCrearError(err.message || 'Error al crear problema');
+                    console.error('Error creando ticket:', err);
+                    setCrearError(err.message || 'Error al crear ticket');
                   } finally {
-                    setSavingProblema(false);
+                    setSavingTicket(false);
                   }
                 }}
-                disabled={savingProblema}
+                disabled={savingTicket}
               >
-                <Text style={styles.btnModalSaveText}>{savingProblema ? 'Guardando...' : 'Guardar'}</Text>
+                <Text style={styles.btnModalSaveText}>
+                  {savingTicket ? 'Guardando...' : 'Guardar'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -747,14 +916,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: { fontSize: 20, fontWeight: 'bold', /* color: '#1976d2', */ marginBottom: 16, textAlign: 'center' },
-  crearProblemaBtn: {
+  crearTicketBtn: {
     backgroundColor: '#12bb1a',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-  crearProblemaText: {
+  crearTicketText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 14,

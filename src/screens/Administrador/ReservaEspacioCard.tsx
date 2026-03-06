@@ -52,8 +52,6 @@ const ReservaEspacioCard: React.FC<Props> = ({ reserva, onAprobar, onRechazar, o
       <View style={[styles.cardContent, { backgroundColor: '#09b41a', borderRadius: 12, padding: 16 }]}> 
         <Text style={[styles.titulo, { color: '#fff', fontWeight: 'bold', fontSize: 22, marginBottom: 8 }]}>{reserva.nom_espa || 'Espacio N/A'}</Text>
         <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Usuario: <Text style={{ fontWeight: 'normal' }}>{reserva.usuario}</Text></Text>
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Ambiente: <Text style={{ fontWeight: 'normal' }}>{reserva.ambient}</Text></Text>
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Ficha: <Text style={{ fontWeight: 'normal' }}>{reserva.num_ficha || 'N/A'}</Text></Text>
         {reserva.elementos && (
           <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Elementos: <Text style={{ fontWeight: 'normal' }}>{reserva.elementos}</Text></Text>
         )}

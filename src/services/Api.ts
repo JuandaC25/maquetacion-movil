@@ -299,7 +299,7 @@ export const problemasService = {
   
   obtenerProblemas: async () => {
     try {
-      return await api.get(`/api/problemas/descripcion`, await withAuth());
+      return await api.get(`/api/problemas`, await withAuth());
     } catch (error: any) {
       if (error.message?.toLowerCase().includes('failed to fetch') || error.message?.includes('NetworkError')) {
         throw new Error('No se pudo conectar con el servidor');
