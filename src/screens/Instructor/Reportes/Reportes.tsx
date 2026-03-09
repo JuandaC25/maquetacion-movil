@@ -25,7 +25,6 @@ interface Problema {
   descr_problem: string;
   tipo_problema?: string; // Añadir tipo_problema
 }
-
 // Estado para los detalles de cada problema (descripción e imágenes)
 interface ProblemaDetalles {
   descripcion: string;
@@ -62,23 +61,6 @@ export default function ReportesScreen({ navigation }: any) {
   });
 
   const [imagenes, setImagenes] = useState<string[]>([]);
-
-  // Estados para editar/eliminar problemas
-  const [editingProblemaId, setEditingProblemaId] = useState<number | null>(null);
-  const [editingProblemaText, setEditingProblemaText] = useState('');
-  const [editSubmitting, setEditSubmitting] = useState(false);
-
-  const [deletingProblemaId, setDeletingProblemaId] = useState<number | null>(null);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-
-  // Estados para editar/eliminar tipos de problemas
-  const [editingTipo, setEditingTipo] = useState<string | null>(null);
-  const [editingTipoName, setEditingTipoName] = useState('');
-  const [editTipoSubmitting, setEditTipoSubmitting] = useState(false);
-
-  const [deletingTipo, setDeletingTipo] = useState<string | null>(null);
-  const [deleteTipoSubmitting, setDeleteTipoSubmitting] = useState(false);
-
   // Cargar problemas
   useEffect(() => {
     cargarProblemas();
@@ -174,84 +156,6 @@ export default function ReportesScreen({ navigation }: any) {
   const handleGuardarDetalles = () => {
     setModalVisible(false);
     setProblemaSeleccionado(null);
-  };
-
-  const handleEditarProblema = async () => {
-    if (!editingProblemaId) return;
-    setEditSubmitting(true);
-    try {
-      await problemasService.editarProblema(editingProblemaId, {
-        descr_problem: editingProblemaText
-      });
-      setSuccess('Problema actualizado correctamente');
-      setEditingProblemaId(null);
-      setEditingProblemaText('');
-      await cargarProblemas();
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error al actualizar problema');
-    } finally {
-      setEditSubmitting(false);
-    }
-  };
-
-  const handleEliminarProblema = async () => {
-    if (!deletingProblemaId) return;
-    setDeleteSubmitting(true);
-    try {
-      await problemasService.eliminarProblema(deletingProblemaId);
-      setSuccess('Problema eliminado correctamente');
-      setDeletingProblemaId(null);
-      await cargarProblemas();
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error al eliminar problema');
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
-
-  const handleEditarTipoProblema = async () => {
-    if (!editingTipo) return;
-    if (!editingTipoName.trim()) {
-      setError('El nombre del tipo no puede estar vacío');
-      return;
-    }
-    setEditTipoSubmitting(true);
-    try {
-      const problemasDelTipo = problemas.filter(p => (p.tipo_problema || 'Otros') === editingTipo);
-      const ids = problemasDelTipo.map(p => p.id);
-      
-      await problemasService.editarTipoProblema(ids, editingTipoName.trim());
-      setSuccess('Tipo de problema actualizado correctamente');
-      setEditingTipo(null);
-      setEditingTipoName('');
-      await cargarProblemas();
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error al actualizar tipo');
-    } finally {
-      setEditTipoSubmitting(false);
-    }
-  };
-
-  const handleEliminarTipoProblema = async () => {
-    if (!deletingTipo) return;
-    setDeleteTipoSubmitting(true);
-    try {
-      const problemasDelTipo = problemas.filter(p => (p.tipo_problema || 'Otros') === deletingTipo);
-      const ids = problemasDelTipo.map(p => p.id);
-      
-      await problemasService.eliminarTipoProblema(ids);
-      setSuccess('Tipo y problemas relacionados eliminados correctamente');
-      setDeletingTipo(null);
-      await cargarProblemas();
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error al eliminar tipo');
-    } finally {
-      setDeleteTipoSubmitting(false);
-    }
   };
 
   const handleSubmit = async () => {
@@ -494,23 +398,7 @@ export default function ReportesScreen({ navigation }: any) {
                         ({lista.length})
                       </Text>
                     </TouchableOpacity>
-                    
-                    {/* Botones de editar y eliminar tipo */}
-                    <TouchableOpacity
-                      onPress={() => {
-                        setEditingTipo(tipo);
-                        setEditingTipoName(tipo);
-                      }}
-                      style={{ padding: 4 }}
-                    >
-                      <Text style={{ fontSize: 16 }}>✏️</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setDeletingTipo(tipo)}
-                      style={{ padding: 4 }}
-                    >
-                      <Text style={{ fontSize: 16 }}>🗑️</Text>
-                    </TouchableOpacity>
+                                      
                   </View>
                 ))}
               </View>
@@ -539,22 +427,7 @@ export default function ReportesScreen({ navigation }: any) {
                               <Text style={ReportesStyles.problemaText}>{problema.descr_problem}</Text>
                             </TouchableOpacity>
                             
-                            {/* Botones de editar y eliminar problema */}
-                            <TouchableOpacity
-                              onPress={() => {
-                                setEditingProblemaId(problema.id);
-                                setEditingProblemaText(problema.descr_problem);
-                              }}
-                              style={{ padding: 4 }}
-                            >
-                              <Text style={{ fontSize: 14 }}>✏️</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => setDeletingProblemaId(problema.id)}
-                              style={{ padding: 4 }}
-                            >
-                              <Text style={{ fontSize: 14 }}>🗑️</Text>
-                            </TouchableOpacity>
+                            {/* Eliminados botones de editar/eliminar problema */}
                           </View>
                           
                           {isSelected && (
@@ -665,175 +538,6 @@ export default function ReportesScreen({ navigation }: any) {
             </View>
           </Modal>
         )}
-
-        {/* MODAL EDITAR PROBLEMA */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!editingProblemaId}
-          onRequestClose={() => setEditingProblemaId(null)}
-        >
-          <View style={[ReportesStyles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-            <View style={[ReportesStyles.modalContent, { width: '85%', paddingVertical: 24 }]}>
-              <Text style={[ReportesStyles.modalTitle, { marginBottom: 20 }]}>Editar Problema</Text>
-              
-              <View style={ReportesStyles.formGroup}>
-                <Text style={ReportesStyles.label}>Descripción</Text>
-                <TextInput
-                  style={[ReportesStyles.input, ReportesStyles.textarea]}
-                  placeholder="Editar descripción del problema"
-                  placeholderTextColor={colors.textTertiary}
-                  multiline
-                  numberOfLines={4}
-                  maxLength={255}
-                  value={editingProblemaText}
-                  onChangeText={setEditingProblemaText}
-                  editable={!editSubmitting}
-                />
-                <Text style={ReportesStyles.charCount}>
-                  {editingProblemaText.length}/255 caracteres
-                </Text>
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSecondary, editSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={() => setEditingProblemaId(null)}
-                  disabled={editSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSubmit, editSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={handleEditarProblema}
-                  disabled={editSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>{editSubmitting ? 'Guardando...' : 'Guardar'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* MODAL ELIMINAR PROBLEMA */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!deletingProblemaId}
-          onRequestClose={() => setDeletingProblemaId(null)}
-        >
-          <View style={[ReportesStyles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-            <View style={[ReportesStyles.modalContent, { width: '85%', paddingVertical: 24 }]}>
-              <Text style={[ReportesStyles.modalTitle, { marginBottom: 20, color: '#d32f2f' }]}>Eliminar Problema</Text>
-              <Text style={{ fontSize: 14, color: colors.textPrimary, marginBottom: 24, textAlign: 'center' }}>
-                ¿Deseas eliminar este problema? Esta acción no se puede deshacer.
-              </Text>
-
-              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSecondary, deleteSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={() => setDeletingProblemaId(null)}
-                  disabled={deleteSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, { backgroundColor: '#d32f2f' }, deleteSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={handleEliminarProblema}
-                  disabled={deleteSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>{deleteSubmitting ? 'Eliminando...' : 'Eliminar'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* MODAL EDITAR TIPO DE PROBLEMA */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!editingTipo}
-          onRequestClose={() => setEditingTipo(null)}
-        >
-          <View style={[ReportesStyles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-            <View style={[ReportesStyles.modalContent, { width: '85%', paddingVertical: 24 }]}>
-              <Text style={[ReportesStyles.modalTitle, { marginBottom: 20 }]}>Editar Tipo de Problema</Text>
-              
-              <View style={ReportesStyles.formGroup}>
-                <Text style={ReportesStyles.label}>Nombre del tipo</Text>
-                <TextInput
-                  style={[ReportesStyles.input]}
-                  placeholder="Nuevo nombre del tipo"
-                  placeholderTextColor={colors.textTertiary}
-                  maxLength={80}
-                  value={editingTipoName}
-                  onChangeText={setEditingTipoName}
-                  editable={!editTipoSubmitting}
-                />
-                <Text style={ReportesStyles.charCount}>
-                  {editingTipoName.length}/80 caracteres
-                </Text>
-              </View>
-
-              <Text style={{ fontSize: 12, color: colors.textTertiary, marginBottom: 24 }}>
-                Al renombrar este tipo, todos los problemas relacionados cambiarán a este nuevo tipo.
-              </Text>
-
-              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSecondary, editTipoSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={() => setEditingTipo(null)}
-                  disabled={editTipoSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSubmit, editTipoSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={handleEditarTipoProblema}
-                  disabled={editTipoSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>{editTipoSubmitting ? 'Guardando...' : 'Guardar'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* MODAL ELIMINAR TIPO DE PROBLEMA */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!deletingTipo}
-          onRequestClose={() => setDeletingTipo(null)}
-        >
-          <View style={[ReportesStyles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-            <View style={[ReportesStyles.modalContent, { width: '85%', paddingVertical: 24 }]}>
-              <Text style={[ReportesStyles.modalTitle, { marginBottom: 20, color: '#d32f2f' }]}>Eliminar Tipo de Problema</Text>
-              <Text style={{ fontSize: 14, color: colors.textPrimary, marginBottom: 24, textAlign: 'center' }}>
-                ¿Deseas eliminar el tipo "{deletingTipo}"? Esto también eliminará todos los problemas relacionados. Esta acción no se puede deshacer.
-              </Text>
-
-              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, ReportesStyles.buttonSecondary, deleteTipoSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={() => setDeletingTipo(null)}
-                  disabled={deleteTipoSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[ReportesStyles.button, { backgroundColor: '#d32f2f' }, deleteTipoSubmitting && ReportesStyles.buttonDisabled]}
-                  onPress={handleEliminarTipoProblema}
-                  disabled={deleteTipoSubmitting}
-                >
-                  <Text style={ReportesStyles.buttonText}>{deleteTipoSubmitting ? 'Eliminando...' : 'Eliminar'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
         {/* Botones */}
         <View style={ReportesStyles.buttonContainer}>
           <TouchableOpacity
