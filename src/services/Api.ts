@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // Ajusta la IP local según tu máquina (ejecuta `ipconfig` y usa la Dirección IPv4)
-const LOCAL_IP = '192.168.20.54'; // IP actualizada según el usuario
+const LOCAL_IP = '172.16.111.75'; // IP actualizada según el usuario
 
 
 export const API_URL = `http://${LOCAL_IP}:8081`;
