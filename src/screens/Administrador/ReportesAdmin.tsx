@@ -605,9 +605,9 @@ const ReportesAdmin: FC = () => {
                     const payload = {
                       id_elem: parseInt(idElemento.trim()),
                       ambiente: ambiente.trim(),
-                      problemas: problemasSeleccionados.map(id => ({ id_problema: id })),
-                      id_est_tick: 1, // Activo por defecto
-                      id_usu: user.id // ← Agregar ID del usuario
+                      problemas: problemasSeleccionados.map(id => ({ id: id })), // ← 'id' no 'id_problema'
+                      id_est_tick: 1,
+                      id_usu: user.id
                     };
                     
                     console.log('[CREAR TICKET] Payload:', JSON.stringify(payload, null, 2));
