@@ -592,13 +592,26 @@ const ReportesAdmin: FC = () => {
                       return;
                     }
                     
+                    // Obtener usuario actual
+                    const userStr = await AsyncStorage.getItem('user');
+                    const user = userStr ? JSON.parse(userStr) : null;
+                    if (!user || !user.id) {
+                      setCrearError('No se pudo obtener el usuario. Inicie sesión nuevamente.');
+                      setSavingTicket(false);
+                      return;
+                    }
+                    
                     // Crear payload igual a la web
                     const payload = {
                       id_elem: parseInt(idElemento.trim()),
                       ambiente: ambiente.trim(),
                       problemas: problemasSeleccionados.map(id => ({ id_problema: id })),
-                      id_est_tick: 1 // Activo por defecto
+                      id_est_tick: 1, // Activo por defecto
+                      id_usu: user.id // ← Agregar ID del usuario
                     };
+                    
+                    console.log('[CREAR TICKET] Payload:', JSON.stringify(payload, null, 2));
+                    console.log('[CREAR TICKET] Usuario:', user.id, user.nom_usu || user.nombre);
                     
                     await ticketsService.create(payload);
                     RNAlert.alert('Éxito', 'Ticket creado correctamente');
@@ -609,7 +622,27 @@ const ReportesAdmin: FC = () => {
                     setTickets(Array.isArray(res.data) ? res.data : []);
                   } catch (err: any) {
                     console.error('Error creando ticket:', err);
-                    setCrearError(err.message || 'Error al crear ticket');
+                    console.error('Error response:', err?.response);
+                    console.error('Error response data:', err?.response?.data);
+                    console.error('Error status:', err?.response?.status);
+                    
+                    let errorMsg = 'Error al crear ticket';
+                    if (err?.response?.status === 409) {
+                      const data = err?.response?.data;
+                      errorMsg = data?.Mensaje || data?.message || data?.errores1 || data?.error || data?.succes || 'Conflicto: El elemento ya tiene un ticket activo o hay un problema con los datos';
+                    } else if (err?.response?.data?.Mensaje) {
+                      errorMsg = err.response.data.Mensaje;
+                    } else if (err?.response?.data?.message) {
+                      errorMsg = err.response.data.message;
+                    } else if (err?.response?.data?.errores1) {
+                      errorMsg = err.response.data.errores1;
+                    } else if (err?.response?.data?.error) {
+                      errorMsg = err.response.data.error;
+                    } else if (err?.message) {
+                      errorMsg = err.message;
+                    }
+                    
+                    setCrearError(errorMsg);
                   } finally {
                     setSavingTicket(false);
                   }
