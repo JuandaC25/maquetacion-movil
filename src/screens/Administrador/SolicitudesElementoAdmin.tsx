@@ -6,9 +6,7 @@ import { View, Text, Button, Modal, TouchableOpacity, TextInput, FlatList, Activ
 import { MaterialIcons } from '@expo/vector-icons';
 import DatePickerModal from '../../components/DatePickerModal';
 import { solicitudesService } from '../../services/Api';
-// ...resto del archivo sin cambios...
 
-// Interfaces necesarias
 interface Categoria {
   id?: number;
   id_cat?: number;
